@@ -23,13 +23,30 @@ public class EasyRender {
         public int shaderProgram;
         public ByteBuffer vertices;
 
+        public int uniformBuffer;
+        public FloatBuffer uniformData;
+
         public int vertexCount;
 
         public Line() {
+            //====CREATE THE VAO AND VBO====//
             vao = glGenVertexArrays();
-            glBindVertexArray(vao);
             vbo = glGenBuffers();
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            vertices = MemoryUtil.memAlloc(1024 * 6 * 4);
+
+            //====CREATE THE UNIFORM BUFFER====//
+            uniformBuffer = glGenBuffers();
+            uniformData = MemoryUtil.memAllocFloat(16);
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            glBufferData(GL_UNIFORM_BUFFER, 48 * Float.BYTES, GL_DYNAMIC_DRAW);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+            //====INITIALIZE THE MATRICES====//
+            setModelMatrix(new Matrix4f().identity());
+            setViewMatrix(new Matrix4f().identity());
+            setProjectionMatrix(new Matrix4f().identity());
+
+            //====CREATE THE SHADER PROGRAM====//
             vertexShader = createShader("src/main/resources/shaders/line/shader.vert", GL_VERTEX_SHADER);
             fragmentShader = createShader("src/main/resources/shaders/line/shader.frag", GL_FRAGMENT_SHADER);
             shaderProgram = glCreateProgram();
@@ -37,11 +54,11 @@ public class EasyRender {
             glAttachShader(shaderProgram, fragmentShader);
             glLinkProgram(shaderProgram);
             glUseProgram(shaderProgram);
-            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), false, new Matrix4f().identity().get(new float[16]));
-            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), false, new Matrix4f().identity().get(new float[16]));
-            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), false, new Matrix4f().identity().get(new float[16]));
-            vertices = MemoryUtil.memAlloc(1024 * 6 * 4);
-            glBufferData(GL_ARRAY_BUFFER, vertices, GL_DYNAMIC_DRAW);
+
+            //====SPECIFY THE VERTEX DATA====//
+            glBindVertexArray(vao);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, vertices.capacity(), GL_DYNAMIC_DRAW);
             glVertexAttribPointer(0, 2, GL_FLOAT, false, 6 * Float.BYTES, 0);
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(1, 4, GL_FLOAT, false, 6 * Float.BYTES, 2 * Float.BYTES);
@@ -52,15 +69,30 @@ public class EasyRender {
         }
 
         public void setModelMatrix(Matrix4f modelMatrix){
-            glProgramUniformMatrix4fv(shaderProgram, glGetUniformLocation(shaderProgram, "model"), false, modelMatrix.get(new float[16]));
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            uniformData.clear();
+            uniformData.put(modelMatrix.get(new float[16]));
+            uniformData.flip();
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, uniformData);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
         public void setViewMatrix(Matrix4f viewMatrix){
-            glProgramUniformMatrix4fv(shaderProgram, glGetUniformLocation(shaderProgram, "view"), false, viewMatrix.get(new float[16]));
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            uniformData.clear();
+            uniformData.put(viewMatrix.get(new float[16]));
+            uniformData.flip();
+            glBufferSubData(GL_UNIFORM_BUFFER, 16 * Float.BYTES, uniformData);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
         public void setProjectionMatrix(Matrix4f projectionMatrix){
-            glProgramUniformMatrix4fv(shaderProgram, glGetUniformLocation(shaderProgram, "projection"), false, projectionMatrix.get(new float[16]));
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            uniformData.clear();
+            uniformData.put(projectionMatrix.get(new float[16]));
+            uniformData.flip();
+            glBufferSubData(GL_UNIFORM_BUFFER, 32 * Float.BYTES, uniformData);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
         /**
@@ -94,15 +126,23 @@ public class EasyRender {
          * flush the data to the gpu and render the lines
          */
         public void flush(){
+            //====FLIP THE BUFFER====//
             vertices.flip();
-            glBindVertexArray(vao);
+
+            //====BIND THE VAO AND VBO====//
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBindVertexArray(vao);
             glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
+            glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniformBuffer);
+
+            //====RENDER THE LINES====//
             glUseProgram(shaderProgram);
             glDrawArrays(GL_LINES, 0, vertexCount);
             glBindVertexArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glUseProgram(0);
+
+            //====CLEAR THE BUFFER====//
             vertices.clear();
         }
 
@@ -122,6 +162,9 @@ public class EasyRender {
             glDeleteShader(fragmentShader);
             glDeleteBuffers(vbo);
             glDeleteVertexArrays(vao);
+            glDeleteBuffers(uniformBuffer);
+            MemoryUtil.memFree(vertices);
+            MemoryUtil.memFree(uniformData);
         }
     }
 
@@ -137,42 +180,6 @@ public class EasyRender {
     public void end(Window window) {
         line.end();
         glfwSwapBuffers(window.id());
-    }
-
-    public void drawTriangleTest(){
-        int vao = glGenVertexArrays();
-        glBindVertexArray(vao);
-        int vbo = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        int vertexShader = createShader("src/test/resources/shaders/triangle/shader.vert", GL_VERTEX_SHADER);
-        int fragmentShader = createShader("src/test/resources/shaders/triangle/shader.frag", GL_FRAGMENT_SHADER);
-        int shaderProgram = glCreateProgram();
-        glAttachShader(shaderProgram, vertexShader);
-        glAttachShader(shaderProgram, fragmentShader);
-        glLinkProgram(shaderProgram);
-        glUseProgram(shaderProgram);
-
-        float[] vertices = {
-                0.0f, 0.5f, 1, 0, 0, 1,
-                -0.5f, -0.5f, 0, 1, 0, 1,
-                0.5f, -0.5f, 0,  0, 1, 1
-        };
-        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 2, GL_FLOAT, false, 6 * Float.BYTES, 0);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(1, 4, GL_FLOAT, false, 6 * Float.BYTES, 2 * Float.BYTES);
-        glEnableVertexAttribArray(1);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
-        glUseProgram(0);
-        glDeleteProgram(shaderProgram);
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-        glDeleteBuffers(vbo);
-        glDeleteVertexArrays(vao);
     }
 
     public int createShader(String shaderSourceFileLoc, int shaderType) {
@@ -192,5 +199,9 @@ public class EasyRender {
             throw new RuntimeException(error);
         }
         return shader;
+    }
+
+    public void dispose(){
+        line.dispose();
     }
 }
