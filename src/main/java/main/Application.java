@@ -112,7 +112,13 @@ public class Application {
         //====RENDER THE GAME====//
         float ratio = window.width() / (float) window.height();
         renderer.line.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
+        renderer.triangle.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
+        renderer.pixel.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
+
+        renderer.triangle.drawTriangle(0,0,0,0.1f,.1f,.1f,0,1,1,1);
         renderer.line.drawLine(0, 0, 1, 1, 1, 1, 1, 1);
+        renderer.pixel.setPixelSize(0.1f);
+        renderer.pixel.drawPixel(-0.5f,-0.5f,1,1,1,1);
 
         renderer.end(window);
     }

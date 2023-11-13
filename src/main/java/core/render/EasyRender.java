@@ -3,6 +3,7 @@ package core.render;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -15,6 +16,10 @@ import static org.lwjgl.glfw.GLFW.*;
 public class EasyRender {
 
     public final Line line;
+    public final Triangle triangle;
+    public final Pixel pixel;
+    public final Image image;
+
     public class Line{
         public int vao;
         public int vbo;
@@ -68,6 +73,10 @@ public class EasyRender {
             glUseProgram(0);
         }
 
+        /**
+         * set the model matrix
+         * @param modelMatrix the model matrix
+         */
         public void setModelMatrix(Matrix4f modelMatrix){
             glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
             uniformData.clear();
@@ -77,6 +86,10 @@ public class EasyRender {
             glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
+        /**
+         * set the view matrix
+         * @param viewMatrix the view matrix
+         */
         public void setViewMatrix(Matrix4f viewMatrix){
             glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
             uniformData.clear();
@@ -86,6 +99,10 @@ public class EasyRender {
             glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
+        /**
+         * set the projection matrix
+         * @param projectionMatrix the projection matrix
+         */
         public void setProjectionMatrix(Matrix4f projectionMatrix){
             glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
             uniformData.clear();
@@ -168,17 +185,733 @@ public class EasyRender {
         }
     }
 
+    public class Triangle{
+        public int vao;
+        public int vbo;
+        public int vertexShader;
+        public int fragmentShader;
+        public int shaderProgram;
+        public ByteBuffer vertices;
+
+        public int uniformBuffer;
+        public FloatBuffer uniformData;
+
+        public int vertexCount;
+
+        public Triangle() {
+            //====CREATE THE VAO AND VBO====//
+            vao = glGenVertexArrays();
+            vbo = glGenBuffers();
+            vertices = MemoryUtil.memAlloc(1024 * 6 * 4);
+
+            //====CREATE THE UNIFORM BUFFER====//
+            uniformBuffer = glGenBuffers();
+            uniformData = MemoryUtil.memAllocFloat(16);
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            glBufferData(GL_UNIFORM_BUFFER, 48 * Float.BYTES, GL_DYNAMIC_DRAW);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+            //====INITIALIZE THE MATRICES====//
+            setModelMatrix(new Matrix4f().identity());
+            setViewMatrix(new Matrix4f().identity());
+            setProjectionMatrix(new Matrix4f().identity());
+
+            //====CREATE THE SHADER PROGRAM====//
+            vertexShader = createShader("src/main/resources/shaders/triangle/shader.vert", GL_VERTEX_SHADER);
+            fragmentShader = createShader("src/main/resources/shaders/triangle/shader.frag", GL_FRAGMENT_SHADER);
+            shaderProgram = glCreateProgram();
+            glAttachShader(shaderProgram, vertexShader);
+            glAttachShader(shaderProgram, fragmentShader);
+            glLinkProgram(shaderProgram);
+            glUseProgram(shaderProgram);
+
+            //====SPECIFY THE VERTEX DATA====//
+            glBindVertexArray(vao);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, vertices.capacity(), GL_DYNAMIC_DRAW);
+            glVertexAttribPointer(0, 2, GL_FLOAT, false, 6 * Float.BYTES, 0);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(1, 4, GL_FLOAT, false, 6 * Float.BYTES, 2 * Float.BYTES);
+            glEnableVertexAttribArray(1);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+            glUseProgram(0);
+        }
+
+        /**
+         * set the model matrix
+         * @param modelMatrix the model matrix
+         */
+        public void setModelMatrix(Matrix4f modelMatrix){
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            uniformData.clear();
+            uniformData.put(modelMatrix.get(new float[16]));
+            uniformData.flip();
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, uniformData);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        /**
+         * set the view matrix
+         * @param viewMatrix the view matrix
+         */
+        public void setViewMatrix(Matrix4f viewMatrix){
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            uniformData.clear();
+            uniformData.put(viewMatrix.get(new float[16]));
+            uniformData.flip();
+            glBufferSubData(GL_UNIFORM_BUFFER, 16 * Float.BYTES, uniformData);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        /**
+         * set the projection matrix
+         * @param projectionMatrix the projection matrix
+         */
+        public void setProjectionMatrix(Matrix4f projectionMatrix){
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            uniformData.clear();
+            uniformData.put(projectionMatrix.get(new float[16]));
+            uniformData.flip();
+            glBufferSubData(GL_UNIFORM_BUFFER, 32 * Float.BYTES, uniformData);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        /**
+         * begin the line renderer
+         */
+        public void begin(){
+            vertices.clear();
+            vertexCount = 0;
+        }
+
+        /**
+         * draw a triangle with 3 points and 1 color
+         * @param x1 the x position of the first point
+         * @param y1 the y position of the first point
+         * @param x2 the x position of the second point
+         * @param y2 the y position of the second point
+         * @param x3 the x position of the third point
+         * @param y3 the y position of the third point
+         * @param r the red value of the triangle
+         * @param g the green value of the triangle
+         * @param b the blue value of the triangle
+         * @param a the alpha value of the triangle
+         */
+        public void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, float r, float g, float b, float a){
+            if(vertices.remaining() < 6 * 4 * 3){
+                flush();
+            }
+            vertices.putFloat(x1);
+            vertices.putFloat(y1);
+            vertices.putFloat(r);
+            vertices.putFloat(g);
+            vertices.putFloat(b);
+            vertices.putFloat(a);
+            vertices.putFloat(x2);
+            vertices.putFloat(y2);
+            vertices.putFloat(r);
+            vertices.putFloat(g);
+            vertices.putFloat(b);
+            vertices.putFloat(a);
+            vertices.putFloat(x3);
+            vertices.putFloat(y3);
+            vertices.putFloat(r);
+            vertices.putFloat(g);
+            vertices.putFloat(b);
+            vertices.putFloat(a);
+            vertexCount += 3;
+        }
+
+        /**
+         * draw a triangle with 3 points and 3 colors
+         * @param x1 the x position of the first point
+         * @param y1 the y position of the first point
+         * @param x2 the x position of the second point
+         * @param y2 the y position of the second point
+         * @param x3 the x position of the third point
+         * @param y3 the y position of the third point
+         * @param r1 the red value of the first point
+         * @param g1 the green value of the first point
+         * @param b1 the blue value of the first point
+         * @param a1 the alpha value of the first point
+         * @param r2 the red value of the second point
+         * @param g2 the green value of the second point
+         * @param b2 the blue value of the second point
+         * @param a2 the alpha value of the second point
+         * @param r3 the red value of the third point
+         * @param g3 the green value of the third point
+         * @param b3 the blue value of the third point
+         * @param a3 the alpha value of the third point
+         */
+        public void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, float r1, float g1, float b1, float a1, float r2, float g2, float b2, float a2, float r3, float g3, float b3, float a3){
+            if(vertices.remaining() < 6 * 4 * 3){
+                flush();
+            }
+            vertices.putFloat(x1);
+            vertices.putFloat(y1);
+            vertices.putFloat(r1);
+            vertices.putFloat(g1);
+            vertices.putFloat(b1);
+            vertices.putFloat(a1);
+            vertices.putFloat(x2);
+            vertices.putFloat(y2);
+            vertices.putFloat(r2);
+            vertices.putFloat(g2);
+            vertices.putFloat(b2);
+            vertices.putFloat(a2);
+            vertices.putFloat(x3);
+            vertices.putFloat(y3);
+            vertices.putFloat(r3);
+            vertices.putFloat(g3);
+            vertices.putFloat(b3);
+            vertices.putFloat(a3);
+            vertexCount += 3;
+        }
+
+        /**
+         * flush the data to the gpu and render the lines
+         */
+        public void flush(){
+            //====FLIP THE BUFFER====//
+            vertices.flip();
+
+            //====BIND THE VAO AND VBO====//
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBindVertexArray(vao);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
+            glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniformBuffer);
+
+            //====RENDER THE LINES====//
+            glUseProgram(shaderProgram);
+            glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+            glBindVertexArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glUseProgram(0);
+
+            //====CLEAR THE BUFFER====//
+            vertices.clear();
+        }
+
+        /**
+         * end the line renderer
+         */
+        public void end(){
+            flush();
+        }
+
+        /**
+         * dispose the line renderer and free the memory
+         */
+        public void dispose() {
+            glDeleteProgram(shaderProgram);
+            glDeleteShader(vertexShader);
+            glDeleteShader(fragmentShader);
+            glDeleteBuffers(vbo);
+            glDeleteVertexArrays(vao);
+            glDeleteBuffers(uniformBuffer);
+            MemoryUtil.memFree(vertices);
+            MemoryUtil.memFree(uniformData);
+        }
+    }
+
+    public class Pixel{
+        public int vao;
+        public int vbo;
+        public int vertexShader;
+        public int geometryShader;
+        public int fragmentShader;
+        public int shaderProgram;
+        public ByteBuffer vertices;
+
+        public int uniformBuffer;
+        public FloatBuffer uniformData;
+
+        public int vertexCount;
+
+        public Pixel() {
+            //====CREATE THE VAO AND VBO====//
+            vao = glGenVertexArrays();
+            vbo = glGenBuffers();
+            vertices = MemoryUtil.memAlloc(1024 * 6 * 4);
+
+            //====CREATE THE UNIFORM BUFFER====//
+            uniformBuffer = glGenBuffers();
+            uniformData = MemoryUtil.memAllocFloat(16);
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            glBufferData(GL_UNIFORM_BUFFER, 48 * Float.BYTES, GL_DYNAMIC_DRAW);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+            //====INITIALIZE THE MATRICES====//
+            setModelMatrix(new Matrix4f().identity());
+            setViewMatrix(new Matrix4f().identity());
+            setProjectionMatrix(new Matrix4f().identity());
+
+            //====CREATE THE SHADER PROGRAM====//
+            vertexShader = createShader("src/main/resources/shaders/pixel/shader.vert", GL_VERTEX_SHADER);
+            geometryShader = createShader("src/main/resources/shaders/pixel/shader.geom", GL_GEOMETRY_SHADER);
+            fragmentShader = createShader("src/main/resources/shaders/pixel/shader.frag", GL_FRAGMENT_SHADER);
+            shaderProgram = glCreateProgram();
+            glAttachShader(shaderProgram, vertexShader);
+            glAttachShader(shaderProgram, geometryShader);
+            glAttachShader(shaderProgram, fragmentShader);
+            glLinkProgram(shaderProgram);
+            glUseProgram(shaderProgram);
+
+            //====SPECIFY THE VERTEX DATA====//
+            glBindVertexArray(vao);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, vertices.capacity(), GL_DYNAMIC_DRAW);
+            glVertexAttribPointer(0, 2, GL_FLOAT, false, 6 * Float.BYTES, 0);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(1, 4, GL_FLOAT, false, 6 * Float.BYTES, 2 * Float.BYTES);
+            glEnableVertexAttribArray(1);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+            glUseProgram(0);
+        }
+
+        /**
+         * set the size of the pixels
+         * @param size the size of the pixels
+         */
+        public void setPixelSize(float size){
+            glUseProgram(shaderProgram);
+            glUniform1f(glGetUniformLocation(shaderProgram, "size"), size);
+            glUseProgram(0);
+        }
+
+        /**
+         * set the model matrix
+         * @param modelMatrix the model matrix
+         */
+        public void setModelMatrix(Matrix4f modelMatrix){
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            uniformData.clear();
+            uniformData.put(modelMatrix.get(new float[16]));
+            uniformData.flip();
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, uniformData);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        /**
+         * set the view matrix
+         * @param viewMatrix the view matrix
+         */
+        public void setViewMatrix(Matrix4f viewMatrix){
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            uniformData.clear();
+            uniformData.put(viewMatrix.get(new float[16]));
+            uniformData.flip();
+            glBufferSubData(GL_UNIFORM_BUFFER, 16 * Float.BYTES, uniformData);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        /**
+         * set the projection matrix
+         * @param projectionMatrix the projection matrix
+         */
+        public void setProjectionMatrix(Matrix4f projectionMatrix){
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            uniformData.clear();
+            uniformData.put(projectionMatrix.get(new float[16]));
+            uniformData.flip();
+            glBufferSubData(GL_UNIFORM_BUFFER, 32 * Float.BYTES, uniformData);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        /**
+         * begin the line renderer
+         */
+        public void begin(){
+            vertices.clear();
+            vertexCount = 0;
+        }
+
+        public void drawPixel(float x, float y, float r, float g, float b, float a){
+            if(vertices.remaining() < 6 * 4){
+                flush();
+            }
+            vertices.putFloat(x);
+            vertices.putFloat(y);
+            vertices.putFloat(r);
+            vertices.putFloat(g);
+            vertices.putFloat(b);
+            vertices.putFloat(a);
+            vertexCount += 1;
+        }
+
+        /**
+         * flush the data to the gpu and render the lines
+         */
+        public void flush(){
+            //====FLIP THE BUFFER====//
+            vertices.flip();
+
+            //====BIND THE VAO AND VBO====//
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBindVertexArray(vao);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
+            glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniformBuffer);
+
+            //====RENDER THE LINES====//
+            glUseProgram(shaderProgram);
+            glDrawArrays(GL_POINTS, 0, vertexCount);
+            glBindVertexArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glUseProgram(0);
+
+            //====CLEAR THE BUFFER====//
+            vertices.clear();
+        }
+
+        /**
+         * end the line renderer
+         */
+        public void end(){
+            flush();
+        }
+
+        /**
+         * dispose the line renderer and free the memory
+         */
+        public void dispose() {
+            glDeleteProgram(shaderProgram);
+            glDeleteShader(vertexShader);
+            glDeleteShader(geometryShader);
+            glDeleteShader(fragmentShader);
+            glDeleteBuffers(vbo);
+            glDeleteVertexArrays(vao);
+            glDeleteBuffers(uniformBuffer);
+            MemoryUtil.memFree(vertices);
+            MemoryUtil.memFree(uniformData);
+        }
+    }
+
+    public class Image{
+        public int vao;
+        public int vbo;
+        public int vertexShader;
+        public int fragmentShader;
+        public int shaderProgram;
+        public int texture;
+        public int sampler;
+        public ByteBuffer vertices;
+
+        public int uniformBuffer;
+        public FloatBuffer uniformData;
+
+        public int vertexCount;
+
+        public Image() {
+            //====CREATE THE VAO AND VBO====//
+            vao = glGenVertexArrays();
+            vbo = glGenBuffers();
+            vertices = MemoryUtil.memAlloc(512 * 12 * 4);
+
+            //====CREATE THE UNIFORM BUFFER====//
+            uniformBuffer = glGenBuffers();
+            uniformData = MemoryUtil.memAllocFloat(16);
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            glBufferData(GL_UNIFORM_BUFFER, 48 * Float.BYTES, GL_DYNAMIC_DRAW);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+            //====CREATE THE TEXTURE====//
+            texture = glGenTextures();
+            sampler = glGenSamplers();
+            glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+            //====INITIALIZE THE MATRICES====//
+            setModelMatrix(new Matrix4f().identity());
+            setViewMatrix(new Matrix4f().identity());
+            setProjectionMatrix(new Matrix4f().identity());
+
+            //====CREATE THE SHADER PROGRAM====//
+            vertexShader = createShader("src/main/resources/shaders/pixel/shader.vert", GL_VERTEX_SHADER);
+            fragmentShader = createShader("src/main/resources/shaders/pixel/shader.frag", GL_FRAGMENT_SHADER);
+            shaderProgram = glCreateProgram();
+            glAttachShader(shaderProgram, vertexShader);
+            glAttachShader(shaderProgram, fragmentShader);
+            glLinkProgram(shaderProgram);
+            glUseProgram(shaderProgram);
+
+            //====SPECIFY THE VERTEX DATA====//
+            glBindVertexArray(vao);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, vertices.capacity(), GL_DYNAMIC_DRAW);
+            glVertexAttribPointer(0, 2, GL_FLOAT, false, 12 * Float.BYTES, 0);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(1, 2, GL_FLOAT, false, 12 * Float.BYTES, 2 * Float.BYTES);
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(2, 4, GL_FLOAT, false, 12 * Float.BYTES, 4 * Float.BYTES);
+            glEnableVertexAttribArray(2);
+            glVertexAttribPointer(3, 4, GL_FLOAT, false, 12 * Float.BYTES, 8 * Float.BYTES);
+            glEnableVertexAttribArray(3);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+            glUseProgram(0);
+        }
+
+        /**
+         * set the model matrix
+         * @param modelMatrix the model matrix
+         */
+        public void setModelMatrix(Matrix4f modelMatrix){
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            uniformData.clear();
+            uniformData.put(modelMatrix.get(new float[16]));
+            uniformData.flip();
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, uniformData);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        /**
+         * set the view matrix
+         * @param viewMatrix the view matrix
+         */
+        public void setViewMatrix(Matrix4f viewMatrix){
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            uniformData.clear();
+            uniformData.put(viewMatrix.get(new float[16]));
+            uniformData.flip();
+            glBufferSubData(GL_UNIFORM_BUFFER, 16 * Float.BYTES, uniformData);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        /**
+         * set the projection matrix
+         * @param projectionMatrix the projection matrix
+         */
+        public void setProjectionMatrix(Matrix4f projectionMatrix){
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            uniformData.clear();
+            uniformData.put(projectionMatrix.get(new float[16]));
+            uniformData.flip();
+            glBufferSubData(GL_UNIFORM_BUFFER, 32 * Float.BYTES, uniformData);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        /**
+         * begin the line renderer
+         */
+        public void begin() {
+            vertices.clear();
+            vertexCount = 0;
+        }
+
+        /**
+         * draw a image with the given sampler
+         * @param x the x position of the image
+         * @param y the y position of the image
+         * @param width the width of the image
+         * @param height the height of the image
+         * @param r the red value of the image
+         * @param g the green value of the image
+         * @param b the blue value of the image
+         * @param a the alpha value of the image
+         * @param s1 the s1 value of the image
+         * @param t1 the t1 value of the image
+         * @param s2 the s2 value of the image
+         * @param t2 the t2 value of the image
+         * @param image the image to draw
+         * @param sampler the sampler to use
+         */
+        public void drawImage(float x, float y, float width, float height, float r, float g, float b, float a, float s1, float t1, float s2, float t2, BufferedImage image, int sampler){
+            flush();
+            ByteBuffer buffer = MemoryUtil.memAlloc(image.getWidth() * image.getHeight() * 4);
+            for (int j = image.getHeight()-1; j >=0; j--) {
+                for (int i = 0; i < image.getWidth(); i++) {
+                    buffer.put((byte) (image.getRGB(i, j) >> 16 & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) >> 8 & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) >> 24 & 0xFF));
+                }
+            }
+            buffer.flip();
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.getWidth(), image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            drawTexture(x, y, width, height, r, g, b, a, s1, t1, s2, t2, texture, sampler);
+        }
+
+        /**
+         * draw a image
+         * @param x the x position of the image
+         * @param y the y position of the image
+         * @param width the width of the image
+         * @param height the height of the image
+         * @param r the red value of the image
+         * @param g the green value of the image
+         * @param b the blue value of the image
+         * @param a the alpha value of the image
+         * @param s1 the s1 value of the image
+         * @param t1 the t1 value of the image
+         * @param s2 the s2 value of the image
+         * @param t2 the t2 value of the image
+         * @param image the image to draw
+         */
+        public void drawImage(float x, float y, float width, float height, float r, float g, float b, float a, float s1, float t1, float s2, float t2, BufferedImage image){
+            flush();
+            ByteBuffer buffer = MemoryUtil.memAlloc(image.getWidth() * image.getHeight() * 4);
+            for (int j = image.getHeight()-1; j >=0; j--) {
+                for (int i = 0; i < image.getWidth(); i++) {
+                    buffer.put((byte) (image.getRGB(i, j) >> 16 & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) >> 8 & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) >> 24 & 0xFF));
+                }
+            }
+            buffer.flip();
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.getWidth(), image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            drawTexture(x, y, width, height, r, g, b, a, s1, t1, s2, t2, texture, sampler);
+        }
+
+        /**
+         * draw texture with the given sampler
+         * @param x the x position of the image
+         * @param y the y position of the image
+         * @param width the width of the image
+         * @param height the height of the image
+         * @param r the red value of the image
+         * @param g the green value of the image
+         * @param b the blue value of the image
+         * @param a the alpha value of the image
+         * @param s1 the s1 value of the image
+         * @param t1 the t1 value of the image
+         * @param s2 the s2 value of the image
+         * @param t2 the t2 value of the image
+         * @param texture the texture to draw
+         * @param sampler the sampler to use
+         */
+        public void drawTexture(float x, float y, float width, float height, float r, float g, float b, float a, float s1, float t1, float s2, float t2, int texture, int sampler){
+            flush();
+            glBindTextureUnit(0, texture);
+            glBindSampler(0, sampler);
+            draw(x, y, width, height, r, g, b, a, s1, t1, s2, t2);
+            flush();
+            glBindTextureUnit(0, 0);
+            glBindSampler(0, 0);
+        }
+
+        /**
+         * draw a texture
+         * @param x the x position of the image
+         * @param y the y position of the image
+         * @param width the width of the image
+         * @param height the height of the image
+         * @param r the red value of the image
+         * @param g the green value of the image
+         * @param b the blue value of the image
+         * @param a the alpha value of the image
+         * @param s1 the s1 value of the image
+         * @param t1 the t1 value of the image
+         * @param s2 the s2 value of the image
+         * @param t2 the t2 value of the image
+         * @param texture the texture to draw
+         */
+        public void drawTexture(float x, float y, float width, float height, float r, float g, float b, float a, float s1, float t1, float s2, float t2, int texture){
+            flush();
+            glBindTextureUnit(0, texture);
+            glBindSampler(0, sampler);
+            draw(x, y, width, height, r, g, b, a, s1, t1, s2, t2);
+            flush();
+            glBindTextureUnit(0, 0);
+            glBindSampler(0, 0);
+        }
+
+        /**
+         * draw a image with the current texture
+         * @param x the x position of the image
+         * @param y the y position of the image
+         * @param width the width of the image
+         * @param height the height of the image
+         * @param r the red value of the image
+         * @param g the green value of the image
+         * @param b the blue value of the image
+         * @param a the alpha value of the image
+         * @param s1 the s1 value of the image
+         * @param t1 the t1 value of the image
+         * @param s2 the s2 value of the image
+         * @param t2 the t2 value of the image
+         */
+        private void draw(float x, float y, float width, float height, float r, float g, float b, float a, float s1, float t1, float s2, float t2){
+            vertices.putFloat(x).putFloat(y).putFloat(width).putFloat(height).putFloat(r).putFloat(g).putFloat(b).putFloat(a).putFloat(s1).putFloat(t1).putFloat(s2).putFloat(t2);
+            flush();
+        }
+
+        /**
+         * flush the data to the gpu and render the lines
+         */
+        public void flush(){
+            //====FLIP THE BUFFER====//
+            vertices.flip();
+
+            //====BIND THE VAO AND VBO====//
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBindVertexArray(vao);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
+            glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniformBuffer);
+
+            //====RENDER THE LINES====//
+            glUseProgram(shaderProgram);
+            glDrawArrays(GL_POINTS, 0, vertexCount);
+            glBindVertexArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glUseProgram(0);
+
+            //====CLEAR THE BUFFER====//
+            vertices.clear();
+        }
+
+        /**
+         * end the line renderer
+         */
+        public void end(){
+            flush();
+        }
+
+        /**
+         * dispose the line renderer and free the memory
+         */
+        public void dispose() {
+            glDeleteProgram(shaderProgram);
+            glDeleteShader(vertexShader);
+            glDeleteShader(fragmentShader);
+            glDeleteBuffers(vbo);
+            glDeleteVertexArrays(vao);
+            glDeleteBuffers(uniformBuffer);
+            glDeleteTextures(texture);
+            glDeleteSamplers(sampler);
+            MemoryUtil.memFree(vertices);
+            MemoryUtil.memFree(uniformData);
+        }
+    }
+
     public EasyRender() {
         line = new Line();
+        triangle = new Triangle();
+        pixel = new Pixel();
+        image = new Image();
     }
 
     public void begin() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         line.begin();
+        triangle.begin();
+        pixel.begin();
+        image.begin();
     }
 
     public void end(Window window) {
         line.end();
+        triangle.end();
+        pixel.end();
+        image.end();
         glfwSwapBuffers(window.id());
     }
 
@@ -203,5 +936,8 @@ public class EasyRender {
 
     public void dispose(){
         line.dispose();
+        triangle.dispose();
+        pixel.dispose();
+        image.dispose();
     }
 }
