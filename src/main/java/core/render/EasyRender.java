@@ -557,8 +557,11 @@ public class EasyRender {
             //====RENDER THE LINES====//
             glUseProgram(shaderProgram);
             glDrawArrays(GL_POINTS, 0, vertexCount);
+
+            //====UNBIND====//
             glBindVertexArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindBufferBase(GL_UNIFORM_BUFFER, 0, 0);
             glUseProgram(0);
 
             //====CLEAR THE BUFFER====//
@@ -592,6 +595,7 @@ public class EasyRender {
         public int vao;
         public int vbo;
         public int vertexShader;
+        public int geometryShader;
         public int fragmentShader;
         public int shaderProgram;
         public int texture;
@@ -630,10 +634,12 @@ public class EasyRender {
             setProjectionMatrix(new Matrix4f().identity());
 
             //====CREATE THE SHADER PROGRAM====//
-            vertexShader = createShader("src/main/resources/shaders/pixel/shader.vert", GL_VERTEX_SHADER);
-            fragmentShader = createShader("src/main/resources/shaders/pixel/shader.frag", GL_FRAGMENT_SHADER);
+            vertexShader = createShader("src/main/resources/shaders/image/shader.vert", GL_VERTEX_SHADER);
+            geometryShader = createShader("src/main/resources/shaders/image/shader.geom", GL_GEOMETRY_SHADER);
+            fragmentShader = createShader("src/main/resources/shaders/image/shader.frag", GL_FRAGMENT_SHADER);
             shaderProgram = glCreateProgram();
             glAttachShader(shaderProgram, vertexShader);
+            glAttachShader(shaderProgram, geometryShader);
             glAttachShader(shaderProgram, fragmentShader);
             glLinkProgram(shaderProgram);
             glUseProgram(shaderProgram);
@@ -793,7 +799,6 @@ public class EasyRender {
             glBindTextureUnit(0, texture);
             glBindSampler(0, sampler);
             draw(x, y, width, height, r, g, b, a, s1, t1, s2, t2);
-            flush();
             glBindTextureUnit(0, 0);
             glBindSampler(0, 0);
         }
@@ -819,7 +824,6 @@ public class EasyRender {
             glBindTextureUnit(0, texture);
             glBindSampler(0, sampler);
             draw(x, y, width, height, r, g, b, a, s1, t1, s2, t2);
-            flush();
             glBindTextureUnit(0, 0);
             glBindSampler(0, 0);
         }
@@ -841,6 +845,7 @@ public class EasyRender {
          */
         private void draw(float x, float y, float width, float height, float r, float g, float b, float a, float s1, float t1, float s2, float t2){
             vertices.putFloat(x).putFloat(y).putFloat(width).putFloat(height).putFloat(r).putFloat(g).putFloat(b).putFloat(a).putFloat(s1).putFloat(t1).putFloat(s2).putFloat(t2);
+            vertexCount += 1;
             flush();
         }
 
@@ -860,8 +865,11 @@ public class EasyRender {
             //====RENDER THE LINES====//
             glUseProgram(shaderProgram);
             glDrawArrays(GL_POINTS, 0, vertexCount);
+
+            //====UNBIND====//
             glBindVertexArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindBufferBase(GL_UNIFORM_BUFFER, 0, 0);
             glUseProgram(0);
 
             //====CLEAR THE BUFFER====//
@@ -897,6 +905,9 @@ public class EasyRender {
         triangle = new Triangle();
         pixel = new Pixel();
         image = new Image();
+        glEnable(GL_BLEND);
+        glBlendEquation(GL_FUNC_ADD);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     public void begin() {

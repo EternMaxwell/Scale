@@ -16,8 +16,7 @@ layout (binding = 0) uniform block{
 } Block;
 
 void main() {
-    mat4 mvp = Block.projection * Block.view * Block.model;
-    gl_Position = mvp * vec4(in_pos,0.0, 1.0);
+    gl_Position = vec4(in_pos,0.0, 1.0);
     out_color = in_color;
     out_size = in_size;
     out_tex = in_tex;
