@@ -623,8 +623,8 @@ public class EasyRender {
             //====CREATE THE TEXTURE====//
             texture = glGenTextures();
             sampler = glGenSamplers();
-            glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
             glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -796,11 +796,13 @@ public class EasyRender {
          */
         public void drawTexture(float x, float y, float width, float height, float r, float g, float b, float a, float s1, float t1, float s2, float t2, int texture, int sampler){
             flush();
-            glBindTextureUnit(0, texture);
-            glBindSampler(0, sampler);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glBindSampler(1, sampler);
             draw(x, y, width, height, r, g, b, a, s1, t1, s2, t2);
-            glBindTextureUnit(0, 0);
-            glBindSampler(0, 0);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindSampler(1, 0);
+            glActiveTexture(0);
         }
 
         /**
@@ -820,12 +822,7 @@ public class EasyRender {
          * @param texture the texture to draw
          */
         public void drawTexture(float x, float y, float width, float height, float r, float g, float b, float a, float s1, float t1, float s2, float t2, int texture){
-            flush();
-            glBindTextureUnit(0, texture);
-            glBindSampler(0, sampler);
-            draw(x, y, width, height, r, g, b, a, s1, t1, s2, t2);
-            glBindTextureUnit(0, 0);
-            glBindSampler(0, 0);
+            drawTexture(x, y, width, height, r, g, b, a, s1, t1, s2, t2, texture, sampler);
         }
 
         /**

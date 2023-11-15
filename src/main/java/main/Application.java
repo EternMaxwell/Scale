@@ -17,11 +17,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
-import static org.lwjgl.opengl.GL30.GL_RGBA32F;
+import static org.lwjgl.opengl.GL30.*;
 
 public class Application {
     public boolean debug = true;
@@ -110,7 +111,8 @@ public class Application {
         }
         buffer.flip();
         glBindTexture(GL_TEXTURE_2D, testTexture);
-        glTexImage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, image.getWidth(), image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.getWidth(), image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+        glGenerateMipmap(GL_TEXTURE_2D);
         MemoryUtil.memFree(buffer);
         glBindTexture(GL_TEXTURE_2D, 0);
 
