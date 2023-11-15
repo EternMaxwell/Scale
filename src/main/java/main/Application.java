@@ -23,6 +23,7 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
 import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.stb.STBImage.*;
 
 public class Application {
     public boolean debug = true;
@@ -92,26 +93,18 @@ public class Application {
             }
         });
 
-        BufferedImage image;
-        try {
-            image = ImageIO.read(new File("src/test/resources/textures/test1.png"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        //====LOAD TEXTURES====//
+        stbi_set_flip_vertically_on_load(true);
+        int[] width = new int[1];
+        int[] height = new int[1];
+        int[] channels = new int[1];
+        ByteBuffer buffer = stbi_load("src/test/resources/textures/test.png", width, height, channels, 4);
+        if(buffer == null){
+            throw new RuntimeException("Failed to load image: " + stbi_failure_reason());
         }
-        testTexture = glGenTextures();
-        ByteBuffer buffer = MemoryUtil.memAlloc(image.getWidth() * image.getHeight() * 4);
-        for (int j = image.getHeight()-1; j >= 0; j--) {
-            for (int i = 0; i < image.getWidth(); i++) {
-                int pixel = image.getRGB(i, j);
-                buffer.put((byte) ((pixel >> 16) & 0xFF)); // Red component
-                buffer.put((byte) ((pixel >> 8) & 0xFF));  // Green component
-                buffer.put((byte) (pixel & 0xFF));         // Blue component
-                buffer.put((byte) ((pixel >> 24) & 0xFF)); // Alpha component. Only for RGBA
-            }
-        }
-        buffer.flip();
+
         glBindTexture(GL_TEXTURE_2D, testTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.getWidth(), image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width[0], height[0], 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
         glGenerateMipmap(GL_TEXTURE_2D);
         MemoryUtil.memFree(buffer);
         glBindTexture(GL_TEXTURE_2D, 0);
