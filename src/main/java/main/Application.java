@@ -22,7 +22,7 @@ import java.nio.FloatBuffer;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
-import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL45.*;
 import static org.lwjgl.stb.STBImage.*;
 
 public class Application {
@@ -37,6 +37,7 @@ public class Application {
     public int prevPosY;
 
     public int testTexture;
+    public int testSampler;
 
     public void init(){
         initGLFW();
@@ -102,12 +103,18 @@ public class Application {
         if(buffer == null){
             throw new RuntimeException("Failed to load image: " + stbi_failure_reason());
         }
-
         glBindTexture(GL_TEXTURE_2D, testTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width[0], height[0], 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
         glGenerateMipmap(GL_TEXTURE_2D);
         MemoryUtil.memFree(buffer);
         glBindTexture(GL_TEXTURE_2D, 0);
+
+        //====LOAD SAMPLERS====//
+        testSampler = glGenSamplers();
+        glSamplerParameteri(testSampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glSamplerParameteri(testSampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glSamplerParameteri(testSampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glSamplerParameteri(testSampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         //====SHOW THE WINDOW====//
         window.showWindow();
@@ -156,14 +163,15 @@ public class Application {
         renderer.line.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
         renderer.triangle.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
         renderer.pixel.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
-        renderer.image.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
+        renderer.image.setProjectionMatrix(new Matrix4f().ortho(-1.15f, 1.15f, -1, 1, -1, 1));
 
-        renderer.triangle.drawTriangle(0,0,0,0.1f,.1f,.1f,0,1,1,1);
-        renderer.line.drawLine(0, 0, 1, 1, 1, 1, 1, 1);
+        //renderer.triangle.drawTriangle(0,0,0,0.1f,.1f,.1f,0,1,1,1);
+        //renderer.line.drawLine(0, 0, 1, 1, 1, 1, 1, 1);
         renderer.pixel.setPixelSize(0.1f);
-        renderer.pixel.drawPixel(-0.5f,-0.5f,1,1,1,1);
+        //renderer.pixel.drawPixel(-0.5f,-0.5f,1,1,1,1);
 
-        renderer.image.drawTexture(-0.5f,-0.5f,1,1,1,1, 1,0.5f,0,0,1,1, testTexture);
+        float rate = 1.15f;
+        renderer.image.drawTexture(-1 * rate,-1 * rate,2 * rate,2 * rate,1,1, 1,0.8f,0,0,1,1, testTexture, testSampler);
 
         renderer.end(window);
     }
