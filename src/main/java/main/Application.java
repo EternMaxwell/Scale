@@ -165,10 +165,10 @@ public class Application {
         renderer.pixel.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
         renderer.image.setProjectionMatrix(new Matrix4f().ortho(-1.15f, 1.15f, -1, 1, -1, 1));
 
-        //renderer.triangle.drawTriangle(0,0,0,0.1f,.1f,.1f,0,1,1,1);
-        //renderer.line.drawLine(0, 0, 1, 1, 1, 1, 1, 1);
+        renderer.triangle.drawTriangle(0,0,0,0.1f,.1f,.1f,0,1,1,1);
+        renderer.line.drawLine(0, 0, 1, 1, 1, 1, 1, 1);
         renderer.pixel.setPixelSize(0.1f);
-        //renderer.pixel.drawPixel(-0.5f,-0.5f,1,1,1,1);
+        renderer.pixel.drawPixel(-0.5f,-0.5f,1,1,1,1);
 
         float rate = 1.15f;
         renderer.image.drawTexture(-1 * rate,-1 * rate,2 * rate,2 * rate,1,1, 1,0.8f,0,0,1,1, testTexture, testSampler);
