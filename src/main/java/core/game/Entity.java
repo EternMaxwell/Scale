@@ -67,7 +67,12 @@ public class Entity {
         this.container = container;
     }
 
+    /**
+     * move the entity by the given delta.
+     * @param delta The delta.
+     */
     public void move(Vector2f delta) {
         pos.add(delta);
+
     }
 }
