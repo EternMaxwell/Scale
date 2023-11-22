@@ -121,7 +121,15 @@ public class Entity {
         return true;
     }
 
-    public void clampMove(Vector2f delta, int maxIterations){
+    /**
+     * move the entity by the given delta.
+     * <p>It will loop no more than the given maxIterations.</p>
+     * <p>Then clamp the position to the last container.</p>
+     * @param delta The delta.
+     * @param maxIterations The maximum number of iterations.
+     * @return true if the position was clamped, false if the next position is valid.
+     */
+    public boolean clampMove(Vector2f delta, int maxIterations){
         lastContainer = container;
         last = pos;
         Vector2f newPos = pos.add(delta, new Vector2f());
@@ -131,14 +139,38 @@ public class Entity {
             if (!container.containsDelta(pos, newPos, deltaContainerIndex, pos, newPos, clamped)) {
                 if (deltaContainerIndex[0] == -1) {
                     pos = clamped;
-                    return;
+                    return true;
                 }
                 container = container.nearby(deltaContainerIndex[0]);
             } else {
                 pos = newPos;
-                return;
+                return false;
             }
         }
         pos = clamped;
+        return true;
+    }
+
+    /**
+     * move the entity by the given delta.
+     * <p>It will loop until the next position is in a container or it goes to where their is no container.</p>
+     * @param delta The delta.
+     * @return true if the position was clamped, false if the next position is valid.
+     */
+    public boolean clampMove(Vector2f delta) {
+        lastContainer = container;
+        last = pos;
+        Vector2f newPos = pos.add(delta, new Vector2f());
+        Vector2f clamped = new Vector2f();
+        int[] deltaContainerIndex = new int[]{-1};
+        while (!container.containsDelta(pos, newPos, deltaContainerIndex, pos, newPos, clamped)) {
+            if (deltaContainerIndex[0] == -1) {
+                pos = clamped;
+                return true;
+            }
+            container = container.nearby(deltaContainerIndex[0]);
+        }
+        pos = newPos;
+        return false;
     }
 }
