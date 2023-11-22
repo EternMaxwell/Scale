@@ -4,7 +4,9 @@ import org.joml.Vector2f;
 
 public class Entity {
     private Container container;
+    private Container lastContainer;
     private Vector2f pos;
+    private Vector2f last;
 
     /**
      * Creates an entity with the given container.
@@ -69,10 +71,74 @@ public class Entity {
 
     /**
      * move the entity by the given delta.
+     * <p>It will loop until the next position is in a container or it goes to where their is no container.</p>
      * @param delta The delta.
+     * @return true if the entity moved, false if the next position is not in any container.
+     * <p>But it will still move to the last iterated container.</p>
      */
-    public void move(Vector2f delta) {
-        pos.add(delta);
+    public boolean move(Vector2f delta) {
+        lastContainer = container;
+        last = pos;
+        Vector2f newPos = pos.add(delta, new Vector2f());
+        int[] deltaContainerIndex = new int[]{-1};
+        while(!container.containsDelta(pos, newPos, deltaContainerIndex, pos, newPos, null)){
+            if(deltaContainerIndex[0] == -1){
+                pos = newPos;
+                return false;
+            }
+            container = container.nearby(deltaContainerIndex[0]);
+        }
+        pos = newPos;
+        return true;
+    }
 
+    /**
+     * move the entity by the given delta.
+     * <p>This method will loop no more than the given maxIterations.</p>
+     * @param delta The delta.
+     * @param maxIterations The maximum number of iterations.
+     * @return true if the entity moved, false if the next position is not in any container after the iterations.
+     * <p>But it will still move to the last iterated container.</p>
+     */
+    public boolean move(Vector2f delta, int maxIterations) {
+        lastContainer = container;
+        last = pos;
+        Vector2f newPos = pos.add(delta, new Vector2f());
+        int[] deltaContainerIndex = new int[]{-1};
+        for (int i = 0; i < maxIterations; i++) {
+            if (!container.containsDelta(pos, newPos, deltaContainerIndex, pos, newPos, null)) {
+                if (deltaContainerIndex[0] == -1) {
+                    pos = newPos;
+                    return false;
+                }
+                container = container.nearby(deltaContainerIndex[0]);
+            } else {
+                pos = newPos;
+                return true;
+            }
+        }
+        pos = newPos;
+        return true;
+    }
+
+    public void clampMove(Vector2f delta, int maxIterations){
+        lastContainer = container;
+        last = pos;
+        Vector2f newPos = pos.add(delta, new Vector2f());
+        Vector2f clamped = new Vector2f();
+        int[] deltaContainerIndex = new int[]{-1};
+        for (int i = 0; i < maxIterations; i++) {
+            if (!container.containsDelta(pos, newPos, deltaContainerIndex, pos, newPos, clamped)) {
+                if (deltaContainerIndex[0] == -1) {
+                    pos = clamped;
+                    return;
+                }
+                container = container.nearby(deltaContainerIndex[0]);
+            } else {
+                pos = newPos;
+                return;
+            }
+        }
+        pos = clamped;
     }
 }
