@@ -15,10 +15,12 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class EasyRender {
 
+    public final Window window;
     public final Line line;
     public final Triangle triangle;
     public final Pixel pixel;
     public final Image image;
+    public final Point point;
 
     public class Line{
         public int vao;
@@ -64,9 +66,9 @@ public class EasyRender {
             glBindVertexArray(vao);
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
             glBufferData(GL_ARRAY_BUFFER, vertices.capacity(), GL_DYNAMIC_DRAW);
-            glVertexAttribPointer(0, 2, GL_FLOAT, false, 6 * Float.BYTES, 0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, false, 7 * Float.BYTES, 0);
             glEnableVertexAttribArray(0);
-            glVertexAttribPointer(1, 4, GL_FLOAT, false, 6 * Float.BYTES, 2 * Float.BYTES);
+            glVertexAttribPointer(1, 4, GL_FLOAT, false, 7 * Float.BYTES, 3 * Float.BYTES);
             glEnableVertexAttribArray(1);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindVertexArray(0);
@@ -120,18 +122,65 @@ public class EasyRender {
             vertexCount = 0;
         }
 
-        public void drawLine(float x1, float y1, float x2, float y2, float r, float g, float b, float a){
-            if(vertices.remaining() < 6 * 4 * 2){
+        /**
+         * draw a line with 2 2d points and 1 color
+         * @param x1 the x position of the first point
+         * @param y1 the y position of the first point
+         * @param x2 the x position of the second point
+         * @param y2 the y position of the second point
+         * @param r the red value of the line
+         * @param g the green value of the line
+         * @param b the blue value of the line
+         * @param a the alpha value of the line
+         */
+        public void drawLine2D(float x1, float y1, float x2, float y2, float r, float g, float b, float a){
+            if(vertices.remaining() < 7 * 4 * 2){
                 flush();
             }
             vertices.putFloat(x1);
             vertices.putFloat(y1);
+            vertices.putFloat(0);
             vertices.putFloat(r);
             vertices.putFloat(g);
             vertices.putFloat(b);
             vertices.putFloat(a);
             vertices.putFloat(x2);
             vertices.putFloat(y2);
+            vertices.putFloat(0);
+            vertices.putFloat(r);
+            vertices.putFloat(g);
+            vertices.putFloat(b);
+            vertices.putFloat(a);
+            vertexCount += 2;
+        }
+
+        /**
+         * draw a line with 2 3d points and 1 color
+         * @param x1 the x position of the first point
+         * @param y1 the y position of the first point
+         * @param z1 the z position of the first point
+         * @param x2 the x position of the second point
+         * @param y2 the y position of the second point
+         * @param z2 the z position of the second point
+         * @param r the red value of the line
+         * @param g the green value of the line
+         * @param b the blue value of the line
+         * @param a the alpha value of the line
+         */
+        public void drawLine3D(float x1, float y1, float z1, float x2, float y2, float z2, float r, float g, float b, float a){
+            if(vertices.remaining() < 7 * 4 * 2){
+                flush();
+            }
+            vertices.putFloat(x1);
+            vertices.putFloat(y1);
+            vertices.putFloat(z1);
+            vertices.putFloat(r);
+            vertices.putFloat(g);
+            vertices.putFloat(b);
+            vertices.putFloat(a);
+            vertices.putFloat(x2);
+            vertices.putFloat(y2);
+            vertices.putFloat(z2);
             vertices.putFloat(r);
             vertices.putFloat(g);
             vertices.putFloat(b);
@@ -897,14 +946,192 @@ public class EasyRender {
         }
     }
 
-    public EasyRender() {
+    public class Point{
+        public int vao;
+        public int vbo;
+        public int vertexShader;
+        public int fragmentShader;
+        public int shaderProgram;
+        public ByteBuffer vertices;
+
+        public int uniformBuffer;
+        public FloatBuffer uniformData;
+
+        public int vertexCount;
+
+        public Point() {
+            //====CREATE THE VAO AND VBO====//
+            vao = glGenVertexArrays();
+            vbo = glGenBuffers();
+            vertices = MemoryUtil.memAlloc(1024 * 6 * 4);
+
+            //====CREATE THE UNIFORM BUFFER====//
+            uniformBuffer = glGenBuffers();
+            uniformData = MemoryUtil.memAllocFloat(16);
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            glBufferData(GL_UNIFORM_BUFFER, 48 * Float.BYTES, GL_DYNAMIC_DRAW);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+            //====INITIALIZE THE MATRICES====//
+            setModelMatrix(new Matrix4f().identity());
+            setViewMatrix(new Matrix4f().identity());
+            setProjectionMatrix(new Matrix4f().identity());
+
+            //====CREATE THE SHADER PROGRAM====//
+            vertexShader = createShader("src/main/resources/shaders/point/shader.vert", GL_VERTEX_SHADER);
+            fragmentShader = createShader("src/main/resources/shaders/point/shader.frag", GL_FRAGMENT_SHADER);
+            shaderProgram = glCreateProgram();
+            glAttachShader(shaderProgram, vertexShader);
+            glAttachShader(shaderProgram, fragmentShader);
+            glLinkProgram(shaderProgram);
+            glUseProgram(shaderProgram);
+
+            //====SPECIFY THE VERTEX DATA====//
+            glBindVertexArray(vao);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, vertices.capacity(), GL_DYNAMIC_DRAW);
+            glVertexAttribPointer(0, 3, GL_FLOAT, false, 7 * Float.BYTES, 0);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(1, 4, GL_FLOAT, false, 7 * Float.BYTES, 3 * Float.BYTES);
+            glEnableVertexAttribArray(1);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+            glUseProgram(0);
+        }
+
+        /**
+         * set the model matrix
+         * @param modelMatrix the model matrix
+         */
+        public void setModelMatrix(Matrix4f modelMatrix){
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            uniformData.clear();
+            uniformData.put(modelMatrix.get(new float[16]));
+            uniformData.flip();
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, uniformData);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        /**
+         * set the view matrix
+         * @param viewMatrix the view matrix
+         */
+        public void setViewMatrix(Matrix4f viewMatrix){
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            uniformData.clear();
+            uniformData.put(viewMatrix.get(new float[16]));
+            uniformData.flip();
+            glBufferSubData(GL_UNIFORM_BUFFER, 16 * Float.BYTES, uniformData);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        /**
+         * set the projection matrix
+         * @param projectionMatrix the projection matrix
+         */
+        public void setProjectionMatrix(Matrix4f projectionMatrix){
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            uniformData.clear();
+            uniformData.put(projectionMatrix.get(new float[16]));
+            uniformData.flip();
+            glBufferSubData(GL_UNIFORM_BUFFER, 32 * Float.BYTES, uniformData);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        /**
+         * begin the line renderer
+         */
+        public void begin(){
+            vertices.clear();
+            vertexCount = 0;
+        }
+
+        /**
+         * draw a point with 1 color
+         * @param x the x position of the point
+         * @param y the y position of the point
+         * @param z the z position of the point
+         * @param r the red value of the point
+         * @param g the green value of the point
+         * @param b the blue value of the point
+         * @param a the alpha value of the point
+         */
+        public void drawPoint(float x, float y, float z, float r, float g, float b, float a) {
+            if (vertices.remaining() < 7 * 4) {
+                flush();
+            }
+            vertices.putFloat(x);
+            vertices.putFloat(y);
+            vertices.putFloat(z);
+            vertices.putFloat(r);
+            vertices.putFloat(g);
+            vertices.putFloat(b);
+            vertices.putFloat(a);
+            vertexCount += 1;
+        }
+
+        /**
+         * flush the data to the gpu and render the lines
+         */
+        public void flush(){
+            //====FLIP THE BUFFER====//
+            vertices.flip();
+
+            //====BIND THE VAO AND VBO====//
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBindVertexArray(vao);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
+            glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniformBuffer);
+
+            //====RENDER THE LINES====//
+            glUseProgram(shaderProgram);
+            glDrawArrays(GL_POINTS, 0, vertexCount);
+
+            //====UNBIND====//
+            glBindVertexArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glUseProgram(0);
+
+            //====CLEAR THE BUFFER====//
+            vertices.clear();
+        }
+
+        /**
+         * end the line renderer
+         */
+        public void end(){
+            flush();
+        }
+
+        /**
+         * dispose the line renderer and free the memory
+         */
+        public void dispose() {
+            glDeleteProgram(shaderProgram);
+            glDeleteShader(vertexShader);
+            glDeleteShader(fragmentShader);
+            glDeleteBuffers(vbo);
+            glDeleteVertexArrays(vao);
+            glDeleteBuffers(uniformBuffer);
+            MemoryUtil.memFree(vertices);
+            MemoryUtil.memFree(uniformData);
+        }
+    }
+
+    public EasyRender(Window window) {
+        this.window = window;
         line = new Line();
         triangle = new Triangle();
         pixel = new Pixel();
         image = new Image();
+        point = new Point();
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    public Window window(){
+        return window;
     }
 
     public void begin() {
@@ -913,6 +1140,7 @@ public class EasyRender {
         triangle.begin();
         pixel.begin();
         image.begin();
+        point.begin();
     }
 
     public void end(Window window) {
@@ -920,6 +1148,7 @@ public class EasyRender {
         triangle.end();
         pixel.end();
         image.end();
+        point.end();
         glfwSwapBuffers(window.id());
     }
 
@@ -947,5 +1176,6 @@ public class EasyRender {
         triangle.dispose();
         pixel.dispose();
         image.dispose();
+        point.dispose();
     }
 }

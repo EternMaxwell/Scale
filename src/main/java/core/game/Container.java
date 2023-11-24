@@ -13,6 +13,7 @@ public class Container {
     private final Container[] nearby = new Container[3];
     private final Vector3f[] nearbyOpposite = new Vector3f[3];
     private Matrix4f transform3to2, transform2to3;
+    private Matrix4f DirTransform3to2, DirTransform2to3;
 
     /**
      * Creates a container with the given vertices.
@@ -22,18 +23,7 @@ public class Container {
      * @param vertex3 The third vertex.
      */
     public Container(Vector3f vertex1, Vector3f vertex2, Vector3f vertex3) {
-        vertices[0] = vertex1;
-        vertices[1] = vertex2;
-        vertices[2] = vertex3;
-        normal = vertex2.sub(vertex1, new Vector3f()).cross(vertex3.sub(vertex1, new Vector3f()));
-        normal.normalize();
-        xDir = vertex2.sub(vertex1, new Vector3f());
-        xDir.normalize();
-        yDir = new Vector3f(normal).cross(xDir, new Vector3f());
-        yDir.normalize();
-        transform3to2 = new Matrix4f();
-        transform3to2.lookAtLH(vertex1, vertex1.add(normal, new Vector3f()), yDir);
-        transform2to3 = new Matrix4f(transform3to2).invert();
+        setVertices(vertex1, vertex2, vertex3);
     }
 
     /**
@@ -48,16 +38,16 @@ public class Container {
         vertices[0] = vertex1;
         vertices[1] = vertex2;
         vertices[2] = vertex3;
-        normal = vertex2.sub(vertex1, new Vector3f()).cross(vertex3.sub(vertex1, new Vector3f())).negate();
+        normal = vertex2.sub(vertex1, new Vector3f()).cross(vertex3.sub(vertex1, new Vector3f()));
         normal.normalize();
         xDir = vertex2.sub(vertex1, new Vector3f());
         xDir.normalize();
         yDir = new Vector3f(normal).cross(xDir, new Vector3f());
         yDir.normalize();
-        transform3to2 = new Matrix4f();
-        transform3to2.translate(vertex1).lookAlong(normal, yDir);
-        transform3to2.setLookAtLH(vertex1, vertex1.add(normal, new Vector3f()), yDir);
-        transform2to3 = new Matrix4f(transform3to2).invert();
+        transform2to3 = new Matrix4f().setColumn(0, new Vector4f(xDir, 0)).setColumn(1, new Vector4f(yDir, 0)).setColumn(2, new Vector4f(normal, 0)).setColumn(3, new Vector4f(vertex1, 1));
+        transform3to2 = new Matrix4f(transform2to3).invert();
+        DirTransform2to3 = new Matrix4f().setColumn(0, new Vector4f(xDir, 0)).setColumn(1, new Vector4f(yDir, 0)).setColumn(2, new Vector4f(normal, 0));
+        DirTransform3to2 = new Matrix4f(DirTransform2to3).invert();
         return this;
     }
 
@@ -115,6 +105,24 @@ public class Container {
     }
 
     /**
+     * set the nearby container at the given index.
+     *
+     * @param index     The index.
+     *                  <p>0: The container at the edge of the first vertex and the second vertex.</p>
+     *                  <p>1: The container at the edge of the second vertex and the third vertex.</p>
+     *                  <p>2: The container at the edge of the third vertex and the first vertex.</p>
+     * @param container The nearby container.
+     * @param opposite The opposite vertex of the nearby container.
+     * @return true if the nearby container is set successfully, false otherwise.
+     * <p>false may mean that the given container is not at the edge of the container.</p>
+     */
+    public boolean setNearby(int index, Container container, Vector3f opposite){
+        nearbyOpposite[index] = opposite;
+        nearby[index] = container;
+        return true;
+    }
+
+    /**
      * set the nearby container.
      *
      * @param container The nearby container.
@@ -122,13 +130,29 @@ public class Container {
      * <p>false may mean that the given container is not at the edge of the container.</p>
      */
     public boolean setNearby(Container container) {
+        boolean result = false;
         for (int i = 0; i < 3; i++) {
-            if (nearby[i] == null) {
-                if (setNearby(i, container))
-                    return true;
+            int equalNum = 0;
+            boolean[] flag = new boolean[]{false, false};
+            int notEqualIndex = -1;
+            for (int j = 0; j < 3; j++) {
+                if (container.vertex(j).equals(vertices[i])) {
+                    flag[0] = true;
+                    equalNum++;
+                } else if (container.vertex(j).equals(vertices[(i + 1) % 3])) {
+                    flag[1] = true;
+                    equalNum++;
+                } else {
+                    notEqualIndex = j;
+                }
+            }
+            if(equalNum == 2 && flag[0] && flag[1]) {
+                nearbyOpposite[notEqualIndex] = container.vertex(notEqualIndex);
+                nearby[notEqualIndex] = container;
+                result = true;
             }
         }
-        return false;
+        return result;
     }
 
     /**
@@ -184,6 +208,26 @@ public class Container {
     public Vector3f absPositionTransform(Vector2f posInContainer) {
         Vector3f temp = new Vector3f(posInContainer, 0);
         return transform2to3.transformProject(temp);
+    }
+
+    /**
+     * get the absolute direction of the given direction in the container.
+     * @param dirInContainer The direction in the container.
+     * @return the absolute direction.
+     */
+    public Vector3f absDir(Vector2f dirInContainer){
+        Vector3f temp = new Vector3f(dirInContainer, 0);
+        return DirTransform2to3.transformProject(temp);
+    }
+
+    /**
+     * get the relative direction of the given direction in the container.
+     * @param dirInWorld The direction in the world.
+     * @return the relative direction.
+     */
+    public Vector2f relDir(Vector3f dirInWorld){
+        Vector3f temp = dirInWorld.mulProject(DirTransform3to2, new Vector3f());
+        return new Vector2f(temp.x, temp.y);
     }
 
     /**
@@ -248,14 +292,14 @@ public class Container {
             if (index == -1) {
                 return true;
             }
-            if (nearby[index] == null) {
-                return false;
-            }
             if (containerIndex != null) {
                 containerIndex[0] = index;
             }
+            if (nearby[index] == null) {
+                return false;
+            }
             Container container = nearby[index];
-            Vector3f lineVertex1 = vertex(index);
+            Vector3f lineVertex1 = new Vector3f(vertex(index));
             Vector3f lineVertex2 = vertex((index + 1) % 3);
             Vector3f opposite1 = vertex((index + 2) % 3);
             Vector3f opposite2 = nearbyOpposite[index];
@@ -263,7 +307,7 @@ public class Container {
             Vector3f dir1 = opposite1.sub(lineVertex1, new Vector3f());
             Vector3f dir2 = opposite2.sub(lineVertex1, new Vector3f());
             float angle = dir1.angleSigned(dir2, line);
-            Matrix4f transform = new Matrix4f().translate(lineVertex1).rotate(-angle, line).translate(lineVertex1.negate());
+            Matrix4f transform = new Matrix4f().translate(lineVertex1).rotate(-angle, line.normalize()).translate(lineVertex1.negate());
             if (posInContainerDelta != null) {
                 posInContainerDelta.set(container.relPosition(transform.transformProject(absPositionTransform(posInContainer), new Vector3f())));
             }
@@ -272,6 +316,36 @@ public class Container {
             }
             return false;
         }
+    }
+
+    /**
+     * transform the given direction in this container to the given index container.
+     * @param dir The direction in this container.
+     * @param index The index of the container in the nearby containers.
+     * @param dest where the result is written to.
+     * @return the result.
+     */
+    public Vector2f transformDir(Vector2f dir, int index, Vector2f dest){
+        Container delta = nearby[index];
+        Vector3f temp = new Vector3f(dir, 0);
+        temp = DirTransform2to3.transformProject(temp);
+        Vector3f lineVertex1 = new Vector3f(vertex(index));
+        Vector3f lineVertex2 = vertex((index + 1) % 3);
+        Vector3f opposite1 = vertex((index + 2) % 3);
+        Vector3f opposite2 = nearbyOpposite[index];
+        Vector3f line = lineVertex2.sub(lineVertex1, new Vector3f());
+        Vector3f dir1 = opposite1.sub(lineVertex1, new Vector3f());
+        Vector3f dir2 = opposite2.sub(lineVertex1, new Vector3f());
+        float angle = dir1.angleSigned(dir2, line);
+        Matrix4f transform = new Matrix4f().rotate(-angle, line.normalize());
+        temp = transform.transformProject(temp);
+        temp = delta.DirTransform3to2.transformProject(temp);
+        if(dest != null) {
+            dest.set(temp.x, temp.y);
+            return dest;
+        }
+        dir.set(temp.x, temp.y);
+        return dir;
     }
 
     /**
@@ -291,7 +365,7 @@ public class Container {
         Vector2f rel2 = line2[1].sub(line1[0], new Vector2f());
         float cross1 = delta1.x * rel1.y - delta1.y * rel1.x;
         float cross2 = delta1.x * rel2.y - delta1.y * rel2.x;
-        if (cross1 * cross2 > 0) {
+        if (cross1 * cross2 < 0) {
             return false;
         }
         Vector2f delta2 = line2[1].sub(line2[0], new Vector2f());
@@ -321,7 +395,7 @@ public class Container {
         Vector2f rel2 = line2[1].sub(line1[0], new Vector2f());
         float cross1 = delta1.x * rel1.y - delta1.y * rel1.x;
         float cross2 = delta1.x * rel2.y - delta1.y * rel2.x;
-        if (cross1 * cross2 >= 0) {
+        if (cross1 * cross2 > 0) {
             return false;
         }
         Vector2f delta2 = line2[1].sub(line2[0], new Vector2f());
@@ -329,12 +403,17 @@ public class Container {
         Vector2f rel4 = line1[1].sub(line2[0], new Vector2f());
         float cross3 = delta2.x * rel3.y - delta2.y * rel3.x;
         float cross4 = delta2.x * rel4.y - delta2.y * rel4.x;
+        if(cross3 * cross4 > 0){
+            return false;
+        }
         if (intersectionPoint != null) {
             float cross5 = delta1.x * delta2.y - delta1.y * delta2.x;
+            cross5 = Math.abs(cross5);
+            cross3 = Math.abs(cross3);
             float t = cross3 / cross5;
-            intersectionPoint.set(line1[0].add(delta1.mul(t, new Vector2f())));
+            intersectionPoint.set(line1[0].add(delta1.mul(t), new Vector2f()));
         }
-        return !(cross3 * cross4 >= 0);
+        return true;
     }
 
 
