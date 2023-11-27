@@ -27,7 +27,7 @@ public class Test {
         vertices = new Vector3f[4];
         vertices[0] = new Vector3f(-0.5f, -0.5f, 0.0f);
         vertices[1] = new Vector3f(0.5f, -0.5f, 0.0f);
-        vertices[3] = new Vector3f(0.5f, 0.5f, 0.5f);
+        vertices[3] = new Vector3f(0.5f, 0.5f, 1f);
         vertices[2] = new Vector3f(-0.5f, 0.5f, 0.0f);
         containers[0] = new Container(vertices[0], vertices[1], vertices[2]);
         containers[1] = new Container(vertices[2], vertices[3], vertices[1]);
@@ -52,7 +52,7 @@ public class Test {
     }
 
     public void update() {
-        point.clampMove(dir);
+        System.out.println(point.clampMove(dir, 20));
         System.out.println(point.pos()+" "+point.absPosition());
     }
 
@@ -91,12 +91,12 @@ public class Test {
             renderer.line.drawLine3D(0,0,0,0,1000,0,0,1,0,1);
             renderer.line.drawLine3D(0,0,0,0,0,1000,0,0,1,1);
 
-            renderer.line.drawLine3D(vertices[0].x, vertices[0].y, vertices[0].z, vertices[1].x, vertices[1].y, vertices[1].z, 1, 1, 0, 1);
-            renderer.line.drawLine3D(vertices[1].x, vertices[1].y, vertices[1].z, vertices[2].x, vertices[2].y, vertices[2].z, 1, 1, 0, 1);
-            renderer.line.drawLine3D(vertices[2].x, vertices[2].y, vertices[2].z, vertices[3].x, vertices[3].y, vertices[3].z, 1, 1, 0, 1);
-            renderer.line.drawLine3D(vertices[3].x, vertices[3].y, vertices[3].z, vertices[0].x, vertices[0].y, vertices[0].z, 1, 1, 0, 1);
-            renderer.line.drawLine3D(vertices[0].x, vertices[0].y, vertices[0].z, vertices[2].x, vertices[2].y, vertices[2].z, 1, 1, 0, 1);
-            renderer.line.drawLine3D(vertices[1].x, vertices[1].y, vertices[1].z, vertices[3].x, vertices[3].y, vertices[3].z, 1, 1, 0, 1);
+            renderer.line.drawLine3D(vertices[0].x, vertices[0].y, vertices[0].z, vertices[1].x, vertices[1].y, vertices[1].z, 1, 1, 0, 0.1f);
+            renderer.line.drawLine3D(vertices[1].x, vertices[1].y, vertices[1].z, vertices[2].x, vertices[2].y, vertices[2].z, 1, 1, 0, 0.1f);
+            renderer.line.drawLine3D(vertices[2].x, vertices[2].y, vertices[2].z, vertices[3].x, vertices[3].y, vertices[3].z, 1, 1, 0, 0.1f);
+            renderer.line.drawLine3D(vertices[3].x, vertices[3].y, vertices[3].z, vertices[0].x, vertices[0].y, vertices[0].z, 1, 1, 0, 0.1f);
+            renderer.line.drawLine3D(vertices[0].x, vertices[0].y, vertices[0].z, vertices[2].x, vertices[2].y, vertices[2].z, 1, 1, 0, 0.1f);
+            renderer.line.drawLine3D(vertices[1].x, vertices[1].y, vertices[1].z, vertices[3].x, vertices[3].y, vertices[3].z, 1, 1, 0, 0.1f);
 
             Vector3f absPos = point.absPosition();
             renderer.point.drawPoint(absPos.x, absPos.y, absPos.z, 0, 1, 1, 1);
