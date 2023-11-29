@@ -310,7 +310,9 @@ public class Container {
         Vector3f line = lineVertex2.sub(lineVertex1, new Vector3f());
         Vector3f dir1 = opposite1.sub(lineVertex1, new Vector3f());
         Vector3f dir2 = opposite2.sub(lineVertex1, new Vector3f());
-        float angle = dir1.angleSigned(dir2, line);
+        dir1.cross(line).cross(line).negate();
+        dir2.cross(line).cross(line).negate();
+        float angle = (float) (Math.PI - dir1.angleSigned(dir2, line));
         Matrix4f transform = new Matrix4f().translate(lineVertex1).rotate(-angle, line.normalize()).translate(lineVertex1.negate());
         if(dest == null){
             for (Vector2f vector2f : posInContainer) {
@@ -343,7 +345,7 @@ public class Container {
     public Vector2f transformDir(Vector2f dir, int index, Vector2f dest){
         Container delta = nearby[index];
         Vector3f temp = new Vector3f(dir, 0);
-        temp = DirTransform2to3.transformProject(temp);
+        System.out.println(temp);
         Vector3f lineVertex1 = new Vector3f(vertex(index));
         Vector3f lineVertex2 = vertex((index + 1) % 3);
         Vector3f opposite1 = vertex((index + 2) % 3);
@@ -351,7 +353,9 @@ public class Container {
         Vector3f line = lineVertex2.sub(lineVertex1, new Vector3f());
         Vector3f dir1 = opposite1.sub(lineVertex1, new Vector3f());
         Vector3f dir2 = opposite2.sub(lineVertex1, new Vector3f());
-        float angle = dir1.angleSigned(dir2, line);
+        dir1.cross(line).cross(line).negate();
+        dir2.cross(line).cross(line).negate();
+        float angle = (float) (Math.PI - dir1.angleSigned(dir2, line));
         Matrix4f transform = new Matrix4f().rotate(-angle, line.normalize());
         temp = transform.transformProject(temp);
         temp = delta.DirTransform3to2.transformProject(temp);
@@ -498,7 +502,7 @@ public class Container {
         vertices[0] = new Vector3f(0, 0, 0);
         vertices[1] = new Vector3f(1, 0, 0);
         vertices[2] = new Vector3f(0, 1, 0);
-        vertices[3] = new Vector3f(1, 1, 0);
+        vertices[3] = new Vector3f(0, 0, 1);
         Container container1 = new Container(vertices[0], vertices[1], vertices[2]);
         Container container2 = new Container(vertices[1], vertices[2], vertices[3]);
         container1.setNearby(container2);
@@ -506,7 +510,7 @@ public class Container {
 
         Vector2f posInContainer = new Vector2f(0.5f, 0.1f);
 
-        Vector2f posInContainer1 = new Vector2f(0.2f, 0.2f);
+        Vector2f posInContainer1 = new Vector2f(0.2f, 0.1f);
         Vector2f next1 = new Vector2f(0.6f, 0.6f);
         Vector2f posInContainerDelta1 = new Vector2f();
         Vector2f nextInContainerDelta1 = new Vector2f();
@@ -537,6 +541,7 @@ public class Container {
         System.out.print("\tnextInContainerDelta:\n\t\t");
         System.out.println(nextInContainerDelta1);
         System.out.println();
+        System.out.println("abs position:\n\t"+container2.absPositionTransform(posInContainerDelta1)+"\n\t"+container2.absPositionTransform(nextInContainerDelta1));
 
         //====TEST FOR CONTAINER'S INTERSECT====//
         System.out.println("====test for container::intersect====".toUpperCase());
@@ -566,5 +571,9 @@ public class Container {
         System.out.print("\tnextInContainerDelta:\n\t\t");
         System.out.println(nextInContainerDelta1);
         System.out.println();
+
+        //====TEST FOR TRANSFORM DIR====//
+        System.out.println("====test for container::transformDir====".toUpperCase());
+        System.out.println("\tdir in delta:\n\t\t"+container1.transformDir(new Vector2f(2, 1), 1, null));
     }
 }

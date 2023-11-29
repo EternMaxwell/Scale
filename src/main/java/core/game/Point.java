@@ -109,10 +109,11 @@ public class Point {
         Vector2f newPos = pos.add(delta, new Vector2f());
         int[] deltaContainerIndex = new int[]{-1};
         while (!container.containsDelta(pos, newPos, deltaContainerIndex, pos, newPos, null)) {
-            if (deltaContainerIndex[0] == -1) {
+            if (deltaContainerIndex[0] == -1 || container.nearby(deltaContainerIndex[0]) == null) {
                 pos = newPos;
                 return false;
             }
+            container.transformDir(delta, deltaContainerIndex[0], null);
             container = container.nearby(deltaContainerIndex[0]);
         }
         pos = newPos;
@@ -135,10 +136,11 @@ public class Point {
         int[] deltaContainerIndex = new int[]{-1};
         for (int i = 0; i < maxIterations; i++) {
             if (!container.containsDelta(pos, newPos, deltaContainerIndex, pos, newPos, null)) {
-                if (deltaContainerIndex[0] == -1) {
+                if (deltaContainerIndex[0] == -1 || container.nearby(deltaContainerIndex[0]) == null) {
                     pos = newPos;
                     return false;
                 }
+                container.transformDir(delta, deltaContainerIndex[0], null);
                 container = container.nearby(deltaContainerIndex[0]);
             } else {
                 pos = newPos;
@@ -166,10 +168,11 @@ public class Point {
         int[] deltaContainerIndex = new int[]{-1};
         for (int i = 0; i < maxIterations; i++) {
             if (!container.containsDelta(pos, newPos, deltaContainerIndex, pos, newPos, clamped)) {
-                if (deltaContainerIndex[0] == -1) {
+                if (deltaContainerIndex[0] == -1 || container.nearby(deltaContainerIndex[0]) == null) {
                     pos = clamped;
                     return true;
                 }
+                container.transformDir(delta, deltaContainerIndex[0], null);
                 container = container.nearby(deltaContainerIndex[0]);
             } else {
                 pos = newPos;

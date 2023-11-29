@@ -25,28 +25,28 @@ public class Test {
 
     public void init() {
         vertices = new Vector3f[4];
-        vertices[0] = new Vector3f(-0.5f, -0.5f, 0.0f);
-        vertices[1] = new Vector3f(0.5f, -0.5f, 0.0f);
-        vertices[3] = new Vector3f(0.5f, 0.5f, 1f);
-        vertices[2] = new Vector3f(-0.5f, 0.5f, 0.0f);
+        vertices[0] = new Vector3f(0, 0, 0);
+        vertices[1] = new Vector3f(1, 0, 0);
+        vertices[2] = new Vector3f(0, 1, 0);
+        vertices[3] = new Vector3f(1, 1, 1);
         containers[0] = new Container(vertices[0], vertices[1], vertices[2]);
-        containers[1] = new Container(vertices[2], vertices[3], vertices[1]);
-        containers[2] = new Container(vertices[0], vertices[1], vertices[3]);
-        containers[3] = new Container(vertices[0], vertices[2], vertices[3]);
-        containers[0].setNearby(1, containers[1], vertices[3]);
-        containers[0].setNearby(0, containers[2], vertices[3]);
-        containers[0].setNearby(2, containers[3], vertices[3]);
-        containers[1].setNearby(2, containers[0], vertices[0]);
-        containers[1].setNearby(1, containers[2], vertices[0]);
-        containers[1].setNearby(0, containers[3], vertices[0]);
-        containers[2].setNearby(0, containers[0], vertices[2]);
-        containers[2].setNearby(1, containers[1], vertices[2]);
-        containers[2].setNearby(2, containers[3], vertices[2]);
-        containers[3].setNearby(0, containers[0], vertices[1]);
-        containers[3].setNearby(1, containers[1], vertices[1]);
-        containers[3].setNearby(2, containers[2], vertices[1]);
-        point = new Point(containers[0], new Vector2f(0.1f, 0.1f));
-        dir = new Vector2f(0.01f, 0.012f);
+        containers[1] = new Container(vertices[1], vertices[2], vertices[3]);
+        containers[2] = new Container(vertices[2], vertices[3], vertices[0]);
+        containers[3] = new Container(vertices[3], vertices[0], vertices[1]);
+        containers[0].setNearby(containers[1]);
+        containers[0].setNearby(containers[2]);
+        containers[0].setNearby(containers[3]);
+        containers[1].setNearby(containers[0]);
+        containers[1].setNearby(containers[2]);
+        containers[1].setNearby(containers[3]);
+        containers[2].setNearby(containers[0]);
+        containers[2].setNearby(containers[1]);
+        containers[2].setNearby(containers[3]);
+        containers[3].setNearby(containers[0]);
+        containers[3].setNearby(containers[1]);
+        containers[3].setNearby(containers[2]);
+        point = new Point(containers[1], new Vector2f(0.1f, 0.1f));
+        dir = new Vector2f(0.012f, 0.01f);
 
         view.lookAtLH(new Vector3f(0, 0, -distance), new Vector3f(0, 0, 0), new Vector3f(0, 1, 0));
     }
@@ -86,6 +86,7 @@ public class Test {
 
             renderer.line.setViewMatrix(mat);
             renderer.point.setViewMatrix(mat);
+            renderer.triangle.setViewMatrix(mat);
 
             renderer.line.drawLine3D(0,0,0,1000,0,0,1,0,0,1);
             renderer.line.drawLine3D(0,0,0,0,1000,0,0,1,0,1);
@@ -97,6 +98,11 @@ public class Test {
             renderer.line.drawLine3D(vertices[3].x, vertices[3].y, vertices[3].z, vertices[0].x, vertices[0].y, vertices[0].z, 1, 1, 0, 0.1f);
             renderer.line.drawLine3D(vertices[0].x, vertices[0].y, vertices[0].z, vertices[2].x, vertices[2].y, vertices[2].z, 1, 1, 0, 0.1f);
             renderer.line.drawLine3D(vertices[1].x, vertices[1].y, vertices[1].z, vertices[3].x, vertices[3].y, vertices[3].z, 1, 1, 0, 0.1f);
+
+            renderer.triangle.drawTriangle3D(point.container().vertex(0).x, point.container().vertex(0).y, point.container().vertex(0).z,
+                    point.container().vertex(1).x, point.container().vertex(1).y, point.container().vertex(1).z,
+                    point.container().vertex(2).x, point.container().vertex(2).y, point.container().vertex(2).z,
+                    1, 0, 0, 0.1f);
 
             Vector3f absPos = point.absPosition();
             renderer.point.drawPoint(absPos.x, absPos.y, absPos.z, 0, 1, 1, 1);

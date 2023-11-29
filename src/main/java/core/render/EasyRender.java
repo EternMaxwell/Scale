@@ -278,9 +278,9 @@ public class EasyRender {
             glBindVertexArray(vao);
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
             glBufferData(GL_ARRAY_BUFFER, vertices.capacity(), GL_DYNAMIC_DRAW);
-            glVertexAttribPointer(0, 2, GL_FLOAT, false, 6 * Float.BYTES, 0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, false, 7 * Float.BYTES, 0);
             glEnableVertexAttribArray(0);
-            glVertexAttribPointer(1, 4, GL_FLOAT, false, 6 * Float.BYTES, 2 * Float.BYTES);
+            glVertexAttribPointer(1, 4, GL_FLOAT, false, 7 * Float.BYTES, 3 * Float.BYTES);
             glEnableVertexAttribArray(1);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindVertexArray(0);
@@ -347,24 +347,27 @@ public class EasyRender {
          * @param b the blue value of the triangle
          * @param a the alpha value of the triangle
          */
-        public void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, float r, float g, float b, float a){
-            if(vertices.remaining() < 6 * 4 * 3){
+        public void drawTriangle2D(float x1, float y1, float x2, float y2, float x3, float y3, float r, float g, float b, float a){
+            if(vertices.remaining() < 7 * 4 * 3){
                 flush();
             }
             vertices.putFloat(x1);
             vertices.putFloat(y1);
+            vertices.putFloat(0);
             vertices.putFloat(r);
             vertices.putFloat(g);
             vertices.putFloat(b);
             vertices.putFloat(a);
             vertices.putFloat(x2);
             vertices.putFloat(y2);
+            vertices.putFloat(0);
             vertices.putFloat(r);
             vertices.putFloat(g);
             vertices.putFloat(b);
             vertices.putFloat(a);
             vertices.putFloat(x3);
             vertices.putFloat(y3);
+            vertices.putFloat(0);
             vertices.putFloat(r);
             vertices.putFloat(g);
             vertices.putFloat(b);
@@ -393,24 +396,123 @@ public class EasyRender {
          * @param b3 the blue value of the third point
          * @param a3 the alpha value of the third point
          */
-        public void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, float r1, float g1, float b1, float a1, float r2, float g2, float b2, float a2, float r3, float g3, float b3, float a3){
-            if(vertices.remaining() < 6 * 4 * 3){
+        public void drawTriangle2D(float x1, float y1, float x2, float y2, float x3, float y3, float r1, float g1, float b1, float a1, float r2, float g2, float b2, float a2, float r3, float g3, float b3, float a3){
+            if(vertices.remaining() < 7 * 4 * 3){
                 flush();
             }
             vertices.putFloat(x1);
             vertices.putFloat(y1);
+            vertices.putFloat(0);
             vertices.putFloat(r1);
             vertices.putFloat(g1);
             vertices.putFloat(b1);
             vertices.putFloat(a1);
             vertices.putFloat(x2);
             vertices.putFloat(y2);
+            vertices.putFloat(0);
             vertices.putFloat(r2);
             vertices.putFloat(g2);
             vertices.putFloat(b2);
             vertices.putFloat(a2);
             vertices.putFloat(x3);
             vertices.putFloat(y3);
+            vertices.putFloat(0);
+            vertices.putFloat(r3);
+            vertices.putFloat(g3);
+            vertices.putFloat(b3);
+            vertices.putFloat(a3);
+            vertexCount += 3;
+        }
+
+        /**
+         * draw a triangle with 3 points and 1 color
+         * @param x1 the x position of the first point
+         * @param y1 the y position of the first point
+         * @param z1 the z position of the first point
+         * @param x2 the x position of the second point
+         * @param y2 the y position of the second point
+         * @param z2 the z position of the second point
+         * @param x3 the x position of the third point
+         * @param y3 the y position of the third point
+         * @param z3 the z position of the third point
+         * @param r the red value of the triangle
+         * @param g the green value of the triangle
+         * @param b the blue value of the triangle
+         * @param a the alpha value of the triangle
+         */
+        public void drawTriangle3D(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float r, float g, float b, float a) {
+            if (vertices.remaining() < 7 * 4 * 3) {
+                flush();
+            }
+            vertices.putFloat(x1);
+            vertices.putFloat(y1);
+            vertices.putFloat(z1);
+            vertices.putFloat(r);
+            vertices.putFloat(g);
+            vertices.putFloat(b);
+            vertices.putFloat(a);
+            vertices.putFloat(x2);
+            vertices.putFloat(y2);
+            vertices.putFloat(z2);
+            vertices.putFloat(r);
+            vertices.putFloat(g);
+            vertices.putFloat(b);
+            vertices.putFloat(a);
+            vertices.putFloat(x3);
+            vertices.putFloat(y3);
+            vertices.putFloat(z3);
+            vertices.putFloat(r);
+            vertices.putFloat(g);
+            vertices.putFloat(b);
+            vertices.putFloat(a);
+            vertexCount += 3;
+        }
+
+        /**
+         * draw a triangle with 3 points and 3 colors
+         * @param x1 the x position of the first point
+         * @param y1 the y position of the first point
+         * @param z1 the z position of the first point
+         * @param x2 the x position of the second point
+         * @param y2 the y position of the second point
+         * @param z2 the z position of the second point
+         * @param x3 the x position of the third point
+         * @param y3 the y position of the third point
+         * @param z3 the z position of the third point
+         * @param r1 the red value of the first point
+         * @param g1 the green value of the first point
+         * @param b1 the blue value of the first point
+         * @param a1 the alpha value of the first point
+         * @param r2 the red value of the second point
+         * @param g2 the green value of the second point
+         * @param b2 the blue value of the second point
+         * @param a2 the alpha value of the second point
+         * @param r3 the red value of the third point
+         * @param g3 the green value of the third point
+         * @param b3 the blue value of the third point
+         * @param a3 the alpha value of the third point
+         */
+        public void drawTriangle3D(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float r1, float g1, float b1, float a1, float r2, float g2, float b2, float a2, float r3, float g3, float b3, float a3) {
+            if (vertices.remaining() < 7 * 4 * 3) {
+                flush();
+            }
+            vertices.putFloat(x1);
+            vertices.putFloat(y1);
+            vertices.putFloat(z1);
+            vertices.putFloat(r1);
+            vertices.putFloat(g1);
+            vertices.putFloat(b1);
+            vertices.putFloat(a1);
+            vertices.putFloat(x2);
+            vertices.putFloat(y2);
+            vertices.putFloat(z2);
+            vertices.putFloat(r2);
+            vertices.putFloat(g2);
+            vertices.putFloat(b2);
+            vertices.putFloat(a2);
+            vertices.putFloat(x3);
+            vertices.putFloat(y3);
+            vertices.putFloat(z3);
             vertices.putFloat(r3);
             vertices.putFloat(g3);
             vertices.putFloat(b3);
