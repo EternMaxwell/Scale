@@ -3,8 +3,6 @@ package core.game;
 import org.joml.*;
 import org.joml.Math;
 
-import java.util.Vector;
-
 public class Container {
     private final Vector3f[] vertices = new Vector3f[3];
     private Vector3f normal;
@@ -13,7 +11,7 @@ public class Container {
     private final Container[] nearby = new Container[3];
     private final Vector3f[] nearbyOpposite = new Vector3f[3];
     private Matrix4f transform3to2, transform2to3;
-    private Matrix4f DirTransform3to2, DirTransform2to3;
+    private Matrix4f dirTransform3to2, dirTransform2to3;
 
     /**
      * Creates a container with the given vertices.
@@ -46,8 +44,8 @@ public class Container {
         yDir.normalize();
         transform2to3 = new Matrix4f().setColumn(0, new Vector4f(xDir, 0)).setColumn(1, new Vector4f(yDir, 0)).setColumn(2, new Vector4f(normal, 0)).setColumn(3, new Vector4f(vertex1, 1));
         transform3to2 = new Matrix4f(transform2to3).invert();
-        DirTransform2to3 = new Matrix4f().setColumn(0, new Vector4f(xDir, 0)).setColumn(1, new Vector4f(yDir, 0)).setColumn(2, new Vector4f(normal, 0));
-        DirTransform3to2 = new Matrix4f(DirTransform2to3).invert();
+        dirTransform2to3 = new Matrix4f().setColumn(0, new Vector4f(xDir, 0)).setColumn(1, new Vector4f(yDir, 0)).setColumn(2, new Vector4f(normal, 0));
+        dirTransform3to2 = new Matrix4f(dirTransform2to3).invert();
         return this;
     }
 
@@ -214,7 +212,7 @@ public class Container {
      */
     public Vector3f absDir(Vector2f dirInContainer){
         Vector3f temp = new Vector3f(dirInContainer, 0);
-        return DirTransform2to3.transformProject(temp);
+        return dirTransform2to3.transformProject(temp);
     }
 
     /**
@@ -223,7 +221,7 @@ public class Container {
      * @return the relative direction.
      */
     public Vector2f relDir(Vector3f dirInWorld){
-        Vector3f temp = dirInWorld.mulProject(DirTransform3to2, new Vector3f());
+        Vector3f temp = dirInWorld.mulProject(dirTransform3to2, new Vector3f());
         return new Vector2f(temp.x, temp.y);
     }
 
@@ -316,7 +314,7 @@ public class Container {
         Matrix4f transform = new Matrix4f().translate(lineVertex1).rotate(-angle, line.normalize()).translate(lineVertex1.negate());
         if(dest == null){
             for (Vector2f vector2f : posInContainer) {
-                Vector3f temp = new Vector3f(vector2f, 0);
+                Vector3f temp = absPositionTransform(vector2f);
                 temp = transform.transformProject(temp);
                 temp = delta.transform3to2.transformProject(temp);
                 vector2f.set(temp.x, temp.y);
@@ -324,7 +322,7 @@ public class Container {
             return posInContainer;
         }
         for(int i = 0; i < posInContainer.length; i++){
-            Vector3f temp = new Vector3f(posInContainer[i], 0);
+            Vector3f temp = absPositionTransform(posInContainer[i]);
             temp = transform.transformProject(temp);
             temp = delta.transform3to2.transformProject(temp);
             if(dest[i] == null)
@@ -344,7 +342,7 @@ public class Container {
      */
     public Vector2f transformDir(Vector2f dir, int index, Vector2f dest){
         Container delta = nearby[index];
-        Vector3f temp = new Vector3f(dir, 0);
+        Vector3f temp = dirTransform2to3.transformProject(new Vector3f(dir, 0));
         System.out.println(temp);
         Vector3f lineVertex1 = new Vector3f(vertex(index));
         Vector3f lineVertex2 = vertex((index + 1) % 3);
@@ -358,7 +356,7 @@ public class Container {
         float angle = (float) (Math.PI - dir1.angleSigned(dir2, line));
         Matrix4f transform = new Matrix4f().rotate(-angle, line.normalize());
         temp = transform.transformProject(temp);
-        temp = delta.DirTransform3to2.transformProject(temp);
+        temp = delta.dirTransform3to2.transformProject(temp);
         if(dest != null) {
             dest.set(temp.x, temp.y);
             return dest;
@@ -499,10 +497,10 @@ public class Container {
      */
     public static void main(String[] args) {
         Vector3f[] vertices = new Vector3f[4];
-        vertices[0] = new Vector3f(0, 0, 0);
-        vertices[1] = new Vector3f(1, 0, 0);
-        vertices[2] = new Vector3f(0, 1, 0);
-        vertices[3] = new Vector3f(0, 0, 1);
+        vertices[0] = new Vector3f(0, 0, 1);
+        vertices[1] = new Vector3f(1, 0, 1);
+        vertices[2] = new Vector3f(0, 1, 1);
+        vertices[3] = new Vector3f(0, 0, 2);
         Container container1 = new Container(vertices[0], vertices[1], vertices[2]);
         Container container2 = new Container(vertices[1], vertices[2], vertices[3]);
         container1.setNearby(container2);
@@ -510,7 +508,7 @@ public class Container {
 
         Vector2f posInContainer = new Vector2f(0.5f, 0.1f);
 
-        Vector2f posInContainer1 = new Vector2f(0.2f, 0.1f);
+        Vector2f posInContainer1 = new Vector2f(0.2f, 0.2f);
         Vector2f next1 = new Vector2f(0.6f, 0.6f);
         Vector2f posInContainerDelta1 = new Vector2f();
         Vector2f nextInContainerDelta1 = new Vector2f();

@@ -45,7 +45,7 @@ public class Test {
         containers[3].setNearby(containers[0]);
         containers[3].setNearby(containers[1]);
         containers[3].setNearby(containers[2]);
-        point = new Point(containers[1], new Vector2f(0.1f, 0.1f));
+        point = new Point(containers[0], new Vector2f(0.1f, 0.1f));
         dir = new Vector2f(0.012f, 0.01f);
 
         view.lookAtLH(new Vector3f(0, 0, -distance), new Vector3f(0, 0, 0), new Vector3f(0, 1, 0));
