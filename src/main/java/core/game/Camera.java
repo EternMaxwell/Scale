@@ -3,26 +3,14 @@ package core.game;
 import org.joml.Vector2f;
 
 public class Camera {
-    private Container container;
-    private Vector2f pos;
+    private final Point globalPos;
 
     /**
-     * Creates a camera with the given container.
-     * @param container The container.
+     * Creates a camera with the given global point.
+     * @param globalPos The global point.
      */
-    public Camera(Container container) {
-        this.container = container;
-        pos = new Vector2f();
-    }
-
-    /**
-     * Creates a camera with the given container and position.
-     * @param container The container.
-     * @param pos The position.
-     */
-    public Camera(Container container, Vector2f pos) {
-        this.container = container;
-        this.pos = pos;
+    public Camera(Point globalPos) {
+        this.globalPos = globalPos;
     }
 
     /**
@@ -30,7 +18,7 @@ public class Camera {
      * @return the container.
      */
     public Container container() {
-        return container;
+        return globalPos.container();
     }
 
     /**
@@ -38,7 +26,7 @@ public class Camera {
      * @return the position.
      */
     public Vector2f pos() {
-        return pos;
+        return globalPos.pos();
     }
 
     /**
@@ -46,7 +34,7 @@ public class Camera {
      * @param pos The new position.
      */
     public void setPos(Vector2f pos) {
-        this.pos = pos;
+        globalPos.setPos(pos);
     }
 
     /**
@@ -55,8 +43,7 @@ public class Camera {
      * @param y The y coordinate of the new position.
      */
     public void setPos(float x, float y) {
-        pos.x = x;
-        pos.y = y;
+        globalPos.setPos(x, y);
     }
 
     /**
@@ -64,6 +51,6 @@ public class Camera {
      * @param container The new container.
      */
     public void setContainer(Container container) {
-        this.container = container;
+        globalPos.setContainer(container);
     }
 }

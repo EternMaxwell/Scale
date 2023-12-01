@@ -3,6 +3,8 @@ package core.game;
 import org.joml.*;
 import org.joml.Math;
 
+import java.util.Iterator;
+
 public class Container {
     private final Vector3f[] vertices = new Vector3f[3];
     private Vector3f normal;
@@ -12,6 +14,8 @@ public class Container {
     private final Vector3f[] nearbyOpposite = new Vector3f[3];
     private Matrix4f transform3to2, transform2to3;
     private Matrix4f dirTransform3to2, dirTransform2to3;
+
+    private Entity entityList;
 
     /**
      * Creates a container with the given vertices.
@@ -253,8 +257,6 @@ public class Container {
         return cross1 >= 0 && cross2 <= 0 && cross3 >= 0;
     }
 
-    //TODO: test for containsDelta
-
     /**
      * check if the given position is in the container.
      *
@@ -488,6 +490,65 @@ public class Container {
             }
         }
         return index;
+    }
+
+    /**
+     * get the entity list.
+     * @return the entity list.
+     */
+    public Iterable entityList(){
+        return () -> new Iterator() {
+            private Entity entity = entityList;
+            @Override
+            public boolean hasNext() {
+                return entity != null && entity.next() != entityList;
+            }
+
+            @Override
+            public Entity next() {
+                Entity temp = entity;
+                entity = entity.next();
+                return temp;
+            }
+        };
+    }
+
+    /**
+     * add an entity to the container.
+     * @param entity The entity.
+     */
+    public void addEntity(Entity entity){
+        if(entityList == null){
+            entityList = entity;
+            entity.setNext(entity);
+            entity.setPrev(entity);
+        }else{
+            entity.setNext(entityList);
+            entity.setPrev(entityList.prev());
+            entityList.prev().setNext(entity);
+            entityList.setPrev(entity);
+        }
+    }
+
+    /**
+     * remove an entity from the container.
+     * @param entity The entity.
+     */
+    public void removeEntity(Entity entity) {
+        if (entityList == entity) {
+            if (entity.next() == entity) {
+                entityList = null;
+            } else {
+                entityList = entity.next();
+                entity.prev().setNext(entity.next());
+                entity.next().setPrev(entity.prev());
+            }
+        } else {
+            entity.prev().setNext(entity.next());
+            entity.next().setPrev(entity.prev());
+            entity.setNext(null);
+            entity.setPrev(null);
+        }
     }
 
     /**
