@@ -5,6 +5,7 @@ import org.joml.Vector2f;
 public abstract class Entity {
     private Point globalPos;
     private Entity prev, next;
+    private Vector2f dir;
 
     public Entity(Point globalPos){
         this.globalPos = globalPos;
@@ -55,12 +56,13 @@ public abstract class Entity {
      * @param delta The delta.
      * @return true if the entity was clamped, false otherwise.
      */
-    public boolean clampMove(Vector2f delta){
+    public boolean clampMove(Vector2f delta, Vector2f[] dirs){
         Container container = globalPos.container();
-        boolean result = globalPos.clampMove(delta);
+        boolean result = globalPos.clampMove(delta, dirs);
         if(globalPos.container() != container){
             container.removeEntity(this);
             globalPos.container().addEntity(this);
+
         }
         return result;
     }
@@ -71,9 +73,9 @@ public abstract class Entity {
      * @param maxIterations The max number of iterations.
      * @return true if the entity was clamped, false otherwise.
      */
-    public boolean clampMove(Vector2f delta, int maxIterations){
+    public boolean clampMove(Vector2f delta, int maxIterations, Vector2f[] dirs){
         Container container = globalPos.container();
-        boolean result = globalPos.clampMove(delta, maxIterations);
+        boolean result = globalPos.clampMove(delta, maxIterations, dirs);
         if(globalPos.container() != container){
             container.removeEntity(this);
             globalPos.container().addEntity(this);

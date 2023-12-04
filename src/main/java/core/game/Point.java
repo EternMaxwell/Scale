@@ -160,7 +160,7 @@ public class Point {
      * @param maxIterations The maximum number of iterations.
      * @return true if the position was clamped, false if the next position is valid.
      */
-    public boolean clampMove(Vector2f delta, int maxIterations) {
+    public boolean clampMove(Vector2f delta, int maxIterations, Vector2f[] dirs) {
         lastContainer = container;
         last = pos;
         Vector2f newPos = pos.add(delta, new Vector2f());
@@ -173,6 +173,10 @@ public class Point {
                     return true;
                 }
                 container.transformDir(delta, deltaContainerIndex[0], null);
+                for (Vector2f dir : dirs) {
+                    if(dir != null)
+                        container.transformDir(dir, deltaContainerIndex[0], null);
+                }
                 container = container.nearby(deltaContainerIndex[0]);
             } else {
                 pos = newPos;
@@ -190,7 +194,7 @@ public class Point {
      * @param delta The delta.
      * @return true if the position was clamped, false if the next position is valid.
      */
-    public boolean clampMove(Vector2f delta) {
+    public boolean clampMove(Vector2f delta, Vector2f[] dirs) {
         lastContainer = container;
         last = pos;
         Vector2f newPos = pos.add(delta, new Vector2f());
@@ -202,6 +206,10 @@ public class Point {
                 return true;
             }
             container.transformDir(delta, deltaContainerIndex[0], null);
+            for (Vector2f dir : dirs) {
+                if(dir != null)
+                    container.transformDir(dir, deltaContainerIndex[0], null);
+            }
             container = container.nearby(deltaContainerIndex[0]);
         }
         pos = newPos;

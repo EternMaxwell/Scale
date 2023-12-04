@@ -52,7 +52,7 @@ public class Test {
     }
 
     public void update() {
-        System.out.println(point.clampMove(dir, 20));
+        System.out.println(point.clampMove(dir, 20, null));
         System.out.println(point.pos()+" "+point.absPosition());
     }
 
