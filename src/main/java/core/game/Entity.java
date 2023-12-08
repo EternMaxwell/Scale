@@ -1,5 +1,6 @@
 package core.game;
 
+import core.render.EasyRender;
 import org.joml.Vector2f;
 
 public abstract class Entity {
@@ -82,4 +83,7 @@ public abstract class Entity {
         }
         return result;
     }
+
+    public abstract void renderFlat(EasyRender renderer);
+    public abstract void renderLinearStretch(EasyRender renderer);
 }

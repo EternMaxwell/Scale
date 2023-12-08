@@ -1,5 +1,6 @@
 package core.game;
 
+import core.render.EasyRender;
 import org.joml.*;
 import org.joml.Math;
 
@@ -549,6 +550,30 @@ public class Container {
             entity.setNext(null);
             entity.setPrev(null);
         }
+    }
+
+    /**
+     * used for {@link Camera#renderFlat(EasyRender)}
+     * @param renderer the renderer to use
+     */
+    public void renderFlat(EasyRender renderer){
+
+    }
+
+    /**
+     * used for {@link Camera#renderLinearStretch(EasyRender)}
+     * @param renderer the renderer to use
+     */
+    public void renderLinearStretch(EasyRender renderer){
+
+    }
+
+    /**
+     * used for {@link Camera#renderLinearStretchPreRender(EasyRender)}
+     * @param renderer the renderer to use
+     */
+    public void renderLinearStretchPreRender(EasyRender renderer){
+
     }
 
     /**
