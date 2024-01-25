@@ -173,9 +173,11 @@ public class Point {
                     return true;
                 }
                 container.transformDir(delta, deltaContainerIndex[0], null);
-                for (Vector2f dir : dirs) {
-                    if(dir != null)
-                        container.transformDir(dir, deltaContainerIndex[0], null);
+                if(dirs != null) {
+                    for (Vector2f dir : dirs) {
+                        if (dir != null)
+                            container.transformDir(dir, deltaContainerIndex[0], null);
+                    }
                 }
                 container = container.nearby(deltaContainerIndex[0]);
             } else {

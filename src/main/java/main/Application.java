@@ -2,29 +2,17 @@ package main;
 
 import core.FrameTimer;
 import core.TickTimer;
-import core.game.Test;
+import core.game.CurvedSpaceTest;
+import core.game.Tests;
 import core.render.EasyRender;
 import core.render.Window;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.system.MemoryUtil;
-
-import javax.imageio.ImageIO;
-import javax.swing.plaf.PanelUI;
-
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
-import static org.lwjgl.opengl.GL45.*;
-import static org.lwjgl.stb.STBImage.*;
 
 public class Application {
     public boolean debug = true;
@@ -40,7 +28,7 @@ public class Application {
     public int testTexture;
     public int testSampler;
 
-    public Test test;
+    public Tests test;
 
     public void init(){
         initGLFW();
@@ -54,7 +42,7 @@ public class Application {
         timer = new FrameTimer(60);
         tickTimer = new TickTimer(20);
         //====INITIALIZE THE GAME====//
-        test = new Test();
+        test = new CurvedSpaceTest();
         test.init();
 
         //====INITIALIZE THE RENDERER====//
@@ -99,27 +87,27 @@ public class Application {
             }
         });
 
-        //====LOAD TEXTURES====//
-        stbi_set_flip_vertically_on_load(true);
-        int[] width = new int[1];
-        int[] height = new int[1];
-        int[] channels = new int[1];
-        ByteBuffer buffer = stbi_load("src/test/resources/textures/test.png", width, height, channels, 4);
-        if(buffer == null){
-            throw new RuntimeException("Failed to load image: " + stbi_failure_reason());
-        }
-        glBindTexture(GL_TEXTURE_2D, testTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width[0], height[0], 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        MemoryUtil.memFree(buffer);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        //====LOAD SAMPLERS====//
-        testSampler = glGenSamplers();
-        glSamplerParameteri(testSampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glSamplerParameteri(testSampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glSamplerParameteri(testSampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glSamplerParameteri(testSampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//        //====LOAD TEXTURES====//
+//        stbi_set_flip_vertically_on_load(true);
+//        int[] width = new int[1];
+//        int[] height = new int[1];
+//        int[] channels = new int[1];
+//        ByteBuffer buffer = stbi_load("src/test/resources/textures/test.png", width, height, channels, 4);
+//        if(buffer == null){
+//            throw new RuntimeException("Failed to load image: " + stbi_failure_reason());
+//        }
+//        glBindTexture(GL_TEXTURE_2D, testTexture);
+//        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width[0], height[0], 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+//        glGenerateMipmap(GL_TEXTURE_2D);
+//        MemoryUtil.memFree(buffer);
+//        glBindTexture(GL_TEXTURE_2D, 0);
+//
+//        //====LOAD SAMPLERS====//
+//        testSampler = glGenSamplers();
+//        glSamplerParameteri(testSampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//        glSamplerParameteri(testSampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//        glSamplerParameteri(testSampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//        glSamplerParameteri(testSampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         //====SHOW THE WINDOW====//
         window.showWindow();

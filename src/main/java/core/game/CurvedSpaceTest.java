@@ -6,7 +6,7 @@ import org.joml.Math;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public class Test {
+public class CurvedSpaceTest implements Tests{
     private Container[] containers;
     private Point point;
 
@@ -19,7 +19,7 @@ public class Test {
     Matrix4f rotateX = new Matrix4f();
     float distance = 10;
 
-    public Test() {
+    public CurvedSpaceTest() {
         containers = new Container[4];
     }
 
@@ -51,9 +51,19 @@ public class Test {
         view.lookAtLH(new Vector3f(0, 0, -distance), new Vector3f(0, 0, 0), new Vector3f(0, 1, 0));
     }
 
+    @Override
+    public void input() {
+
+    }
+
     public void update() {
         System.out.println(point.clampMove(dir, 20, null));
         System.out.println(point.pos()+" "+point.absPosition());
+    }
+
+    @Override
+    public void cleanup() {
+
     }
 
     public void render(EasyRender renderer) {
