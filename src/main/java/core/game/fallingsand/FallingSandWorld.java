@@ -2,30 +2,21 @@ package core.game.fallingsand;
 
 import core.game.Tests;
 import core.render.EasyRender;
+import core.render.Window;
 
-public class FallingSandWorld implements Tests {
+public abstract class FallingSandWorld implements Tests {
     @Override
-    public void init() {
-
-    }
-
-    @Override
-    public void input() {
-
-    }
+    public abstract void init(Window window);
 
     @Override
-    public void update() {
-
-    }
+    public abstract void input();
 
     @Override
-    public void render(EasyRender render) {
-
-    }
+    public abstract void update();
 
     @Override
-    public void cleanup() {
+    public abstract void render(EasyRender render);
 
-    }
+    @Override
+    public abstract void cleanup();
 }

@@ -1,6 +1,7 @@
 package core.game;
 
 import core.render.EasyRender;
+import core.render.Window;
 import org.joml.*;
 import org.joml.Math;
 
@@ -23,7 +24,7 @@ public class CurvedSpaceTest implements Tests{
         containers = new Container[4];
     }
 
-    public void init() {
+    public void init(Window window) {
         vertices = new Vector3f[4];
         vertices[0] = new Vector3f(0, 0, 0);
         vertices[1] = new Vector3f(1, 0, 0);

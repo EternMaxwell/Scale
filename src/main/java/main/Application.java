@@ -4,6 +4,7 @@ import core.FrameTimer;
 import core.TickTimer;
 import core.game.CurvedSpaceTest;
 import core.game.Tests;
+import core.game.fallingsand.easyfallingsand.EasyFallingSandWorld;
 import core.render.EasyRender;
 import core.render.Window;
 import org.joml.Matrix4f;
@@ -42,8 +43,8 @@ public class Application {
         timer = new FrameTimer(60);
         tickTimer = new TickTimer(20);
         //====INITIALIZE THE GAME====//
-        test = new CurvedSpaceTest();
-        test.init();
+        test = new EasyFallingSandWorld();
+        test.init(window);
 
         //====INITIALIZE THE RENDERER====//
         glfwMakeContextCurrent(window.id());
@@ -143,6 +144,7 @@ public class Application {
     public void input(){
         //====INPUT THE GAME====//
         glfwPollEvents();
+        test.input();
     }
 
     public void update(){
