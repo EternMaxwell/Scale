@@ -6,6 +6,7 @@ import core.game.fallingsand.Grid;
 public class EasyGrid extends Grid {
 
     Element[][] grid;
+    boolean inverse = true;
 
     public EasyGrid(int width, int height) {
         grid = new Element[width][height];
@@ -55,13 +56,24 @@ public class EasyGrid extends Grid {
 
     @Override
     public void step() {
-        for(int x = 0; x < grid.length; x++) {
+        if(inverse){
             for(int y = 0; y < grid[0].length; y++) {
-                if(grid[x][y] != null) {
-                    grid[x][y].step(this, x, y);
+                for(int x = grid.length-1; x >= 0; x--) {
+                    if(grid[x][y] != null) {
+                        grid[x][y].step(this, x, y);
+                    }
+                }
+            }
+        }else {
+            for (int y = 0; y < grid[0].length; y++) {
+                for (int x = 0; x < grid.length; x++) {
+                    if (grid[x][y] != null) {
+                        grid[x][y].step(this, x, y);
+                    }
                 }
             }
         }
+        inverse = !inverse;
     }
 
     @Override

@@ -41,7 +41,7 @@ public class Application {
         window.setFocused(true);
         window.createWindow();
         timer = new FrameTimer(60);
-        tickTimer = new TickTimer(20);
+        tickTimer = new TickTimer(60);
         //====INITIALIZE THE GAME====//
         test = new EasyFallingSandWorld();
         test.init(window);

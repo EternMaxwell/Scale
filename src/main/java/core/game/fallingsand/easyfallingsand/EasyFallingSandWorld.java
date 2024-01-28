@@ -12,17 +12,18 @@ public class EasyFallingSandWorld extends core.game.fallingsand.FallingSandWorld
     Grid grid;
     Window window;
     Matrix4f viewMatrix = new Matrix4f();
+    ElementPlacement elementPlacement;
     @Override
     public void init(Window window) {
-        grid = new EasyGrid(100, 100);
+        grid = new EasyGrid(1000, 1000);
         this.window = window;
-        viewMatrix.ortho2D(0, 100, 0, 100);
+        viewMatrix.ortho2D(0, 1000, 0, 1000);
+        elementPlacement = new ElementPlacement(grid);
     }
 
     @Override
     public void input() {
-        //if(glfwGetKey(window.id(), GLFW_KEY_SPACE) == GLFW_PRESS)
-            grid.set(99,99, new Sand());
+        elementPlacement.input(window.id());
     }
 
     @Override
@@ -35,14 +36,16 @@ public class EasyFallingSandWorld extends core.game.fallingsand.FallingSandWorld
         render.pixel.setPixelSize(1);
         render.pixel.setViewMatrix(viewMatrix);
 
-        for(int x = 0; x < 100; x++){
-            for(int y = 0; y < 100; y++){
+        for(int x = 0; x < 1000; x++){
+            for(int y = 0; y < 1000; y++){
                 if(grid.get(x, y) != null){
                     float[] color = grid.get(x, y).color();
-                    render.pixel.drawPixel(x,y,color[0],color[1],color[2],color[3]);
+                    render.pixel.drawPixel(x+0.5f,y+0.5f,color[0],color[1],color[2],color[3]);
                 }
             }
         }
+
+        elementPlacement.render(render);
     }
 
     @Override

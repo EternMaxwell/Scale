@@ -31,4 +31,11 @@ public abstract class Element {
      * @return the id.
      */
     public abstract int id();
+
+    /**
+     * get the density of the element.
+     *
+     * @return the density.
+     */
+    public abstract float density();
 }

@@ -2,20 +2,16 @@ package core.game.fallingsand.easyfallingsand;
 
 import core.game.fallingsand.Element;
 import core.game.fallingsand.Grid;
-import org.apache.logging.log4j.core.appender.RandomAccessFileManager;
 
 import java.util.Random;
 
-public class Sand extends Element {
+public class Water extends Element {
 
     float[] color;
-    float velocity;
+    float velocity = 0.7f;
 
-    public Sand(){
-        Random random = new Random();
-        float l = random.nextFloat();
-        color = new float[]{0.75f+0.15F*l, 0.7f+0.15f*l, 0.01f*(1f-l), 1};
-        velocity = 0.7f;
+    public Water() {
+        color = new float[]{0, 0, 1,1};
     }
 
     /**
@@ -27,7 +23,7 @@ public class Sand extends Element {
      */
     @Override
     public void step(Grid grid, int x, int y) {
-        int distance = velocity > 1 ? (int) velocity : 1;
+int distance = velocity > 1 ? (int) velocity : 1;
         int ix = x;
         int iy = y;
         boolean moved = false;
@@ -50,40 +46,37 @@ public class Sand extends Element {
             return;
         }
 
-        if(grid.get(ix, iy - 1)!=null && grid.get(ix, iy - 1).type() ==1){
-            grid.set(ix, iy, grid.get(ix, iy - 1));
-            grid.set(ix, iy - 1, this);
-            return;
-        }
-
         int dir = new Random().nextInt(2);
         dir = dir == 0 ? -1 : 1;
-        Element side = grid.get(ix + dir, iy - 1);
-        if (side == null && grid.valid(ix + dir, iy - 1)) {
+        Element diagnose = grid.get(ix + dir, iy - 1);
+        if (diagnose == null && grid.valid(ix + dir, iy - 1)) {
             grid.set(ix + dir, iy - 1, this);
             grid.set(ix, iy, null);
             moved = true;
         } else {
-            side = grid.get(ix - dir, iy - 1);
-            if (side == null && grid.valid(ix - dir, iy - 1)) {
+            diagnose = grid.get(ix - dir, iy - 1);
+            if (diagnose == null && grid.valid(ix - dir, iy - 1)) {
                 grid.set(ix - dir, iy - 1, this);
                 grid.set(ix, iy, null);
                 moved = true;
             }
         }
 
-        if (!moved) {
-            side = grid.get(ix + dir, iy-1);
-            if(side != null && side.type()==1 ){
-                grid.set(ix + dir, iy-1, this);
-                grid.set(ix, iy, side);
-                moved = true;
-            }else {
-                side = grid.get(ix - dir, iy-1);
-                if(side != null && side.type()==1 ){
-                    grid.set(ix - dir, iy-1, this);
-                    grid.set(ix, iy, side);
-                    moved = true;
+        if(!moved){
+            velocity = 0.7f;
+            for(int i = 5;i>0; i--){
+                Element side = grid.get(ix + dir*i, iy);
+                if (side == null && grid.valid(ix + dir*i, iy)) {
+                    grid.set(ix + dir*i, iy, this);
+                    grid.set(ix, iy, null);
+                    break;
+                } else {
+                    side = grid.get(ix - dir*i, iy);
+                    if (side == null && grid.valid(ix - dir*i, iy)) {
+                        grid.set(ix - dir*i, iy, this);
+                        grid.set(ix, iy, null);
+                        break;
+                    }
                 }
             }
         }
@@ -96,9 +89,14 @@ public class Sand extends Element {
      */
     @Override
     public int type() {
-        return 0;
+        return 1;
     }
 
+    /**
+     * get the color of the element.
+     *
+     * @return the color.
+     */
     @Override
     public float[] color() {
         return color;
@@ -120,7 +118,7 @@ public class Sand extends Element {
      * @return the density.
      */
     @Override
-    public float density(){
-        return 3;
+    public float density() {
+        return 1;
     }
 }
