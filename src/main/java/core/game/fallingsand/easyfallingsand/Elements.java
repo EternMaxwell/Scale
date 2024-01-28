@@ -11,12 +11,18 @@ public class Elements {
         return new Water();
     }
 
+    public Element stone(){
+        return new Stone();
+    }
+
     public Element getFromId(int id) {
         switch (id) {
             case 0:
                 return sand();
             case 1:
                 return water();
+            case 2:
+                return stone();
             default:
                 return null;
         }

@@ -14,7 +14,7 @@ public class ElementPlacement {
     private int id = 0;
     private int radius = 10;
     private float density = 0.1f;
-    private int[] lastMousePos = new int[2];
+    private final int[] lastMousePos = new int[2];
 
     public ElementPlacement(Grid grid) {
         elements = new Elements();
@@ -24,10 +24,12 @@ public class ElementPlacement {
     public void input(long window) {
         Random random = new Random();
         if(glfwGetKey(window, GLFW_KEY_EQUAL) == GLFW_PRESS){
-            id = (id+1)%2;
+            id = (id+1)%3;
         }
         if(glfwGetKey(window, GLFW_KEY_MINUS) == GLFW_PRESS){
-            id = (id-1)%2;
+            id = (id-1)%3;
+            if(id < 0)
+                id += 2;
         }
         if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
             radius++;
@@ -49,6 +51,15 @@ public class ElementPlacement {
             if(density < 0){
                 density = 0;
             }
+        }
+        if(glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS){
+            id = 0;
+        }
+        if(glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS){
+            id = 1;
+        }
+        if(glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS){
+            id = 2;
         }
 
         double[] xpos = new double[1];

@@ -47,8 +47,11 @@ public class Sand extends Element {
         }
         if(moved){
             velocity += 0.1f;
+            velocity *= 0.985f;
             return;
         }
+
+        velocity = 0.7f;
 
         if(grid.get(ix, iy - 1)!=null && grid.get(ix, iy - 1).type() ==1){
             grid.set(ix, iy, grid.get(ix, iy - 1));

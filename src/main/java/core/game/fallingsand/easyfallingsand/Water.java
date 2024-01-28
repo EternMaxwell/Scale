@@ -11,7 +11,7 @@ public class Water extends Element {
     float velocity = 0.7f;
 
     public Water() {
-        color = new float[]{0, 0, 1,1};
+        color = new float[]{0, 0, 1, 1};
     }
 
     /**
@@ -23,58 +23,58 @@ public class Water extends Element {
      */
     @Override
     public void step(Grid grid, int x, int y) {
-int distance = velocity > 1 ? (int) velocity : 1;
-        int ix = x;
+        int distance = velocity > 1 ? (int) velocity : 1;
         int iy = y;
         boolean moved = false;
         for (int i = 0; i < distance; i++) {
-            Element below = grid.get(ix, iy - 1);
-            if (below == null && grid.valid(ix, iy - 1)) {
+            Element below = grid.get(x, iy - 1);
+            if (below == null && grid.valid(x, iy - 1)) {
                 moved = true;
-                grid.set(ix, iy -1, this);
-                grid.set(ix, iy, null);
+                grid.set(x, iy - 1, this);
+                grid.set(x, iy, null);
                 iy--;
-            }else if(below != null){
+            } else if (below != null) {
                 break;
-            }else {
+            } else {
                 velocity = 0.7f;
                 return;
             }
         }
-        if(moved){
+        if (moved) {
             velocity += 0.1f;
+            velocity *= 0.98f;
             return;
         }
 
         int dir = new Random().nextInt(2);
         dir = dir == 0 ? -1 : 1;
-        Element diagnose = grid.get(ix + dir, iy - 1);
-        if (diagnose == null && grid.valid(ix + dir, iy - 1)) {
-            grid.set(ix + dir, iy - 1, this);
-            grid.set(ix, iy, null);
+        Element diagnose = grid.get(x + dir, iy - 1);
+        if (diagnose == null && grid.valid(x + dir, iy - 1)) {
+            grid.set(x + dir, iy - 1, this);
+            grid.set(x, iy, null);
             moved = true;
         } else {
-            diagnose = grid.get(ix - dir, iy - 1);
-            if (diagnose == null && grid.valid(ix - dir, iy - 1)) {
-                grid.set(ix - dir, iy - 1, this);
-                grid.set(ix, iy, null);
+            diagnose = grid.get(x - dir, iy - 1);
+            if (diagnose == null && grid.valid(x - dir, iy - 1)) {
+                grid.set(x - dir, iy - 1, this);
+                grid.set(x, iy, null);
                 moved = true;
             }
         }
 
-        if(!moved){
+        if (!moved) {
             velocity = 0.7f;
-            for(int i = 5;i>0; i--){
-                Element side = grid.get(ix + dir*i, iy);
-                if (side == null && grid.valid(ix + dir*i, iy)) {
-                    grid.set(ix + dir*i, iy, this);
-                    grid.set(ix, iy, null);
+            for (int i = 5; i > 0; i--) {
+                Element side = grid.get(x + dir * i, iy);
+                if (side == null && grid.valid(x + dir * i, iy)) {
+                    grid.set(x + dir * i, iy, this);
+                    grid.set(x, iy, null);
                     break;
                 } else {
-                    side = grid.get(ix - dir*i, iy);
-                    if (side == null && grid.valid(ix - dir*i, iy)) {
-                        grid.set(ix - dir*i, iy, this);
-                        grid.set(ix, iy, null);
+                    side = grid.get(x - dir * i, iy);
+                    if (side == null && grid.valid(x - dir * i, iy)) {
+                        grid.set(x - dir * i, iy, this);
+                        grid.set(x, iy, null);
                         break;
                     }
                 }
@@ -109,7 +109,7 @@ int distance = velocity > 1 ? (int) velocity : 1;
      */
     @Override
     public int id() {
-        return 0;
+        return 1;
     }
 
     /**
