@@ -21,6 +21,7 @@ public class EasyRender {
     public final Pixel pixel;
     public final Image image;
     public final Point point;
+    public final Text text;
 
     public class Line{
         public int vao;
@@ -1220,6 +1221,105 @@ public class EasyRender {
         }
     }
 
+    public class Text{
+        public int vao;
+        public int vbo;
+        public int vertexShader;
+        public int geometryShader;
+        public int fragmentShader;
+        public int shaderProgram;
+        public int texture;
+        public int sampler;
+        public ByteBuffer vertices;
+
+        public int uniformBuffer;
+        public FloatBuffer uniformData;
+
+        public int vertexCount;
+
+        public Text() {
+            //====CREATE THE VAO AND VBO====//
+            vao = glGenVertexArrays();
+            vbo = glGenBuffers();
+            vertices = MemoryUtil.memAlloc(512 * 12 * 4);
+
+            //====CREATE THE UNIFORM BUFFER====//
+            uniformBuffer = glGenBuffers();
+            uniformData = MemoryUtil.memAllocFloat(16);
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            glBufferData(GL_UNIFORM_BUFFER, 48 * Float.BYTES, GL_DYNAMIC_DRAW);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+            //====CREATE THE TEXTURE====//
+            texture = glGenTextures();
+            sampler = glGenSamplers();
+            glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+            //====INITIALIZE THE MATRICES====//
+            setModelMatrix(new Matrix4f().identity());
+            setViewMatrix(new Matrix4f().identity());
+            setProjectionMatrix(new Matrix4f().identity());
+
+            //====CREATE THE SHADER PROGRAM====//
+            vertexShader = createShader("src/main/resources/shaders/text/shader.vert", GL_VERTEX_SHADER);
+            geometryShader = createShader("src/main/resources/shaders/text/shader.geom", GL_GEOMETRY_SHADER);
+            fragmentShader = createShader("src/main/resources/shaders/text/shader.frag", GL_FRAGMENT_SHADER);
+            shaderProgram = glCreateProgram();
+            glAttachShader(shaderProgram, vertexShader);
+            glAttachShader(shaderProgram, geometryShader);
+            glAttachShader(shaderProgram, fragmentShader);
+            glLinkProgram(shaderProgram);
+            glUseProgram(shaderProgram);
+
+            //====SPECIFY THE VERTEX DATA====//
+            glBindVertexArray(vao);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, vertices.capacity(), GL_DYNAMIC_DRAW);
+        }
+
+        /**
+         * set the model matrix
+         * @param modelMatrix the model matrix
+         */
+        public void setModelMatrix(Matrix4f modelMatrix) {
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            uniformData.clear();
+            uniformData.put(modelMatrix.get(new float[16]));
+            uniformData.flip();
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, uniformData);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        /**
+         * set the view matrix
+         * @param viewMatrix the view matrix
+         */
+        public void setViewMatrix(Matrix4f viewMatrix) {
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            uniformData.clear();
+            uniformData.put(viewMatrix.get(new float[16]));
+            uniformData.flip();
+            glBufferSubData(GL_UNIFORM_BUFFER, 16 * Float.BYTES, uniformData);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        /**
+         * set the projection matrix
+         * @param projectionMatrix the projection matrix
+         */
+        public void setProjectionMatrix(Matrix4f projectionMatrix) {
+            glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer);
+            uniformData.clear();
+            uniformData.put(projectionMatrix.get(new float[16]));
+            uniformData.flip();
+            glBufferSubData(GL_UNIFORM_BUFFER, 32 * Float.BYTES, uniformData);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+    }
+
     public EasyRender(Window window) {
         this.window = window;
         line = new Line();
@@ -1227,6 +1327,7 @@ public class EasyRender {
         pixel = new Pixel();
         image = new Image();
         point = new Point();
+        text = new Text();
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
