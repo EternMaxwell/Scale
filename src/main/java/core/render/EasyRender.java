@@ -1278,6 +1278,17 @@ public class EasyRender {
             glBindVertexArray(vao);
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
             glBufferData(GL_ARRAY_BUFFER, vertices.capacity(), GL_DYNAMIC_DRAW);
+            glVertexAttribPointer(0, 4, GL_FLOAT, false, 12 * Float.BYTES, 0);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(1, 2, GL_FLOAT, false, 12 * Float.BYTES, 4 * Float.BYTES);
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(2, 2, GL_FLOAT, false, 12 * Float.BYTES, 6 * Float.BYTES);
+            glEnableVertexAttribArray(2);
+            glVertexAttribPointer(3, 2, GL_FLOAT, false, 12 * Float.BYTES, 8 * Float.BYTES);
+            glEnableVertexAttribArray(3);
+            glVertexAttribPointer(4, 2, GL_FLOAT, false, 12 * Float.BYTES, 10 * Float.BYTES);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
         }
 
         /**
