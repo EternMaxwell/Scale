@@ -3,12 +3,18 @@ package core.render;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.lwjgl.opengl.GL46.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -211,6 +217,7 @@ public class EasyRender {
 
             //====CLEAR THE BUFFER====//
             vertices.clear();
+            vertexCount = 0;
         }
 
         /**
@@ -543,6 +550,7 @@ public class EasyRender {
 
             //====CLEAR THE BUFFER====//
             vertices.clear();
+            vertexCount = 0;
         }
 
         /**
@@ -718,6 +726,7 @@ public class EasyRender {
 
             //====CLEAR THE BUFFER====//
             vertices.clear();
+            vertexCount = 0;
         }
 
         /**
@@ -1023,6 +1032,7 @@ public class EasyRender {
 
             //====CLEAR THE BUFFER====//
             vertices.clear();
+            vertexCount = 0;
         }
 
         /**
@@ -1197,6 +1207,7 @@ public class EasyRender {
 
             //====CLEAR THE BUFFER====//
             vertices.clear();
+            vertexCount = 0;
         }
 
         /**
@@ -1221,7 +1232,16 @@ public class EasyRender {
         }
     }
 
-    public class Text{
+    public class Text {
+        public class Glyph {
+            public float s1;
+            public float t1;
+            public float s2;
+            public float t2;
+            public float width;
+            public float height;
+        }
+
         public int vao;
         public int vbo;
         public int vertexShader;
@@ -1236,6 +1256,8 @@ public class EasyRender {
         public FloatBuffer uniformData;
 
         public int vertexCount;
+
+        private Map<Character, Glyph> glyphs = new HashMap<>();
 
         public Text() {
             //====CREATE THE VAO AND VBO====//
@@ -1289,10 +1311,53 @@ public class EasyRender {
             glVertexAttribPointer(4, 2, GL_FLOAT, false, 12 * Float.BYTES, 10 * Float.BYTES);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindVertexArray(0);
+
+            //====LOAD THE GLYPHS====//
+            try {
+                BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/fonts/arial.fnt"));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] split = line.split(" ");
+                    if (split[0].equals("char")) {
+                        Glyph glyph = new Glyph();
+                        glyph.s1 = Float.parseFloat(split[4].split("=")[1]) / 512f;
+                        glyph.t1 = Float.parseFloat(split[5].split("=")[1]) / 512f;
+                        glyph.s2 = (Float.parseFloat(split[4].split("=")[1]) + Float.parseFloat(split[6].split("=")[1])) / 512f;
+                        glyph.t2 = (Float.parseFloat(split[5].split("=")[1]) + Float.parseFloat(split[7].split("=")[1])) / 512f;
+                        glyph.width = Float.parseFloat(split[6].split("=")[1]);
+                        glyph.height = Float.parseFloat(split[7].split("=")[1]);
+                        glyphs.put((char) Integer.parseInt(split[1].split("=")[1]), glyph);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            //====CREATE THE TEXTURE====//
+            BufferedImage image = null;
+            try {
+                image = ImageIO.read(new File("src/main/resources/fonts/arial.png"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            ByteBuffer buffer = MemoryUtil.memAlloc(image.getWidth() * image.getHeight() * 4);
+            for (int j = image.getHeight() - 1; j >= 0; j--) {
+                for (int i = 0; i < image.getWidth(); i++) {
+                    buffer.put((byte) (image.getRGB(i, j) >> 16 & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) >> 8 & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) >> 24 & 0xFF));
+                }
+            }
+            buffer.flip();
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.getWidth(), image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+            glBindTexture(GL_TEXTURE_2D, 0);
         }
 
         /**
          * set the model matrix
+         *
          * @param modelMatrix the model matrix
          */
         public void setModelMatrix(Matrix4f modelMatrix) {
@@ -1306,6 +1371,7 @@ public class EasyRender {
 
         /**
          * set the view matrix
+         *
          * @param viewMatrix the view matrix
          */
         public void setViewMatrix(Matrix4f viewMatrix) {
@@ -1319,6 +1385,7 @@ public class EasyRender {
 
         /**
          * set the projection matrix
+         *
          * @param projectionMatrix the projection matrix
          */
         public void setProjectionMatrix(Matrix4f projectionMatrix) {
@@ -1328,6 +1395,67 @@ public class EasyRender {
             uniformData.flip();
             glBufferSubData(GL_UNIFORM_BUFFER, 32 * Float.BYTES, uniformData);
             glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        public void begin() {
+            vertices.clear();
+            vertexCount = 0;
+        }
+
+        public void drawText(float x, float y, float size, float r, float g, float b, float a, String text) {
+            float x1 = x;
+            float y1 = y;
+            for (char c : text.toCharArray()) {
+                Glyph glyph = glyphs.get(c);
+                if (glyph != null) {
+                    float x2 = x1 + glyph.width * size;
+                    float y2 = y1 + glyph.height * size;
+                    float s1 = glyph.s1;
+                    float t1 = glyph.t1;
+                    float s2 = glyph.s2;
+                    float t2 = glyph.t2;
+                    draw(x1, y1, x2, y2, r, g, b, a, s1, t1, s2, t2);
+                    x1 = x2;
+                    y1 = y2;
+                }
+            }
+        }
+
+        private void draw(float x1, float y1, float w, float h, float r, float g, float b, float a, float s1, float t1, float sl, float tl) {
+            if (vertices.remaining() < 12 * 4) {
+                flush();
+            }
+            vertices.putFloat(r).putFloat(g).putFloat(b).putFloat(a).putFloat(s1).putFloat(t1).putFloat(x1).putFloat(y1).putFloat(w).putFloat(h).putFloat(sl).putFloat(tl);
+            vertexCount += 1;
+        }
+
+        public void flush(){
+            //====FLIP THE BUFFER====//
+            vertices.flip();
+
+            //====BIND THE VAO AND VBO====//
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBindVertexArray(vao);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
+            glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniformBuffer);
+
+            //====RENDER THE LINES====//
+            glUseProgram(shaderProgram);
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glBindSampler(1, sampler);
+            glDrawArrays(GL_POINTS, 0, vertexCount);
+
+            //====UNBIND====//
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindSampler(1, 0);
+            glBindVertexArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindBufferBase(GL_UNIFORM_BUFFER, 0, 0);
+            glUseProgram(0);
+
+            //====CLEAR THE BUFFER====//
+            vertices.clear();
+            vertexCount = 0;
         }
     }
 
