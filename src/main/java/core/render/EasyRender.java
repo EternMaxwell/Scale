@@ -2,13 +2,12 @@ package core.render;
 
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
+import static org.lwjgl.stb.STBImage.*;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.file.Files;
@@ -1311,48 +1310,6 @@ public class EasyRender {
             glVertexAttribPointer(4, 2, GL_FLOAT, false, 12 * Float.BYTES, 10 * Float.BYTES);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindVertexArray(0);
-
-            //====LOAD THE GLYPHS====//
-            try {
-                BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/fonts/arial.fnt"));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] split = line.split(" ");
-                    if (split[0].equals("char")) {
-                        Glyph glyph = new Glyph();
-                        glyph.s1 = Float.parseFloat(split[4].split("=")[1]) / 512f;
-                        glyph.t1 = Float.parseFloat(split[5].split("=")[1]) / 512f;
-                        glyph.s2 = (Float.parseFloat(split[4].split("=")[1]) + Float.parseFloat(split[6].split("=")[1])) / 512f;
-                        glyph.t2 = (Float.parseFloat(split[5].split("=")[1]) + Float.parseFloat(split[7].split("=")[1])) / 512f;
-                        glyph.width = Float.parseFloat(split[6].split("=")[1]);
-                        glyph.height = Float.parseFloat(split[7].split("=")[1]);
-                        glyphs.put((char) Integer.parseInt(split[1].split("=")[1]), glyph);
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            //====CREATE THE TEXTURE====//
-            BufferedImage image = null;
-            try {
-                image = ImageIO.read(new File("src/main/resources/fonts/arial.png"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            ByteBuffer buffer = MemoryUtil.memAlloc(image.getWidth() * image.getHeight() * 4);
-            for (int j = image.getHeight() - 1; j >= 0; j--) {
-                for (int i = 0; i < image.getWidth(); i++) {
-                    buffer.put((byte) (image.getRGB(i, j) >> 16 & 0xFF));
-                    buffer.put((byte) (image.getRGB(i, j) >> 8 & 0xFF));
-                    buffer.put((byte) (image.getRGB(i, j) & 0xFF));
-                    buffer.put((byte) (image.getRGB(i, j) >> 24 & 0xFF));
-                }
-            }
-            buffer.flip();
-            glBindTexture(GL_TEXTURE_2D, texture);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.getWidth(), image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-            glBindTexture(GL_TEXTURE_2D, 0);
         }
 
         /**
@@ -1402,23 +1359,44 @@ public class EasyRender {
             vertexCount = 0;
         }
 
-        public void drawText(float x, float y, float size, float r, float g, float b, float a, String text) {
-            float x1 = x;
-            float y1 = y;
-            for (char c : text.toCharArray()) {
-                Glyph glyph = glyphs.get(c);
-                if (glyph != null) {
-                    float x2 = x1 + glyph.width * size;
-                    float y2 = y1 + glyph.height * size;
-                    float s1 = glyph.s1;
-                    float t1 = glyph.t1;
-                    float s2 = glyph.s2;
-                    float t2 = glyph.t2;
-                    draw(x1, y1, x2, y2, r, g, b, a, s1, t1, s2, t2);
-                    x1 = x2;
-                    y1 = y2;
+        public void drawText(float x, float y, float h, float r, float g, float b, float a, String text) {
+            Graphics2D g2d = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics();
+            Font font = new Font(Font.MONOSPACED, Font.PLAIN, 16);
+            g2d.setFont(font);
+            FontMetrics metrics = g2d.getFontMetrics(font);
+            int width = metrics.stringWidth(text);
+            int height = metrics.getHeight();
+            g2d.dispose();
+            g2d = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB).createGraphics();
+            g2d.setFont(font);
+            g2d.setColor(new Color(r, g, b, a));
+            g2d.drawString(text, 0, metrics.getAscent());
+            g2d.dispose();
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            g2d = image.createGraphics();
+            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g2d.setFont(font);
+            g2d.setPaint(new Color(r, g, b, a));
+            g2d.drawString(text, 0, metrics.getAscent());
+            g2d.dispose();
+
+            ByteBuffer buffer = MemoryUtil.memAlloc(image.getWidth() * image.getHeight() * 4);
+            for (int j = image.getHeight()-1; j >=0; j--) {
+                for (int i = 0; i < image.getWidth(); i++) {
+                    buffer.put((byte) (image.getRGB(i, j) >> 16 & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) >> 8 & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) >> 24 & 0xFF));
                 }
             }
+            buffer.flip();
+
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, image.getWidth(), image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            draw(x, y, h * width / height, h, r, g, b, a, 0, 0, 1, 1);
+            flush();
+            MemoryUtil.memFree(buffer);
         }
 
         private void draw(float x1, float y1, float w, float h, float r, float g, float b, float a, float s1, float t1, float sl, float tl) {
@@ -1483,6 +1461,7 @@ public class EasyRender {
         pixel.begin();
         image.begin();
         point.begin();
+        text.begin();
     }
 
     public void end(Window window) {
@@ -1491,6 +1470,7 @@ public class EasyRender {
         pixel.end();
         image.end();
         point.end();
+        text.flush();
         glfwSwapBuffers(window.id());
     }
 

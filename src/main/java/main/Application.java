@@ -161,6 +161,7 @@ public class Application {
         renderer.pixel.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
         renderer.image.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
         renderer.point.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
+        renderer.text.setProjectionMatrix(new Matrix4f().ortho(0, 1, 0, 1, -1, 1));
 
 //        renderer.triangle.drawTriangle(0,0,0,0.1f,.1f,.1f,0,1,1,1);
 //        renderer.line.drawLine2D(0, 0, 1, 1, 1, 1, 1, 1);
@@ -172,6 +173,8 @@ public class Application {
 //        renderer.image.drawTexture(-1 * rate,-1 * rate,2 * rate,2 * rate,1,1, 1,0.8f,0,0,1,1, testTexture, testSampler);
 
         test.render(renderer);
+
+        renderer.text.drawText(0,0,0.1f,1,1,1,0.5f,"Wwwwwwwwwwwwwwwww");
 
         renderer.end(window);
     }
