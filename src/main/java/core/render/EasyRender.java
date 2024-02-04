@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -1256,8 +1257,6 @@ public class EasyRender {
 
         public int vertexCount;
 
-        private Map<Character, Glyph> glyphs = new HashMap<>();
-
         public Text() {
             //====CREATE THE VAO AND VBO====//
             vao = glGenVertexArrays();
@@ -1367,14 +1366,10 @@ public class EasyRender {
             int width = metrics.stringWidth(text);
             int height = metrics.getHeight();
             g2d.dispose();
-            g2d = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB).createGraphics();
-            g2d.setFont(font);
-            g2d.setColor(new Color(r, g, b, a));
-            g2d.drawString(text, 0, metrics.getAscent());
-            g2d.dispose();
             BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
             g2d = image.createGraphics();
-            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            //g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g2d.setBackground(new Color(0, 0, 0, 0));
             g2d.setFont(font);
             g2d.setPaint(new Color(r, g, b, a));
             g2d.drawString(text, 0, metrics.getAscent());
@@ -1390,13 +1385,25 @@ public class EasyRender {
                 }
             }
             buffer.flip();
+//
+//            //Write the image to a file
+//            try {
+//                ImageIO.write(image, "png", new File("text.png"));
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            //read the image from the file
+//            stbi_set_flip_vertically_on_load(true);
+//            buffer = stbi_load("text.png", new int[1], new int[1], new int[1], 4);
 
             glBindTexture(GL_TEXTURE_2D, texture);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, image.getWidth(), image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.getWidth(), image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+            glGenerateMipmap(GL_TEXTURE_2D);
             glBindTexture(GL_TEXTURE_2D, 0);
+            MemoryUtil.memFree(buffer);
             draw(x, y, h * width / height, h, r, g, b, a, 0, 0, 1, 1);
             flush();
-            MemoryUtil.memFree(buffer);
         }
 
         private void draw(float x1, float y1, float w, float h, float r, float g, float b, float a, float s1, float t1, float sl, float tl) {
@@ -1416,16 +1423,18 @@ public class EasyRender {
             glBindVertexArray(vao);
             glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
             glBindBufferBase(GL_UNIFORM_BUFFER, 0, uniformBuffer);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glBindSampler(1, sampler);
 
             //====RENDER THE LINES====//
             glUseProgram(shaderProgram);
-            glBindTexture(GL_TEXTURE_2D, texture);
-            glBindSampler(1, sampler);
             glDrawArrays(GL_POINTS, 0, vertexCount);
 
             //====UNBIND====//
             glBindTexture(GL_TEXTURE_2D, 0);
             glBindSampler(1, 0);
+            glActiveTexture(0);
             glBindVertexArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindBufferBase(GL_UNIFORM_BUFFER, 0, 0);

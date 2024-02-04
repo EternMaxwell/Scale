@@ -174,7 +174,7 @@ public class Application {
 
         test.render(renderer);
 
-        renderer.text.drawText(0,0,0.1f,1,1,1,0.5f,"Wwwwwwwwwwwwwwwww");
+        renderer.text.drawText(0,0,0.1f,1,1,1,0.5f,"Wwwwwwwwwwwww");
 
         renderer.end(window);
     }

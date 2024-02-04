@@ -1,13 +1,14 @@
 #version 460 core
 
 layout (points) in;
-layout (triangle_strip, max_vertices = 6) out;
 
 layout (location = 0) in vec4 color[];
 layout (location = 1) in vec2 texCoord[];
 layout (location = 2) in vec2 pos[];
 layout (location = 3) in vec2 size[];
 layout (location = 4) in vec2 texSize[];
+
+layout (triangle_strip, max_vertices = 6) out;
 
 layout (location = 0) out vec4 fColor;
 layout (location = 1) out vec2 fTexCoord;
