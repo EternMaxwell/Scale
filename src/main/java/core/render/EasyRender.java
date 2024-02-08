@@ -593,7 +593,7 @@ public class EasyRender {
             //====CREATE THE VAO AND VBO====//
             vao = glGenVertexArrays();
             vbo = glGenBuffers();
-            vertices = MemoryUtil.memAlloc(1024 * 6 * 4);
+            vertices = MemoryUtil.memAlloc(256 * 1024 * 6 * 4);
 
             //====CREATE THE UNIFORM BUFFER====//
             uniformBuffer = glGenBuffers();
@@ -1359,7 +1359,7 @@ public class EasyRender {
             vertexCount = 0;
         }
 
-        public void drawText(float x, float y, float h, float r, float g, float b, float a, String text) {
+        public int drawText(float x, float y, float h, float r, float g, float b, float a, String text) {
             Graphics2D g2d = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics();
             Font font = new Font(Font.MONOSPACED, Font.PLAIN, 16);
             g2d.setFont(font);
@@ -1373,7 +1373,8 @@ public class EasyRender {
             g2d.setBackground(new Color(0,0,0,0));
             g2d.setFont(font);
             g2d.setPaint(new Color(255,255,255,255));
-            g2d.drawString(text, 0, metrics.getAscent());
+            int h1 = metrics.getAscent();
+            g2d.drawString(text, 0, h1);
             g2d.dispose();
 
             ByteBuffer buffer = MemoryUtil.memAlloc(image.getWidth() * image.getHeight() * 4);
@@ -1403,6 +1404,9 @@ public class EasyRender {
             glGenerateMipmap(GL_TEXTURE_2D);
             MemoryUtil.memFree(buffer);
             glBindTexture(GL_TEXTURE_2D, 0);
+            if(h <= 0){
+                h = height;
+            }
             draw(x, y, h * width / height, h, r, g, b, a, 0, 0, 1, 1);
 
             glActiveTexture(GL_TEXTURE1);
@@ -1412,6 +1416,8 @@ public class EasyRender {
             glBindTexture(GL_TEXTURE_2D, 0);
             glBindSampler(1, 0);
             glActiveTexture(0);
+
+            return height;
         }
 
         private void draw(float x1, float y1, float w, float h, float r, float g, float b, float a, float s1, float t1, float sl, float tl) {

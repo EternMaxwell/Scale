@@ -23,42 +23,42 @@ public class ElementPlacement {
 
     public void input(long window) {
         Random random = new Random();
-        if(glfwGetKey(window, GLFW_KEY_EQUAL) == GLFW_PRESS){
-            id = (id+1)%3;
+        if (glfwGetKey(window, GLFW_KEY_EQUAL) == GLFW_PRESS) {
+            id = (id + 1) % 3;
         }
-        if(glfwGetKey(window, GLFW_KEY_MINUS) == GLFW_PRESS){
-            id = (id-1)%3;
-            if(id < 0)
+        if (glfwGetKey(window, GLFW_KEY_MINUS) == GLFW_PRESS) {
+            id = (id - 1) % 3;
+            if (id < 0)
                 id += 2;
         }
-        if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
+        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
             radius++;
         }
-        if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
+        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
             radius--;
-            if(radius < 0){
+            if (radius < 0) {
                 radius = 0;
             }
         }
-        if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
+        if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
             density += 0.01f;
-            if(density > 1){
+            if (density > 1) {
                 density = 1;
             }
         }
-        if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
+        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
             density -= 0.01f;
-            if(density < 0){
+            if (density < 0) {
                 density = 0;
             }
         }
-        if(glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS){
+        if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
             id = 0;
         }
-        if(glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS){
+        if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
             id = 1;
         }
-        if(glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS){
+        if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
             id = 2;
         }
 
@@ -68,15 +68,15 @@ public class ElementPlacement {
         int[] ysize = new int[1];
         glfwGetCursorPos(window, xpos, ypos);
         glfwGetWindowSize(window, xsize, ysize);
-        float ratio = (float) xsize[0]/ysize[0];
-        float x1 = ratio * ((float) xpos[0]/xsize[0]-0.5f)+0.5f;
-        float y1 = 1- (float) ypos[0]/ysize[0];
-        int x = (int) (x1*1000);
-        int y = (int) (y1*1000);
+        float ratio = (float) xsize[0] / ysize[0];
+        float x1 = ratio * ((float) xpos[0] / xsize[0] - 0.5f) + 0.5f;
+        float y1 = 1 - (float) ypos[0] / ysize[0];
+        int x = (int) (x1 * 1000);
+        int y = (int) (y1 * 1000);
 
-        if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS){
-            float length = (float) Math.sqrt((x-lastMousePos[0])*(x-lastMousePos[0])+(y-lastMousePos[1])*(y-lastMousePos[1]));
-            if(length!=0) {
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+            float length = (float) Math.sqrt((x - lastMousePos[0]) * (x - lastMousePos[0]) + (y - lastMousePos[1]) * (y - lastMousePos[1]));
+            if (length != 0) {
                 for (int i = 0; i <= length / radius; i++) {
                     int nx = (int) (lastMousePos[0] + (x - lastMousePos[0]) / length * i * radius);
                     int ny = (int) (lastMousePos[1] + (y - lastMousePos[1]) / length * i * radius);
@@ -90,7 +90,7 @@ public class ElementPlacement {
                         }
                     }
                 }
-            }else {
+            } else {
                 for (int ix = x - radius; ix <= x + radius; ix++) {
                     for (int iy = y - radius; iy <= y + radius; iy++) {
                         if (grid.valid(ix, iy)) {
@@ -104,8 +104,8 @@ public class ElementPlacement {
         }
 
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
-            float length = (float) Math.sqrt((x-lastMousePos[0])*(x-lastMousePos[0])+(y-lastMousePos[1])*(y-lastMousePos[1]));
-            if(length!=0) {
+            float length = (float) Math.sqrt((x - lastMousePos[0]) * (x - lastMousePos[0]) + (y - lastMousePos[1]) * (y - lastMousePos[1]));
+            if (length != 0) {
                 for (int i = 0; i <= length / radius; i++) {
                     int nx = (int) (lastMousePos[0] + (x - lastMousePos[0]) / length * i * radius);
                     int ny = (int) (lastMousePos[1] + (y - lastMousePos[1]) / length * i * radius);
@@ -117,7 +117,7 @@ public class ElementPlacement {
                         }
                     }
                 }
-            }else {
+            } else {
                 for (int ix = x - radius; ix <= x + radius; ix++) {
                     for (int iy = y - radius; iy <= y + radius; iy++) {
                         if (grid.valid(ix, iy)) {
@@ -153,8 +153,8 @@ public class ElementPlacement {
         float color[] = elements.getFromId(id).color();
         for (int x = 0; x < 32; x++)
             for (int y = 0; y < 32; y++) {
-                if(random.nextFloat() < density)
-                    render.pixel.drawPixel(x-128,y+800, color[0], color[1], color[2], color[3]);
+                if (random.nextFloat() < density)
+                    render.pixel.drawPixel(x - 128, y + 800, color[0], color[1], color[2], color[3]);
             }
     }
 }
