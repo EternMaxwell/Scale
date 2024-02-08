@@ -2,16 +2,14 @@
 
 layout (points) in;
 
-layout (location = 0) in vec4 color[];
-layout (location = 1) in vec2 texCoord[];
-layout (location = 2) in vec2 pos[];
-layout (location = 3) in vec2 size[];
-layout (location = 4) in vec2 texSize[];
+layout (location = 0) in vec2 in_size[];
+layout (location = 1) in vec4 in_color[];
+layout (location = 2) in vec4 in_tex[];
 
 layout (triangle_strip, max_vertices = 6) out;
 
-layout (location = 0) out vec4 fColor;
-layout (location = 1) out vec2 fTexCoord;
+layout (location = 0) out vec4 out_color;
+layout (location = 1) out vec2 out_tex;
 
 layout (binding = 0) uniform block{
     mat4 model;
@@ -21,36 +19,36 @@ layout (binding = 0) uniform block{
 
 void main() {
     mat4 mvp = Block.projection * Block.view * Block.model;
+    vec4 pos = gl_in[0].gl_Position;
 
-    gl_Position = mvp * vec4(pos[0], 0.0, 1.0);
-    fColor = color[0];
-    fTexCoord = texCoord[0];
+    float width = in_size[0].x;
+    float height = in_size[0].y;
+
+    out_color = in_color[0];
+    gl_Position = mvp * vec4(pos.x, pos.y, pos.z, 1.0);
+    out_tex = vec2(in_tex[0].x, in_tex[0].y);
     EmitVertex();
-
-    gl_Position = mvp * vec4(pos[0].x + size[0].x, pos[0].y, 0.0, 1.0);
-    fColor = color[0];
-    fTexCoord = vec2(texCoord[0].x + texSize[0].x, texCoord[0].y);
+    out_color = in_color[0];
+    gl_Position = mvp * vec4(pos.x + width, pos.y, pos.z, 1.0);
+    out_tex = vec2(in_tex[0].z, in_tex[0].y);
     EmitVertex();
-
-    gl_Position = mvp * vec4(pos[0].x, pos[0].y + size[0].y, 0.0, 1.0);
-    fColor = color[0];
-    fTexCoord = vec2(texCoord[0].x, texCoord[0].y + texSize[0].y);
+    out_color = in_color[0];
+    gl_Position = mvp * vec4(pos.x + width, pos.y + height, pos.z, 1.0);
+    out_tex = vec2(in_tex[0].z, in_tex[0].w);
     EmitVertex();
     EndPrimitive();
 
-    gl_Position = mvp * vec4(pos[0].x + size[0].x, pos[0].y, 0.0, 1.0);
-    fColor = color[0];
-    fTexCoord = vec2(texCoord[0].x + texSize[0].x, texCoord[0].y);
+    out_color = in_color[0];
+    gl_Position = mvp * vec4(pos.x, pos.y, pos.z, 1.0);
+    out_tex = vec2(in_tex[0].x, in_tex[0].y);
     EmitVertex();
-
-    gl_Position = mvp * vec4(pos[0].x + size[0].x, pos[0].y + size[0].y, 0.0, 1.0);
-    fColor = color[0];
-    fTexCoord = vec2(texCoord[0].x + texSize[0].x, texCoord[0].y + texSize[0].y);
+    out_color = in_color[0];
+    gl_Position = mvp * vec4(pos.x + width, pos.y + height, pos.z, 1.0);
+    out_tex = vec2(in_tex[0].z, in_tex[0].w);
     EmitVertex();
-
-    gl_Position = mvp * vec4(pos[0].x, pos[0].y + size[0].y, 0.0, 1.0);
-    fColor = color[0];
-    fTexCoord = vec2(texCoord[0].x, texCoord[0].y + texSize[0].y);
+    out_color = in_color[0];
+    gl_Position = mvp * vec4(pos.x, pos.y + height, pos.z, 1.0);
+    out_tex = vec2(in_tex[0].x, in_tex[0].w);
     EmitVertex();
     EndPrimitive();
 }
