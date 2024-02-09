@@ -55,7 +55,8 @@ public class EasyGrid extends Grid {
     }
 
     @Override
-    public void step() {
+    public double step() {
+        double start = System.nanoTime();
         if(inverse){
             for(int y = 0; y < grid[0].length; y++) {
                 for(int x = grid.length-1; x >= 0; x--) {
@@ -74,6 +75,7 @@ public class EasyGrid extends Grid {
             }
         }
         inverse = !inverse;
+        return (System.nanoTime() - start) / 1000000;
     }
 
     @Override

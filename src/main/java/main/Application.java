@@ -24,7 +24,7 @@ import static org.lwjgl.opengl.GL33.glSamplerParameteri;
 import static org.lwjgl.stb.STBImage.*;
 
 public class Application {
-    public boolean debug = true;
+    public boolean debug = false;
     public Window window;
     public FrameTimer timer;
     public TickTimer tickTimer;

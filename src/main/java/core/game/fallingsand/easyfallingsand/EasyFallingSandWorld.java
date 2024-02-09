@@ -13,6 +13,8 @@ public class EasyFallingSandWorld extends core.game.fallingsand.FallingSandWorld
     Grid grid;
     Window window;
     double mspt = 0;
+    double gridStepTime = 0;
+    double updateTimeRate = 0.15;
     Matrix4f viewMatrix = new Matrix4f();
     ElementPlacement elementPlacement;
     @Override
@@ -31,9 +33,9 @@ public class EasyFallingSandWorld extends core.game.fallingsand.FallingSandWorld
     @Override
     public void update() {
         double start = glfwGetTime();
-        grid.step();
+        gridStepTime = gridStepTime * (1 - updateTimeRate) + updateTimeRate * grid.step();
         double end = glfwGetTime();
-        mspt = mspt * 0.8 + 0.2* (end - start)/1000;
+        mspt = mspt * (1 - updateTimeRate) + updateTimeRate * (end - start) * 1000;
     }
 
     @Override
@@ -52,8 +54,10 @@ public class EasyFallingSandWorld extends core.game.fallingsand.FallingSandWorld
 
         int startH = 0;
 
-        startH += render.text.drawText(5,0,0,1,1,1,1,
-                "mspt: " + String.format("%f",mspt) + "ms");
+        startH += render.text.drawText(5,startH,0,1,1,1,1,
+                "grid step time: " + String.format("%.2f",gridStepTime) + "ms");
+        startH += render.text.drawText(5,startH,0,1,1,1,1,
+                "mspt: " + String.format("%.2f",mspt) + "ms");
 
         elementPlacement.render(render);
     }

@@ -593,7 +593,7 @@ public class EasyRender {
             //====CREATE THE VAO AND VBO====//
             vao = glGenVertexArrays();
             vbo = glGenBuffers();
-            vertices = MemoryUtil.memAlloc(256 * 1024 * 6 * 4);
+            //vertices = MemoryUtil.memAlloc(256 * 1024 * 6 * 4);
 
             //====CREATE THE UNIFORM BUFFER====//
             uniformBuffer = glGenBuffers();
@@ -621,7 +621,8 @@ public class EasyRender {
             //====SPECIFY THE VERTEX DATA====//
             glBindVertexArray(vao);
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBufferData(GL_ARRAY_BUFFER, vertices.capacity(), GL_DYNAMIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, 1024 * 1024 * 6 * 4, GL_DYNAMIC_DRAW);
+            vertices = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY, 256 * 1024 * 6 * 4, vertices);
             glVertexAttribPointer(0, 2, GL_FLOAT, false, 6 * Float.BYTES, 0);
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(1, 4, GL_FLOAT, false, 6 * Float.BYTES, 2 * Float.BYTES);
@@ -707,6 +708,9 @@ public class EasyRender {
         public void flush(){
             //====FLIP THE BUFFER====//
             vertices.flip();
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glUnmapBuffer(GL_ARRAY_BUFFER);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             //====BIND THE VAO AND VBO====//
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -717,6 +721,7 @@ public class EasyRender {
             //====RENDER THE LINES====//
             glUseProgram(shaderProgram);
             glDrawArrays(GL_POINTS, 0, vertexCount);
+            vertices = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY, 1024 * 1024 * 6 * 4, vertices);
 
             //====UNBIND====//
             glBindVertexArray(0);
@@ -747,7 +752,7 @@ public class EasyRender {
             glDeleteBuffers(vbo);
             glDeleteVertexArrays(vao);
             glDeleteBuffers(uniformBuffer);
-            MemoryUtil.memFree(vertices);
+            //MemoryUtil.memFree(vertices);
             MemoryUtil.memFree(uniformData);
         }
     }
@@ -1452,6 +1457,20 @@ public class EasyRender {
             vertices.clear();
             vertexCount = 0;
         }
+
+        public void dispose() {
+            glDeleteProgram(shaderProgram);
+            glDeleteShader(vertexShader);
+            glDeleteShader(geometryShader);
+            glDeleteShader(fragmentShader);
+            glDeleteBuffers(vbo);
+            glDeleteVertexArrays(vao);
+            glDeleteBuffers(uniformBuffer);
+            glDeleteTextures(texture);
+            glDeleteSamplers(sampler);
+            MemoryUtil.memFree(vertices);
+            MemoryUtil.memFree(uniformData);
+        }
     }
 
     public EasyRender(Window window) {
@@ -1516,5 +1535,6 @@ public class EasyRender {
         pixel.dispose();
         image.dispose();
         point.dispose();
+        text.dispose();
     }
 }
