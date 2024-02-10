@@ -71,8 +71,8 @@ public class ElementPlacement {
         float ratio = (float) xsize[0] / ysize[0];
         float x1 = ratio * ((float) xpos[0] / xsize[0] - 0.5f) + 0.5f;
         float y1 = 1 - (float) ypos[0] / ysize[0];
-        int x = (int) (x1 * 1000);
-        int y = (int) (y1 * 1000);
+        int x = (int) (x1 * 1024);
+        int y = (int) (y1 * 1024);
 
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
             float length = (float) Math.sqrt((x - lastMousePos[0]) * (x - lastMousePos[0]) + (y - lastMousePos[1]) * (y - lastMousePos[1]));
@@ -144,7 +144,7 @@ public class ElementPlacement {
         float x1 = 2 * ratio * ((float) mousePosX[0] / xsize[0] - 0.5f);
         float y1 = 0.5f - (float) mousePosY[0] / ysize[0];
         y1 *= 2;
-        float length = radius / 500f;
+        float length = radius / 512f;
         render.line.drawLine2D(x1 - length, y1 - length, x1 + length, y1 - length, 1, 0, 0, 0.5f);
         render.line.drawLine2D(x1 - length, y1 - length, x1 - length, y1 + length, 1, 0, 0, 0.5f);
         render.line.drawLine2D(x1 + length, y1 - length, x1 + length, y1 + length, 1, 0, 0, 0.5f);

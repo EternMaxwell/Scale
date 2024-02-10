@@ -41,7 +41,7 @@ public class Application {
 
     public void init(){
         initGLFW();
-        window = new Window(1600, 1000, "test");
+        window = new Window(1600, 1024, "test");
         window.setContextVersionMajor(4);
         window.setContextVersionMinor(6);
         window.setResizable(true);

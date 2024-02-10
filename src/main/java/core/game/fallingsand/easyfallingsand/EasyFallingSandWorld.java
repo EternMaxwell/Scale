@@ -19,9 +19,9 @@ public class EasyFallingSandWorld extends core.game.fallingsand.FallingSandWorld
     ElementPlacement elementPlacement;
     @Override
     public void init(Window window) {
-        grid = new EasyGrid(1000, 1000);
+        grid = new ChunkBasedSimpleGrid(16, 16);
         this.window = window;
-        viewMatrix.ortho2D(0, 1000, 0, 1000);
+        viewMatrix.ortho2D(0, 1024, 0, 1024);
         elementPlacement = new ElementPlacement(grid);
     }
 
@@ -43,8 +43,8 @@ public class EasyFallingSandWorld extends core.game.fallingsand.FallingSandWorld
         render.pixel.setPixelSize(1);
         render.pixel.setViewMatrix(viewMatrix);
 
-        for(int x = 0; x < 1000; x++){
-            for(int y = 0; y < 1000; y++){
+        for(int x = 0; x < 1024; x++){
+            for(int y = 0; y < 1024; y++){
                 if(grid.get(x, y) != null){
                     float[] color = grid.get(x, y).color();
                     render.pixel.drawPixel(x+0.5f,y+0.5f,color[0],color[1],color[2],color[3]);
