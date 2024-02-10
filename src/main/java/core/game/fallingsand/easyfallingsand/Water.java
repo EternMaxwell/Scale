@@ -33,10 +33,12 @@ public class Water extends Element {
                 moved = true;
                 grid.set(x, iy - 1, this);
                 grid.set(x, iy, null);
+                lastStepTick = tick;
                 iy--;
             } else if (below != null) {
                 break;
             } else {
+                lastStepTick = tick;
                 velocity = 0.7f;
                 return true;
             }

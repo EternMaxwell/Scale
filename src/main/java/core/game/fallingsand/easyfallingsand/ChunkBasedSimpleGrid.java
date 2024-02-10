@@ -82,7 +82,7 @@ public class ChunkBasedSimpleGrid extends Grid {
 
     @Override
     public void set(int x, int y, Element element) {
-        toStep.add(new int[]{x, y});
+        addToStep(x, y, element);
         try {
             chunks[x >> 6][y >> 6].set(x & 63, y & 63, element);
         } catch (ArrayIndexOutOfBoundsException ignored) {
@@ -91,7 +91,7 @@ public class ChunkBasedSimpleGrid extends Grid {
 
     @Override
     public Element replace(int x, int y, Element element) {
-        toStep.add(new int[]{x, y});
+        addToStep(x, y, element);
         try {
             return chunks[x >> 6][y >> 6].replace(x & 63, y & 63, element);
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -101,7 +101,7 @@ public class ChunkBasedSimpleGrid extends Grid {
 
     @Override
     public Element pop(int x, int y) {
-        toStep.add(new int[]{x, y});
+        addToStep(x, y, null);
         try {
             return chunks[x >> 6][y >> 6].pop(x & 63, y & 63);
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -111,31 +111,51 @@ public class ChunkBasedSimpleGrid extends Grid {
 
     @Override
     public void remove(int x, int y) {
-        toStep.add(new int[]{x, y});
+        addToStep(x, y, null);
         try {
             chunks[x >> 6][y >> 6].remove(x & 63, y & 63);
         } catch (ArrayIndexOutOfBoundsException ignored) {
         }
     }
 
+    private void stepSingle(int x, int y) {
+        if(valid(x,y) && get(x, y) != null && get(x,y).lastStepTick() != tick && get(x, y).step(this, x, y, tick)) {
+            try {
+                stepSingle(x, y - 1);
+                stepSingle(x - (inverse ? 1 : -1), y);
+                stepSingle(x + (inverse ? 1 : -1), y);
+                stepSingle(x, y + 1);
+            }catch (StackOverflowError e) {
+                addToStep(x, y, get(x, y));
+            }
+        }
+    }
+
     @Override
     public double step() {
         double start = System.nanoTime();
-        for(int y = chunks[0][0].y * chunks[0][0].width; y < chunks[0].length * chunks[0][0].width + chunks[0][0].width; y++) {
-            if (!inverse)
-                for (int x = chunks[0][0].x * chunks[0][0].width; x < chunks[0].length * chunks[0][0].width + chunks[0][0].width; x++) {
-                    if (get(x, y) != null) {
-                        get(x, y).step(this, x, y, tick);
-                    }
-                }
-            else {
-                for (int x = chunks[0].length * chunks[0][0].width + chunks[0][0].width - 1; x >= chunks[0][0].x * chunks[0][0].width; x--) {
-                    if (get(x, y) != null) {
-                        get(x, y).step(this, x, y, tick);
-                    }
-                }
-            }
+//        for(int y = chunks[0][0].y * chunks[0][0].width; y < chunks[0].length * chunks[0][0].width + chunks[0][0].width; y++) {
+//            if (!inverse)
+//                for (int x = chunks[0][0].x * chunks[0][0].width; x < chunks[0].length * chunks[0][0].width + chunks[0][0].width; x++) {
+//                    if (get(x, y) != null) {
+//                        get(x, y).step(this, x, y, tick);
+//                    }
+//                }
+//            else {
+//                for (int x = chunks[0].length * chunks[0][0].width + chunks[0][0].width - 1; x >= chunks[0][0].x * chunks[0][0].width; x--) {
+//                    if (get(x, y) != null) {
+//                        get(x, y).step(this, x, y, tick);
+//                    }
+//                }
+//            }
+//        }
+        List<int[]> temp = toStep;
+        toStep = stepping;
+        stepping = temp;
+        for(int[] pos : stepping) {
+            stepSingle(pos[0], pos[1]);
         }
+        stepping.clear();
         inverse = !inverse;
         tick++;
         return (System.nanoTime() - start) / 1e6;
@@ -143,7 +163,16 @@ public class ChunkBasedSimpleGrid extends Grid {
 
     @Override
     public void addToStep(int x, int y, Element element) {
-
+        int dir = -(inverse?1:-1);
+        toStep.add(new int[]{x+dir,y-1});
+        toStep.add(new int[]{x, y-1});
+        toStep.add(new int[]{x-dir, y-1});
+        toStep.add(new int[]{x+dir, y});
+        toStep.add(new int[]{x, y});
+        toStep.add(new int[]{x-dir, y});
+        toStep.add(new int[]{x+dir, y+1});
+        toStep.add(new int[]{x, y+1});
+        toStep.add(new int[]{x-dir, y+1});
     }
 
     @Override

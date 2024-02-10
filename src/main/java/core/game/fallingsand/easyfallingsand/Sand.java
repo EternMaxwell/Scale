@@ -38,10 +38,12 @@ public class Sand extends Element {
                 moved = true;
                 grid.set(ix, iy -1, this);
                 grid.set(ix, iy, null);
+                lastTick = tick;
                 iy--;
             }else if(below != null){
                 break;
             }else {
+                lastTick = tick;
                 velocity = 0.7f;
                 return true;
             }
