@@ -7,6 +7,6 @@ public abstract class Grid {
     public abstract Element pop(int x, int y);
     public abstract void remove(int x, int y);
     public abstract double step();
-
+    public abstract void addToStep(int x, int y, Element element);
     public abstract boolean valid(int x, int y);
 }

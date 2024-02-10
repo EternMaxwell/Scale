@@ -7,6 +7,7 @@ public class EasyGrid extends Grid {
 
     Element[][] grid;
     boolean inverse = true;
+    int tick = 0;
 
     public EasyGrid(int width, int height) {
         grid = new Element[width][height];
@@ -61,7 +62,7 @@ public class EasyGrid extends Grid {
             for(int y = 0; y < grid[0].length; y++) {
                 for(int x = grid.length-1; x >= 0; x--) {
                     if(grid[x][y] != null) {
-                        grid[x][y].step(this, x, y);
+                        grid[x][y].step(this, x, y, tick);
                     }
                 }
             }
@@ -69,13 +70,19 @@ public class EasyGrid extends Grid {
             for (int y = 0; y < grid[0].length; y++) {
                 for (int x = 0; x < grid.length; x++) {
                     if (grid[x][y] != null) {
-                        grid[x][y].step(this, x, y);
+                        grid[x][y].step(this, x, y, tick);
                     }
                 }
             }
         }
         inverse = !inverse;
+        tick++;
         return (System.nanoTime() - start) / 1000000;
+    }
+
+    @Override
+    public void addToStep(int x, int y, Element element) {
+
     }
 
     @Override

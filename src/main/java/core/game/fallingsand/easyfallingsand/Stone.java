@@ -5,6 +5,7 @@ import core.game.fallingsand.Grid;
 
 public class Stone extends Element{
 
+    int lastStepTick = -1;
     float[] color;
 
     public Stone(){
@@ -20,8 +21,9 @@ public class Stone extends Element{
      * @param y    the y position.
      */
     @Override
-    public void step(Grid grid, int x, int y) {
-
+    public boolean step(Grid grid, int x, int y, int tick) {
+        lastStepTick = tick;
+        return false;
     }
 
     /**
@@ -62,5 +64,15 @@ public class Stone extends Element{
     @Override
     public float density() {
         return 5;
+    }
+
+    /**
+     * get the last step tick of the element.
+     *
+     * @return the last step tick.
+     */
+    @Override
+    public int lastStepTick() {
+        return lastStepTick;
     }
 }

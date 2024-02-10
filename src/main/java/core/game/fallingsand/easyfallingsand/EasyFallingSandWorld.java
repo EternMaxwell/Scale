@@ -5,6 +5,8 @@ import core.render.EasyRender;
 import core.render.Window;
 import org.joml.Matrix4f;
 
+import java.awt.*;
+
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL32.*;
 
@@ -54,10 +56,12 @@ public class EasyFallingSandWorld extends core.game.fallingsand.FallingSandWorld
 
         int startH = 0;
 
-        startH += render.text.drawText(5,startH,0,1,1,1,1,
-                "grid step time: " + String.format("%.2f",gridStepTime) + "ms");
-        startH += render.text.drawText(5,startH,0,1,1,1,1,
-                "mspt: " + String.format("%.2f",mspt) + "ms");
+        startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
+                "grid step time: " + String.format("%.2f",gridStepTime) + "ms", new Font("Arial", Font.PLAIN, 12));
+        startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
+                "mspt: " + String.format("%.2f",mspt) + "ms", new Font("Arial", Font.PLAIN, 12));
+
+        render.pixel.flush();
 
         elementPlacement.render(render);
     }

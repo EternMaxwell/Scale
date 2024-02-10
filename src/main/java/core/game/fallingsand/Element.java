@@ -9,7 +9,7 @@ public abstract class Element {
      * @param x    the x position.
      * @param y    the y position.
      */
-    public abstract void step(Grid grid, int x, int y);
+    public abstract boolean step(Grid grid, int x, int y, int tick);
 
     /**
      * get the type of the element.
@@ -38,4 +38,11 @@ public abstract class Element {
      * @return the density.
      */
     public abstract float density();
+
+    /**
+     * get the last step tick of the element.
+     *
+     * @return the last step tick.
+     */
+    public abstract int lastStepTick();
 }

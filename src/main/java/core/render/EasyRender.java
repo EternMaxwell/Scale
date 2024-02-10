@@ -1364,9 +1364,8 @@ public class EasyRender {
             vertexCount = 0;
         }
 
-        public int drawText(float x, float y, float h, float r, float g, float b, float a, String text) {
+        public int drawText(float x, float y, float h, float r, float g, float b, float a, String text, Font font) {
             Graphics2D g2d = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics();
-            Font font = new Font(Font.MONOSPACED, Font.PLAIN, 16);
             g2d.setFont(font);
             FontMetrics metrics = g2d.getFontMetrics(font);
             int width = metrics.stringWidth(text);
@@ -1423,6 +1422,10 @@ public class EasyRender {
             glActiveTexture(0);
 
             return height;
+        }
+
+        public int drawText(float x, float y, float h, float r, float g, float b, float a, String text){
+            return drawText(x, y, h, r, g, b, a, text, new Font(Font.MONOSPACED, Font.PLAIN, 16));
         }
 
         private void draw(float x1, float y1, float w, float h, float r, float g, float b, float a, float s1, float t1, float sl, float tl) {

@@ -8,6 +8,7 @@ import java.util.Random;
 
 public class Sand extends Element {
 
+    int lastTick = -1;
     float[] color;
     float velocity;
 
@@ -26,7 +27,7 @@ public class Sand extends Element {
      * @param y    the y position.
      */
     @Override
-    public void step(Grid grid, int x, int y) {
+    public boolean step(Grid grid, int x, int y, int tick) {
         int distance = velocity > 1 ? (int) velocity : 1;
         int ix = x;
         int iy = y;
@@ -42,13 +43,14 @@ public class Sand extends Element {
                 break;
             }else {
                 velocity = 0.7f;
-                return;
+                return true;
             }
         }
         if(moved){
+            lastTick = tick;
             velocity += 0.1f;
             velocity *= 0.985f;
-            return;
+            return true;
         }
 
         velocity = 0.7f;
@@ -56,7 +58,8 @@ public class Sand extends Element {
         if(grid.get(ix, iy - 1)!=null && grid.get(ix, iy - 1).type() ==1){
             grid.set(ix, iy, grid.get(ix, iy - 1));
             grid.set(ix, iy - 1, this);
-            return;
+            lastTick = tick;
+            return true;
         }
 
         int dir = new Random().nextInt(2);
@@ -90,6 +93,11 @@ public class Sand extends Element {
                 }
             }
         }
+        if(moved){
+            lastTick = tick;
+        }
+
+        return moved;
     }
 
     /**
@@ -125,5 +133,15 @@ public class Sand extends Element {
     @Override
     public float density(){
         return 3;
+    }
+
+    /**
+     * get the last step tick of the element.
+     *
+     * @return the last step tick.
+     */
+    @Override
+    public int lastStepTick() {
+        return lastTick;
     }
 }

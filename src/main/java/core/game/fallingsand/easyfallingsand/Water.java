@@ -7,11 +7,12 @@ import java.util.Random;
 
 public class Water extends Element {
 
+    int lastStepTick = -1;
     float[] color;
     float velocity = 0.7f;
 
     public Water() {
-        color = new float[]{0, 0, 1, 1};
+        color = new float[]{0, 0, 1, 0.7f};
     }
 
     /**
@@ -22,7 +23,7 @@ public class Water extends Element {
      * @param y    the y position.
      */
     @Override
-    public void step(Grid grid, int x, int y) {
+    public boolean step(Grid grid, int x, int y, int tick) {
         int distance = velocity > 1 ? (int) velocity : 1;
         int iy = y;
         boolean moved = false;
@@ -37,13 +38,14 @@ public class Water extends Element {
                 break;
             } else {
                 velocity = 0.7f;
-                return;
+                return true;
             }
         }
         if (moved) {
+            lastStepTick = tick;
             velocity += 0.1f;
             velocity *= 0.98f;
-            return;
+            return true;
         }
 
         int dir = new Random().nextInt(2);
@@ -69,17 +71,25 @@ public class Water extends Element {
                 if (side == null && grid.valid(x + dir * i, iy)) {
                     grid.set(x + dir * i, iy, this);
                     grid.set(x, iy, null);
+                    moved = true;
                     break;
                 } else {
                     side = grid.get(x - dir * i, iy);
                     if (side == null && grid.valid(x - dir * i, iy)) {
                         grid.set(x - dir * i, iy, this);
                         grid.set(x, iy, null);
+                        moved = true;
                         break;
                     }
                 }
             }
         }
+
+        if (moved) {
+            lastStepTick = tick;
+        }
+
+        return moved;
     }
 
     /**
@@ -120,5 +130,15 @@ public class Water extends Element {
     @Override
     public float density() {
         return 1;
+    }
+
+    /**
+     * get the last step tick of the element.
+     *
+     * @return the last step tick.
+     */
+    @Override
+    public int lastStepTick() {
+        return lastStepTick;
     }
 }

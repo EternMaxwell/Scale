@@ -3,6 +3,9 @@ package core.game.fallingsand.easyfallingsand;
 import core.game.fallingsand.Element;
 import core.game.fallingsand.Grid;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ChunkBasedSimpleGrid extends Grid {
     public class Chunk {
         public Element[][] grid;
@@ -54,6 +57,10 @@ public class ChunkBasedSimpleGrid extends Grid {
     }
 
     public Chunk[][] chunks;
+    boolean inverse = false;
+    int tick = 0;
+    List<int[]> stepping = new ArrayList<>();
+    List<int[]> toStep = new ArrayList<>();
 
     public ChunkBasedSimpleGrid(int chunkWidth, int chunkHeight) {
         chunks = new Chunk[chunkWidth][chunkHeight];
@@ -75,6 +82,7 @@ public class ChunkBasedSimpleGrid extends Grid {
 
     @Override
     public void set(int x, int y, Element element) {
+        toStep.add(new int[]{x, y});
         try {
             chunks[x >> 6][y >> 6].set(x & 63, y & 63, element);
         } catch (ArrayIndexOutOfBoundsException ignored) {
@@ -83,6 +91,7 @@ public class ChunkBasedSimpleGrid extends Grid {
 
     @Override
     public Element replace(int x, int y, Element element) {
+        toStep.add(new int[]{x, y});
         try {
             return chunks[x >> 6][y >> 6].replace(x & 63, y & 63, element);
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -92,6 +101,7 @@ public class ChunkBasedSimpleGrid extends Grid {
 
     @Override
     public Element pop(int x, int y) {
+        toStep.add(new int[]{x, y});
         try {
             return chunks[x >> 6][y >> 6].pop(x & 63, y & 63);
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -101,6 +111,7 @@ public class ChunkBasedSimpleGrid extends Grid {
 
     @Override
     public void remove(int x, int y) {
+        toStep.add(new int[]{x, y});
         try {
             chunks[x >> 6][y >> 6].remove(x & 63, y & 63);
         } catch (ArrayIndexOutOfBoundsException ignored) {
@@ -111,17 +122,37 @@ public class ChunkBasedSimpleGrid extends Grid {
     public double step() {
         double start = System.nanoTime();
         for(int y = chunks[0][0].y * chunks[0][0].width; y < chunks[0].length * chunks[0][0].width + chunks[0][0].width; y++) {
-            for(int x = chunks[0][0].x * chunks[0][0].width; x < chunks[0].length * chunks[0][0].width + chunks[0][0].width; x++) {
-                if(get(x, y) != null) {
-                    get(x, y).step(this, x, y);
+            if (!inverse)
+                for (int x = chunks[0][0].x * chunks[0][0].width; x < chunks[0].length * chunks[0][0].width + chunks[0][0].width; x++) {
+                    if (get(x, y) != null) {
+                        get(x, y).step(this, x, y, tick);
+                    }
+                }
+            else {
+                for (int x = chunks[0].length * chunks[0][0].width + chunks[0][0].width - 1; x >= chunks[0][0].x * chunks[0][0].width; x--) {
+                    if (get(x, y) != null) {
+                        get(x, y).step(this, x, y, tick);
+                    }
                 }
             }
         }
+        inverse = !inverse;
+        tick++;
         return (System.nanoTime() - start) / 1e6;
     }
 
     @Override
+    public void addToStep(int x, int y, Element element) {
+
+    }
+
+    @Override
     public boolean valid(int x, int y) {
-        return x >= 0 && x < chunks.length * chunks[0][0].width && y >= 0 && y < chunks[0].length * chunks[0][0].width;
+        try {
+            Element e = chunks[x >> 6][y >> 6].get(x & 63, y & 63);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return false;
+        }
+        return true;
     }
 }
