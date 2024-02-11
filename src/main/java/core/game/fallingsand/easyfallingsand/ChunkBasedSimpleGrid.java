@@ -59,8 +59,8 @@ public class ChunkBasedSimpleGrid extends Grid {
     public Chunk[][] chunks;
     boolean inverse = false;
     int tick = 0;
-    List<int[]> stepping = new ArrayList<>();
-    List<int[]> toStep = new ArrayList<>();
+    List<int[]> stepping = new ArrayList<>(4096);
+    List<int[]> toStep = new ArrayList<>(4096);
 
     public ChunkBasedSimpleGrid(int chunkWidth, int chunkHeight) {
         chunks = new Chunk[chunkWidth][chunkHeight];
@@ -119,9 +119,14 @@ public class ChunkBasedSimpleGrid extends Grid {
     }
 
     private void stepSingle(int x, int y) {
+        try {
+            if(valid(x, y-1) && get(x, y-1) != null && get(x, y-1).lastStepTick() != tick)
+                stepSingle(x, y-1);
+        }catch (StackOverflowError e) {
+            addToStep(x, y, get(x, y));
+        }
         if(valid(x,y) && get(x, y) != null && get(x,y).lastStepTick() != tick && get(x, y).step(this, x, y, tick)) {
             try {
-                stepSingle(x, y - 1);
                 stepSingle(x - (inverse ? 1 : -1), y);
                 stepSingle(x + (inverse ? 1 : -1), y);
                 stepSingle(x, y + 1);
@@ -164,9 +169,6 @@ public class ChunkBasedSimpleGrid extends Grid {
     @Override
     public void addToStep(int x, int y, Element element) {
         int dir = -(inverse?1:-1);
-        toStep.add(new int[]{x+dir,y-1});
-        toStep.add(new int[]{x, y-1});
-        toStep.add(new int[]{x-dir, y-1});
         toStep.add(new int[]{x+dir, y});
         toStep.add(new int[]{x, y});
         toStep.add(new int[]{x-dir, y});

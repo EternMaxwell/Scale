@@ -29,15 +29,14 @@ public class Sand extends Element {
     @Override
     public boolean step(Grid grid, int x, int y, int tick) {
         int distance = velocity > 1 ? (int) velocity : 1;
-        int ix = x;
         int iy = y;
         boolean moved = false;
         for (int i = 0; i < distance; i++) {
-            Element below = grid.get(ix, iy - 1);
-            if (below == null && grid.valid(ix, iy - 1)) {
+            Element below = grid.get(x, iy - 1);
+            if (below == null && grid.valid(x, iy - 1)) {
                 moved = true;
-                grid.set(ix, iy -1, this);
-                grid.set(ix, iy, null);
+                grid.set(x, iy -1, this);
+                grid.set(x, iy, null);
                 lastTick = tick;
                 iy--;
             }else if(below != null){
@@ -57,40 +56,40 @@ public class Sand extends Element {
 
         velocity = 0.7f;
 
-        if(grid.get(ix, iy - 1)!=null && grid.get(ix, iy - 1).type() ==1){
-            grid.set(ix, iy, grid.get(ix, iy - 1));
-            grid.set(ix, iy - 1, this);
+        if(grid.get(x, iy - 1)!=null && grid.get(x, iy - 1).type() ==1){
+            grid.set(x, iy, grid.get(x, iy - 1));
+            grid.set(x, iy - 1, this);
             lastTick = tick;
             return true;
         }
 
         int dir = new Random().nextInt(2);
         dir = dir == 0 ? -1 : 1;
-        Element side = grid.get(ix + dir, iy - 1);
-        if (side == null && grid.valid(ix + dir, iy - 1)) {
-            grid.set(ix + dir, iy - 1, this);
-            grid.set(ix, iy, null);
+        Element side = grid.get(x + dir, iy - 1);
+        if (side == null && grid.valid(x + dir, iy - 1)) {
+            grid.set(x + dir, iy - 1, this);
+            grid.set(x, iy, null);
             moved = true;
         } else {
-            side = grid.get(ix - dir, iy - 1);
-            if (side == null && grid.valid(ix - dir, iy - 1)) {
-                grid.set(ix - dir, iy - 1, this);
-                grid.set(ix, iy, null);
+            side = grid.get(x - dir, iy - 1);
+            if (side == null && grid.valid(x - dir, iy - 1)) {
+                grid.set(x - dir, iy - 1, this);
+                grid.set(x, iy, null);
                 moved = true;
             }
         }
 
         if (!moved) {
-            side = grid.get(ix + dir, iy-1);
+            side = grid.get(x + dir, iy-1);
             if(side != null && side.type()==1 ){
-                grid.set(ix + dir, iy-1, this);
-                grid.set(ix, iy, side);
+                grid.set(x + dir, iy-1, this);
+                grid.set(x, iy, side);
                 moved = true;
             }else {
-                side = grid.get(ix - dir, iy-1);
+                side = grid.get(x - dir, iy-1);
                 if(side != null && side.type()==1 ){
-                    grid.set(ix - dir, iy-1, this);
-                    grid.set(ix, iy, side);
+                    grid.set(x - dir, iy-1, this);
+                    grid.set(x, iy, side);
                     moved = true;
                 }
             }
