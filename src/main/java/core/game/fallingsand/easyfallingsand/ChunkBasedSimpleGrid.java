@@ -3,8 +3,7 @@ package core.game.fallingsand.easyfallingsand;
 import core.game.fallingsand.Element;
 import core.game.fallingsand.Grid;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ChunkBasedSimpleGrid extends Grid {
     public class Chunk {
@@ -59,8 +58,9 @@ public class ChunkBasedSimpleGrid extends Grid {
     public Chunk[][] chunks;
     boolean inverse = false;
     int tick = 0;
-    List<int[]> stepping = new ArrayList<>(4096);
-    List<int[]> toStep = new ArrayList<>(4096);
+    Deque<int[]> stepping = new ArrayDeque<>(4096);
+    Deque<int[]> toStep = new ArrayDeque<>(4096);
+    Deque<Integer> stack = new ArrayDeque<>(8192);
 
     public ChunkBasedSimpleGrid(int chunkWidth, int chunkHeight) {
         chunks = new Chunk[chunkWidth][chunkHeight];
@@ -119,21 +119,52 @@ public class ChunkBasedSimpleGrid extends Grid {
     }
 
     private void stepSingle(int x, int y) {
-        try {
-            if(valid(x, y-1) && get(x, y-1) != null && get(x, y-1).lastStepTick() != tick)
-                stepSingle(x, y-1);
-        }catch (StackOverflowError e) {
-            addToStep(x, y, get(x, y));
-        }
-        if(valid(x,y) && get(x, y) != null && get(x,y).lastStepTick() != tick && get(x, y).step(this, x, y, tick)) {
-            try {
-                stepSingle(x - (inverse ? 1 : -1), y);
-                stepSingle(x + (inverse ? 1 : -1), y);
-                stepSingle(x, y + 1);
-            }catch (StackOverflowError e) {
-                addToStep(x, y, get(x, y));
+        stack.push(x);
+        stack.push(y);
+        int ix, iy;
+        while (!stack.isEmpty()) {
+            iy = stack.pop();
+            ix = stack.pop();
+//            if (valid(ix, iy - 1) && get(ix, iy - 1) != null && get(ix, iy - 1).lastStepTick() != tick) {
+//                stack.push(ix);
+//                stack.push(iy);
+//                stack.push(ix);
+//                stack.push(iy - 1);
+//                continue;
+//            }
+            if (valid(ix, iy) && get(ix, iy) != null && get(ix, iy).lastStepTick() != tick && get(ix, iy).step(this, ix, iy, tick)) {
+                int dir = -(inverse ? 1 : -1);
+                stack.push(ix + dir);
+                stack.push(iy);
+                stack.push(ix - dir);
+                stack.push(iy);
+                stack.push(ix);
+                stack.push(iy + 1);
+                stack.push(ix + dir);
+                stack.push(iy + 1);
+                stack.push(ix - dir);
+                stack.push(iy + 1);
             }
         }
+////        try {
+////            if(valid(x, y-1) && get(x, y-1) != null && get(x, y-1).lastStepTick() != tick)
+////                stepSingle(x, y-1);
+////        }catch (StackOverflowError e) {
+////            System.err.println("StackOverflowError");
+////            addToStep(x, y, get(x, y));
+////        }
+//        if(valid(x,y) && get(x, y) != null && get(x,y).lastStepTick() != tick && get(x, y).step(this, x, y, tick)) {
+//            try {
+//                stepSingle(x - (inverse ? 1 : -1), y + 1);
+//                stepSingle(x + (inverse ? 1 : -1), y + 1);
+//                stepSingle(x, y + 1);
+//                stepSingle(x - (inverse ? 1 : -1), y);
+//                stepSingle(x + (inverse ? 1 : -1), y);
+//            }catch (StackOverflowError e) {
+//                System.err.println("StackOverflowError");
+//                addToStep(x, y, get(x, y));
+//            }
+//        }
     }
 
     @Override
@@ -154,13 +185,17 @@ public class ChunkBasedSimpleGrid extends Grid {
 //                }
 //            }
 //        }
-        List<int[]> temp = toStep;
+        Deque<int[]> temp = toStep;
         toStep = stepping;
         stepping = temp;
-        for(int[] pos : stepping) {
+//        for(int[] pos : stepping) {
+//            stepSingle(pos[0], pos[1]);
+//        }
+//        stepping.clear();
+        while(!stepping.isEmpty()){
+            int[] pos = stepping.poll();
             stepSingle(pos[0], pos[1]);
         }
-        stepping.clear();
         inverse = !inverse;
         tick++;
         return (System.nanoTime() - start) / 1e6;
@@ -172,15 +207,13 @@ public class ChunkBasedSimpleGrid extends Grid {
         toStep.add(new int[]{x+dir, y});
         toStep.add(new int[]{x, y});
         toStep.add(new int[]{x-dir, y});
-        toStep.add(new int[]{x+dir, y+1});
         toStep.add(new int[]{x, y+1});
-        toStep.add(new int[]{x-dir, y+1});
     }
 
     @Override
     public boolean valid(int x, int y) {
         try {
-            Element e = chunks[x >> 6][y >> 6].get(x & 63, y & 63);
+            chunks[x >> 6][y >> 6].get(x & 63, y & 63);
         } catch (ArrayIndexOutOfBoundsException e) {
             return false;
         }

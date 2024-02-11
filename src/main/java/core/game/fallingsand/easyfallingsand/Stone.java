@@ -75,4 +75,13 @@ public class Stone extends Element{
     public int lastStepTick() {
         return lastStepTick;
     }
+
+    /**
+     * get if the element is in free fall.
+     * @return if the element is in free fall.
+     */
+    @Override
+    public boolean freeFall() {
+        return false;
+    }
 }

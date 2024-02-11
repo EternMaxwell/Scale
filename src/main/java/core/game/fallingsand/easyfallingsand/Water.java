@@ -7,6 +7,7 @@ import java.util.Random;
 
 public class Water extends Element {
 
+    boolean falling = true;
     int lastStepTick = -1;
     float[] color;
     float velocity = 0.7f;
@@ -30,17 +31,20 @@ public class Water extends Element {
         for (int i = 0; i < distance; i++) {
             Element below = grid.get(x, iy - 1);
             if (below == null && grid.valid(x, iy - 1)) {
+                falling = true;
                 moved = true;
                 grid.set(x, iy - 1, this);
                 grid.set(x, iy, null);
                 lastStepTick = tick;
                 iy--;
             } else if (below != null) {
+                falling = grid.get(x, iy - 1).freeFall();
                 break;
             } else {
+                falling = false;
                 lastStepTick = tick;
                 velocity = 0.7f;
-                return true;
+                return moved;
             }
         }
         if (moved) {
@@ -49,6 +53,9 @@ public class Water extends Element {
             velocity *= 0.98f;
             return true;
         }
+
+        if(!falling)
+            velocity = 0.7f;
 
         int dir = new Random().nextInt(2);
         dir = dir == 0 ? -1 : 1;
@@ -142,5 +149,14 @@ public class Water extends Element {
     @Override
     public int lastStepTick() {
         return lastStepTick;
+    }
+
+    /**
+     * get if the element is in free fall.
+     * @return if the element is in free fall.
+     */
+    @Override
+    public boolean freeFall() {
+        return falling;
     }
 }

@@ -45,4 +45,10 @@ public abstract class Element {
      * @return the last step tick.
      */
     public abstract int lastStepTick();
+
+    /**
+     * get if the element is in free fall.
+     * @return if the element is in free fall.
+     */
+    public abstract boolean freeFall();
 }

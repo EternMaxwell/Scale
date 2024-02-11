@@ -8,6 +8,7 @@ import java.util.Random;
 
 public class Sand extends Element {
 
+    boolean falling = true;
     int lastTick = -1;
     float[] color;
     float velocity;
@@ -34,17 +35,20 @@ public class Sand extends Element {
         for (int i = 0; i < distance; i++) {
             Element below = grid.get(x, iy - 1);
             if (below == null && grid.valid(x, iy - 1)) {
+                falling = true;
                 moved = true;
                 grid.set(x, iy -1, this);
                 grid.set(x, iy, null);
                 lastTick = tick;
                 iy--;
             }else if(below != null){
+                falling = grid.get(x, iy - 1).freeFall();
                 break;
             }else {
+                falling = false;
                 lastTick = tick;
                 velocity = 0.7f;
-                return true;
+                return moved;
             }
         }
         if(moved){
@@ -54,7 +58,8 @@ public class Sand extends Element {
             return true;
         }
 
-        velocity = 0.7f;
+        if(!falling)
+            velocity = 0.7f;
 
         if(grid.get(x, iy - 1)!=null && grid.get(x, iy - 1).type() ==1){
             grid.set(x, iy, grid.get(x, iy - 1));
@@ -63,8 +68,7 @@ public class Sand extends Element {
             return true;
         }
 
-        int dir = new Random().nextInt(2);
-        dir = dir == 0 ? -1 : 1;
+        int dir = Math.random()>=0.5?1:-1;
         Element side = grid.get(x + dir, iy - 1);
         if (side == null && grid.valid(x + dir, iy - 1)) {
             grid.set(x + dir, iy - 1, this);
@@ -144,5 +148,15 @@ public class Sand extends Element {
     @Override
     public int lastStepTick() {
         return lastTick;
+    }
+
+    /**
+     * get if the element is in free fall.
+     *
+     * @return if the element is in free fall.
+     */
+    @Override
+    public boolean freeFall() {
+        return falling;
     }
 }
