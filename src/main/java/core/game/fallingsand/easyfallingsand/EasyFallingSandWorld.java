@@ -49,6 +49,9 @@ public class EasyFallingSandWorld extends core.game.fallingsand.FallingSandWorld
             for(int y = 0; y < 1024; y++){
                 if(grid.get(x, y) != null){
                     float[] color = grid.get(x, y).color();
+                    if(!grid.get(x,y).freeFall()){
+                        color = new float[]{color[0]*0.5f, color[1]*0.5f, color[2]*0.5f, color[3]};
+                    }
                     render.pixel.drawPixel(x+0.5f,y+0.5f,color[0],color[1],color[2],color[3]);
                 }
             }

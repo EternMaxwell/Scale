@@ -2,6 +2,8 @@ package core.game.fallingsand.easyfallingsand;
 
 import core.game.fallingsand.Element;
 import core.game.fallingsand.Grid;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -82,7 +84,15 @@ public class ChunkBasedSimpleGrid extends Grid {
 
     @Override
     public void set(int x, int y, Element element) {
-        addToStep(x, y, element);
+        if(element != null)
+            addToStep(x, y, element);
+        else {
+            addToStep(x, y + 1, null);
+            addToStep(x - (inverse ? -1 : 1), y + 1, null);
+            addToStep(x + (inverse ? -1 : 1), y + 1, null);
+            addToStep(x - (inverse ? -1 : 1), y, null);
+            addToStep(x + (inverse ? -1 : 1), y, null);
+        }
         try {
             chunks[x >> 6][y >> 6].set(x & 63, y & 63, element);
         } catch (ArrayIndexOutOfBoundsException ignored) {
@@ -91,7 +101,15 @@ public class ChunkBasedSimpleGrid extends Grid {
 
     @Override
     public Element replace(int x, int y, Element element) {
-        addToStep(x, y, element);
+        if(element != null)
+            addToStep(x, y, element);
+        else {
+            addToStep(x, y + 1, null);
+            addToStep(x - (inverse ? -1 : 1), y + 1, null);
+            addToStep(x + (inverse ? -1 : 1), y + 1, null);
+            addToStep(x - (inverse ? -1 : 1), y, null);
+            addToStep(x + (inverse ? -1 : 1), y, null);
+        }
         try {
             return chunks[x >> 6][y >> 6].replace(x & 63, y & 63, element);
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -101,7 +119,11 @@ public class ChunkBasedSimpleGrid extends Grid {
 
     @Override
     public Element pop(int x, int y) {
-        addToStep(x, y, null);
+        addToStep(x, y + 1, null);
+        addToStep(x - (inverse ? -1 : 1), y + 1, null);
+        addToStep(x + (inverse ? -1 : 1), y + 1, null);
+        addToStep(x - (inverse ? -1 : 1), y, null);
+        addToStep(x + (inverse ? -1 : 1), y, null);
         try {
             return chunks[x >> 6][y >> 6].pop(x & 63, y & 63);
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -111,7 +133,11 @@ public class ChunkBasedSimpleGrid extends Grid {
 
     @Override
     public void remove(int x, int y) {
-        addToStep(x, y, null);
+        addToStep(x, y + 1, null);
+        addToStep(x - (inverse ? -1 : 1), y + 1, null);
+        addToStep(x + (inverse ? -1 : 1), y + 1, null);
+        addToStep(x - (inverse ? -1 : 1), y, null);
+        addToStep(x + (inverse ? -1 : 1), y, null);
         try {
             chunks[x >> 6][y >> 6].remove(x & 63, y & 63);
         } catch (ArrayIndexOutOfBoundsException ignored) {
@@ -204,10 +230,10 @@ public class ChunkBasedSimpleGrid extends Grid {
     @Override
     public void addToStep(int x, int y, Element element) {
         int dir = -(inverse?1:-1);
-        toStep.add(new int[]{x+dir, y});
+//        toStep.add(new int[]{x+dir, y});
         toStep.add(new int[]{x, y});
-        toStep.add(new int[]{x-dir, y});
-        toStep.add(new int[]{x, y+1});
+//        toStep.add(new int[]{x-dir, y});
+//        toStep.add(new int[]{x, y+1});
     }
 
     @Override
