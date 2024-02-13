@@ -13,7 +13,7 @@ public class Water extends Element {
     float velocity = 0.7f;
 
     public Water() {
-        color = new float[]{0, 0, 1, 0.7f};
+        color = new float[]{0.1f, 0.1f, 1, 0.8f};
     }
 
     /**

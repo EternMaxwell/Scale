@@ -227,7 +227,6 @@ public class ChunkBasedSimpleGrid extends Grid {
         return (System.nanoTime() - start) / 1e6;
     }
 
-    @Override
     public void addToStep(int x, int y, Element element) {
         int dir = -(inverse?1:-1);
 //        toStep.add(new int[]{x+dir, y});

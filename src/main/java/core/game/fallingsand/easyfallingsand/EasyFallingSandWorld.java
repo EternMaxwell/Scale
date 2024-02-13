@@ -21,7 +21,7 @@ public class EasyFallingSandWorld extends core.game.fallingsand.FallingSandWorld
     ElementPlacement elementPlacement;
     @Override
     public void init(Window window) {
-        grid = new ChunkBasedSimpleGrid(16, 16);
+        grid = new ChunkAndSleepingBasedGrid(16, 16);
         this.window = window;
         viewMatrix.ortho2D(0, 1024, 0, 1024);
         elementPlacement = new ElementPlacement(grid);
@@ -50,7 +50,7 @@ public class EasyFallingSandWorld extends core.game.fallingsand.FallingSandWorld
                 if(grid.get(x, y) != null){
                     float[] color = grid.get(x, y).color();
                     if(!grid.get(x,y).freeFall()){
-                        color = new float[]{color[0]*0.5f, color[1]*0.5f, color[2]*0.5f, color[3]};
+                        //color = new float[]{color[0]*0.5f, color[1]*0.5f, color[2]*0.5f, color[3]};
                     }
                     render.pixel.drawPixel(x+0.5f,y+0.5f,color[0],color[1],color[2],color[3]);
                 }
@@ -66,6 +66,7 @@ public class EasyFallingSandWorld extends core.game.fallingsand.FallingSandWorld
 
         render.pixel.flush();
 
+        grid.render(render);
         elementPlacement.render(render);
     }
 

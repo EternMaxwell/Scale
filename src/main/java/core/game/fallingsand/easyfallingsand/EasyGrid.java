@@ -81,11 +81,6 @@ public class EasyGrid extends Grid {
     }
 
     @Override
-    public void addToStep(int x, int y, Element element) {
-
-    }
-
-    @Override
     public boolean valid(int x, int y) {
         return x >= 0 && x < grid.length && y >= 0 && y < grid[0].length;
     }
