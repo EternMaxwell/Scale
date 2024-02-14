@@ -69,7 +69,7 @@ public class ChunkAndSleepingBasedGrid extends Grid {
         public void awake(int x, int y){
             if(x >= 0 && x < grid.length && y >= 0 && y < grid[0].length){
                 sleepDetectGrid[x>>bitShift][y>>bitShift] = false;
-                sleepGrid[x>>bitShift][y>>bitShift] = false;
+                //sleepGrid[x>>bitShift][y>>bitShift] = false;
             }
         }
         public void resetSleep(){
