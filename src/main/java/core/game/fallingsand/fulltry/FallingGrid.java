@@ -88,21 +88,47 @@ public class FallingGrid extends Grid {
     int tick = 0;
     boolean inverse = false;
     public Chunk[][] chunks;
+    public int currentChunkNum;
+    public int[] chunkSize;
+    public int[] chunkBasePos;
 
-    public FallingGrid(int chunkWidth, int chunkHeight){
-        chunks = new FallingGrid.Chunk[chunkWidth][chunkHeight];
+    public FallingGrid(){
+        chunkSize = new int[]{10,10};
+        chunks = new Chunk[chunkSize[0]][chunkSize[1]];
+        chunkBasePos = new int[]{-5, -5};
         for(int x = 0; x < chunks.length; x++){
             for(int y = 0; y < chunks[0].length; y++){
-                chunks[x][y] = new Chunk(x, y);
+                chunks[x][y] = new Chunk(x + chunkBasePos[0], y + chunkBasePos[1]);
             }
         }
+        currentChunkNum = chunkSize[0] * chunkSize[1];
+    }
+
+    public void insertChunk(int x, int y){
+        if(x < chunkBasePos[0]){
+            Chunk[][] newChunks = new Chunk[chunkSize[0] + chunkBasePos[0] - x][chunkSize[1]];
+            for(int xx = 0; xx < newChunks.length; xx++){
+                for(int yy = 0; yy < newChunks[0].length; yy++){
+                    if(xx < chunkBasePos[0] - x){
+                        newChunks[xx][yy] = new Chunk(x + xx, y + yy);
+                    }else{
+                        newChunks[xx][yy] = chunks[xx - chunkBasePos[0] + x][yy];
+                    }
+                }
+            }
+            chunks = newChunks;
+            chunkBasePos[0] = x;
+        }
+    }
+
+    public void updateChunks(){
     }
 
     @Override
     public Element get(int x, int y) {
         try {
             return chunks[x >> 6][y >> 6].get(x & 63, y & 63);
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
             return null;
         }
     }
@@ -116,14 +142,14 @@ public class FallingGrid extends Grid {
         awake(x, y+1);
         try {
             chunks[x >> 6][y >> 6].set(x & 63, y & 63, element);
-        } catch (ArrayIndexOutOfBoundsException ignored) {
+        } catch (ArrayIndexOutOfBoundsException | NullPointerException ignored) {
         }
     }
 
     private void awake(int x, int y){
         try {
             chunks[x >> 6][y >> 6].awake(x & 63, y & 63);
-        } catch (ArrayIndexOutOfBoundsException ignored) {
+        } catch (ArrayIndexOutOfBoundsException | NullPointerException ignored) {
         }
     }
 
@@ -136,7 +162,7 @@ public class FallingGrid extends Grid {
         awake(x, y+1);
         try {
             return chunks[x >> 6][y >> 6].replace(x & 63, y & 63, element);
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
             return null;
         }
     }
@@ -150,7 +176,7 @@ public class FallingGrid extends Grid {
         awake(x, y+1);
         try {
             return chunks[x >> 6][y >> 6].pop(x & 63, y & 63);
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
             return null;
         }
     }
@@ -164,16 +190,17 @@ public class FallingGrid extends Grid {
         awake(x, y+1);
         try {
             chunks[x >> 6][y >> 6].remove(x & 63, y & 63);
-        } catch (ArrayIndexOutOfBoundsException ignored) {
+        } catch (ArrayIndexOutOfBoundsException | NullPointerException ignored) {
         }
     }
 
     @Override
     public double step() {
+        updateChunks();
         double start = System.nanoTime();
         for (FallingGrid.Chunk[] chunk : chunks) {
-            for (int y = 0; y < chunks[0].length; y++) {
-                chunk[y].resetSleep();
+            for (FallingGrid.Chunk value : chunk) {
+                value.resetSleep();
             }
         }
         for(int y = 0; y < chunks[0].length * chunks[0][0].width; y++){
@@ -209,7 +236,7 @@ public class FallingGrid extends Grid {
     public boolean valid(int x, int y) {
         try{
             chunks[x >> 6][y >> 6].get(x & 63, y & 63);
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
             return false;
         }
         return true;
