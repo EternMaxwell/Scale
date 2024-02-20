@@ -104,21 +104,108 @@ public class FallingGrid extends Grid {
         currentChunkNum = chunkSize[0] * chunkSize[1];
     }
 
-    public void insertChunk(int x, int y){
+    public Chunk insertChunk(int x, int y){
         if(x < chunkBasePos[0]){
             Chunk[][] newChunks = new Chunk[chunkSize[0] + chunkBasePos[0] - x][chunkSize[1]];
-            for(int xx = 0; xx < newChunks.length; xx++){
-                for(int yy = 0; yy < newChunks[0].length; yy++){
-                    if(xx < chunkBasePos[0] - x){
-                        newChunks[xx][yy] = new Chunk(x + xx, y + yy);
-                    }else{
-                        newChunks[xx][yy] = chunks[xx - chunkBasePos[0] + x][yy];
-                    }
-                }
-            }
+            if (newChunks.length - (chunkBasePos[0] - x) >= 0)
+                System.arraycopy(chunks, 0, newChunks, chunkBasePos[0] - x, chunks.length);
             chunks = newChunks;
             chunkBasePos[0] = x;
+            chunkSize[0] = chunks.length;
+        }else if(x >= chunkBasePos[0] + chunkSize[0]){
+            Chunk[][] newChunks = new Chunk[x - chunkBasePos[0]][chunkSize[1]];
+            System.arraycopy(chunks, 0, newChunks, 0, chunks.length);
+            chunks = newChunks;
+            chunkSize[0] = chunks.length;
         }
+        if(y < chunkBasePos[1]){
+            for(int i = 0; i < chunks.length; i++){
+                Chunk[] newChunks = new Chunk[chunkSize[1] + chunkBasePos[1] - y];
+                System.arraycopy(chunks[i], 0, newChunks, chunkBasePos[1] - y, chunks[i].length);
+                chunks[i] = newChunks;
+            }
+            chunkBasePos[1] = y;
+            chunkSize[1] = chunks[0].length;
+        }else if(y >= chunkBasePos[1] + chunkSize[1]){
+            for(int i = 0; i < chunks.length; i++){
+                Chunk[] newChunks = new Chunk[y - chunkBasePos[1]];
+                System.arraycopy(chunks[i], 0, newChunks, 0, chunks[i].length);
+                chunks[i] = newChunks;
+            }
+            chunkSize[1] = chunks[0].length;
+        }
+        chunks[x - chunkBasePos[0]][y - chunkBasePos[1]] = new Chunk(x, y);
+        return chunks[x - chunkBasePos[0]][y - chunkBasePos[1]];
+    }
+
+    public Chunk removeChunk(int x, int y){
+        Chunk chunk = chunks[x - chunkBasePos[0]][y - chunkBasePos[1]];
+        chunks[x - chunkBasePos[0]][y - chunkBasePos[1]] = null;
+        if(x == chunkBasePos[0]) {
+            boolean emptyCol = true;
+            for(int i = 0; i < chunks[0].length; i++){
+                if(chunks[0][i] != null){
+                    emptyCol = false;
+                    break;
+                }
+            }
+            if(emptyCol){
+                Chunk[][] newChunks = new Chunk[chunkSize[0] - 1][chunkSize[1]];
+                System.arraycopy(chunks, 1, newChunks, 0, chunks.length - 1);
+                chunks = newChunks;
+                chunkBasePos[0]++;
+                chunkSize[0]--;
+            }
+        }else if(x == chunkBasePos[0] + chunkSize[0] - 1){
+            boolean emptyCol = true;
+            for(int i = 0; i < chunks[0].length; i++){
+                if(chunks[chunks.length - 1][i] != null){
+                    emptyCol = false;
+                    break;
+                }
+            }
+            if(emptyCol){
+                Chunk[][] newChunks = new Chunk[chunkSize[0] - 1][chunkSize[1]];
+                System.arraycopy(chunks, 0, newChunks, 0, chunks.length - 1);
+                chunks = newChunks;
+                chunkSize[0]--;
+            }
+        }
+        if(y == chunkBasePos[1]) {
+            boolean emptyRow = true;
+            for (int i = 0; i < chunks.length; i++) {
+                if (chunks[i][0] != null) {
+                    emptyRow = false;
+                    break;
+                }
+            }
+            if (emptyRow) {
+                for (int i = 0; i < chunks.length; i++) {
+                    Chunk[] newChunks = new Chunk[chunkSize[1] - 1];
+                    System.arraycopy(chunks[i], 1, newChunks, 0, chunks[i].length - 1);
+                    chunks[i] = newChunks;
+                }
+                chunkBasePos[1]++;
+                chunkSize[1]--;
+            }
+        }else if(y == chunkBasePos[1] + chunkSize[1] - 1){
+            boolean emptyRow = true;
+            for (int i = 0; i < chunks.length; i++) {
+                if (chunks[i][chunks[0].length - 1] != null) {
+                    emptyRow = false;
+                    break;
+                }
+            }
+            if (emptyRow) {
+                for (int i = 0; i < chunks.length; i++) {
+                    Chunk[] newChunks = new Chunk[chunkSize[1] - 1];
+                    System.arraycopy(chunks[i], 0, newChunks, 0, chunks[i].length - 1);
+                    chunks[i] = newChunks;
+                }
+                chunkSize[1]--;
+            }
+        }
+        return chunk;
     }
 
     public void updateChunks(){
@@ -200,7 +287,8 @@ public class FallingGrid extends Grid {
         double start = System.nanoTime();
         for (FallingGrid.Chunk[] chunk : chunks) {
             for (FallingGrid.Chunk value : chunk) {
-                value.resetSleep();
+                if(value != null)
+                    value.resetSleep();
             }
         }
         for(int y = 0; y < chunks[0].length * chunks[0][0].width; y++){
