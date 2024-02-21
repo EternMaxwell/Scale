@@ -135,6 +135,7 @@ public class FallingGrid extends Grid {
             chunkSize[1] = chunks[0].length;
         }
         chunks[x - chunkBasePos[0]][y - chunkBasePos[1]] = new Chunk(x, y);
+        currentChunkNum++;
         return chunks[x - chunkBasePos[0]][y - chunkBasePos[1]];
     }
 
@@ -205,10 +206,94 @@ public class FallingGrid extends Grid {
                 chunkSize[1]--;
             }
         }
+        currentChunkNum--;
         return chunk;
     }
 
+    public Chunk chunkAt(int x, int y){
+        if(x < chunkBasePos[0] || x >= chunkBasePos[0] + chunkSize[0] || y < chunkBasePos[1] || y >= chunkBasePos[1] + chunkSize[1]){
+            return null;
+        }
+        return chunks[x - chunkBasePos[0]][y - chunkBasePos[1]];
+    }
+
+    public int[] farthestChunk() {
+        int[] result = new int[]{0, 0};
+        initialize:
+        for (int x = chunkBasePos[0]; x < chunkBasePos[0] + chunkSize[0]; x++) {
+            for (int y = chunkBasePos[1]; y < chunkBasePos[1] + chunkSize[1]; y++) {
+                if (chunkAt(x, y) != null) {
+                    result = new int[]{x, y};
+                    break initialize;
+                }
+            }
+        }
+
+        double[] realPos = new double[2];
+        double[] realPosOfResult = new double[2];
+        for(int x = chunkBasePos[0]; x < chunkBasePos[0] + chunkSize[0]; x++){
+            for(int y = chunkBasePos[1]; y < chunkBasePos[1] + chunkSize[1]; y++){
+                if(chunkAt(x, y) != null){
+                    realPos[0] = (x + 0.5) * 64;
+                    realPos[1] = (y + 0.5) * 64;
+                    realPosOfResult[0] = (result[0] + 0.5) * 64;
+                    realPosOfResult[1] = (result[1] + 0.5) * 64;
+                    if(Math.pow(realPos[0] - FallingData.cameraCentrePos[0], 2) + Math.pow(realPos[1] - FallingData.cameraCentrePos[1], 2) >
+                            Math.pow(realPosOfResult[0] - FallingData.cameraCentrePos[0], 2) + Math.pow(realPosOfResult[1] - FallingData.cameraCentrePos[1], 2)){
+                        result = new int[]{x, y};
+                    }
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
     public void updateChunks(){
+        double[][] screenRectangle = new double[4][];
+        double[] screenCenter = FallingData.cameraCentrePos;
+        screenRectangle[0] = new double[]{screenCenter[0] - FallingData.scale * FallingData.defaultShowGridWidth / 2,
+                screenCenter[1] - FallingData.scale * FallingData.defaultShowGridWidth * 9 / 32};
+        screenRectangle[1] = new double[]{screenCenter[0] + FallingData.scale * FallingData.defaultShowGridWidth / 2,
+                screenCenter[1] - FallingData.scale * FallingData.defaultShowGridWidth * 9 / 32};
+        screenRectangle[2] = new double[]{screenCenter[0] + FallingData.scale * FallingData.defaultShowGridWidth / 2,
+                screenCenter[1] + FallingData.scale * FallingData.defaultShowGridWidth * 9 / 32};
+        screenRectangle[3] = new double[]{screenCenter[0] - FallingData.scale * FallingData.defaultShowGridWidth / 2,
+                screenCenter[1] + FallingData.scale * FallingData.defaultShowGridWidth * 9 / 32};
+        boolean next = true;
+        while(next) {
+            next = false;
+            for (int x = chunkBasePos[0] - 1; x < chunkBasePos[0] + chunkSize[0] + 1; x++) {
+                for(int y = chunkBasePos[1] - 1; y < chunkBasePos[1] + chunkSize[1] + 1; y++){
+                    if(chunkAt(x, y) == null && !outOf(new double[][]{{x * 64, y * 64}, {(x + 1) * 64, y * 64}, {(x + 1) * 64, (y + 1) * 64}, {x * 64, (y + 1) * 64}}, screenRectangle)){
+                        insertChunk(x, y);
+                        next = true;
+                    }
+                }
+            }
+        }
+        while(currentChunkNum > FallingData.chunkMaxNum){
+            int[] removeChunk = farthestChunk();
+            removeChunk(removeChunk[0], removeChunk[1]);
+        }
+    }
+
+    public boolean outOf(double[][] obj, double[][] mother){
+        boolean result = false;
+        double minX = 0, minY = 0, maxX = 0, maxY = 0;
+        for(int i = 0; i < 4; i++){
+            minX = Math.min(mother[i][0], mother[(i+1)%4][0]);
+            minY = Math.min(mother[i][1], mother[(i+1)%4][1]);
+            maxX = Math.max(mother[i][0], mother[(i+1)%4][0]);
+            maxY = Math.max(mother[i][1], mother[(i+1)%4][1]);
+        }
+        for(int i = 0; i < 4; i++){
+            if(obj[i][0] < minX || obj[i][0] > maxX || obj[i][1] < minY || obj[i][1] > maxY){
+                result = true;
+                break;
+            }
+        }
+        return result;
     }
 
     @Override
@@ -285,8 +370,8 @@ public class FallingGrid extends Grid {
     public double step() {
         updateChunks();
         double start = System.nanoTime();
-        for (FallingGrid.Chunk[] chunk : chunks) {
-            for (FallingGrid.Chunk value : chunk) {
+        for (Chunk[] chunk : chunks) {
+            for (Chunk value : chunk) {
                 if(value != null)
                     value.resetSleep();
             }

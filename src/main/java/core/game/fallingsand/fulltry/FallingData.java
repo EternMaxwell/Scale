@@ -10,6 +10,6 @@ public class FallingData {
         scale = 1;
         defaultShowGridWidth = 512;
         cameraCentrePos = new double[]{0,0};
-        chunkMaxNum = 12;
+        chunkMaxNum = 128;
     }
 }
