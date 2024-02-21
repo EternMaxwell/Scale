@@ -1,5 +1,7 @@
 package core.game.fallingsand.fulltry;
 
+import core.render.Window;
+
 public class FallingData {
     public static float scale;
     public static int defaultShowGridWidth;
@@ -10,6 +12,6 @@ public class FallingData {
         scale = 1;
         defaultShowGridWidth = 512;
         cameraCentrePos = new double[]{0,0};
-        chunkMaxNum = 128;
+        chunkMaxNum = 256;
     }
 }
