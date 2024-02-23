@@ -19,8 +19,6 @@ public class FallingWorld extends FallingSandWorld {
     double gridStepTime = 0;
     double updateTimeRate = 0.15;
     Window window;
-    Matrix4f viewMatrix = new Matrix4f();
-    Matrix4f modelMatrix = new Matrix4f();
     @Override
     public void init(Window window) {
         grid = new FallingGrid();
@@ -41,14 +39,6 @@ public class FallingWorld extends FallingSandWorld {
 
     @Override
     public void render(EasyRender render) {
-        modelMatrix.setColumn(3, new Vector4f(-(float) FallingData.cameraCentrePos[0],
-                -(float) FallingData.cameraCentrePos[1], 0, 1));
-        viewMatrix.ortho2D(0, FallingData.scale * FallingData.defaultShowGridWidth * 9/16, 0,
-                FallingData.scale * FallingData.defaultShowGridWidth * 9/16);
-
-        render.pixel.setModelMatrix(modelMatrix);
-        render.pixel.setViewMatrix(viewMatrix);
-        render.pixel.setPixelSize(1);
 
         int startH = 0;
 

@@ -7,11 +7,19 @@ public class FallingData {
     public static int defaultShowGridWidth;
     public static double[] cameraCentrePos;
     public static int chunkMaxNum;
+    public static int chunkWidth;
+    public static int chunkSleepLevel;
+    public static int chunkSleepBitShift;
+    public static int[] chunkBasePos;
 
-    public static void startup(){
+    public static void startup() {
         scale = 1;
         defaultShowGridWidth = 512;
-        cameraCentrePos = new double[]{0,0};
+        cameraCentrePos = new double[]{0, 0};
         chunkMaxNum = 256;
+        chunkWidth = 64;
+        chunkSleepBitShift = 4;
+        chunkSleepLevel = chunkWidth / (1 << chunkSleepBitShift);
+        chunkBasePos = new int[]{0, 0};
     }
 }

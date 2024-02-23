@@ -4,6 +4,8 @@ import core.game.fallingsand.Element;
 import core.game.fallingsand.Grid;
 import core.game.fallingsand.easyfallingsand.ChunkAndSleepingBasedGrid;
 import core.render.EasyRender;
+import org.joml.Matrix4f;
+import org.joml.Vector4f;
 
 public class FallingGrid extends Grid {
     public static class Chunk{
@@ -91,6 +93,8 @@ public class FallingGrid extends Grid {
     public int currentChunkNum;
     public int[] chunkSize;
     public int[] chunkBasePos;
+    private Matrix4f viewMatrix = new Matrix4f();
+    private Matrix4f modelMatrix = new Matrix4f();
 
     public FallingGrid(){
         chunkSize = new int[]{10,10};
@@ -276,10 +280,10 @@ public class FallingGrid extends Grid {
             int[] removeChunk = farthestChunk();
             removeChunk(removeChunk[0], removeChunk[1]);
         }
+        FallingData.chunkBasePos = chunkBasePos;
     }
 
     public boolean outOf(double[][] obj, double[][] mother){
-        boolean result = false;
         double minX = 0, minY = 0, maxX = 0, maxY = 0;
         for(int i = 0; i < 4; i++){
             minX = Math.min(mother[i][0], mother[(i+1)%4][0]);
@@ -289,11 +293,10 @@ public class FallingGrid extends Grid {
         }
         for(int i = 0; i < 4; i++){
             if(obj[i][0] < minX || obj[i][0] > maxX || obj[i][1] < minY || obj[i][1] > maxY){
-                result = true;
-                break;
+                return true;
             }
         }
-        return result;
+        return false;
     }
 
     @Override
@@ -417,32 +420,86 @@ public class FallingGrid extends Grid {
 
     @Override
     public void render(EasyRender render){
-        for(int x = 0; x < chunks.length; x++){
-            for(int y = 0; y < chunks[0].length; y++){
-                for(int xx = 0; xx < chunks[0][0].level; xx++){
-                    for(int yy = 0; yy < chunks[0][0].level; yy++){float drawX = x*64 + xx*((float) 64 /chunks[0][0].level);
-                        float drawY = y*64 + yy*((float) 64 /chunks[0][0].level);
-                        float drawWidth = ((float) 64 /chunks[0][0].level)/512f;
-                        drawY /= 512f;
-                        drawX /= 512f;
-                        float ratio = render.window().width()/(float)render.window().height();
-                        drawY -= 1;
-                        drawX -= 1;
+        modelMatrix.setColumn(3, new Vector4f(-(float) FallingData.cameraCentrePos[0],
+                -(float) FallingData.cameraCentrePos[1], 0, 1));
+        viewMatrix.setOrtho2D(-FallingData.scale * FallingData.defaultShowGridWidth * 9/32f,
+                FallingData.scale * FallingData.defaultShowGridWidth * 9/32f,
+                -FallingData.scale * FallingData.defaultShowGridWidth * 9/32f,
+                FallingData.scale * FallingData.defaultShowGridWidth * 9/32f);
+        //viewMatrix.setOrtho2D(0, 1024, 0, 1024);
+
+        render.pixel.setModelMatrix(modelMatrix);
+        render.pixel.setViewMatrix(viewMatrix);
+        render.line.setModelMatrix(modelMatrix);
+        render.line.setViewMatrix(viewMatrix);
+        render.pixel.setPixelSize(1);
+
+        double[][] screenRectangle = new double[4][];
+        double[] screenCenter = FallingData.cameraCentrePos;
+        screenRectangle[0] = new double[]{screenCenter[0] - FallingData.scale * FallingData.defaultShowGridWidth / 2,
+                screenCenter[1] - FallingData.scale * FallingData.defaultShowGridWidth * 9 / 32};
+        screenRectangle[1] = new double[]{screenCenter[0] + FallingData.scale * FallingData.defaultShowGridWidth / 2,
+                screenCenter[1] - FallingData.scale * FallingData.defaultShowGridWidth * 9 / 32};
+        screenRectangle[2] = new double[]{screenCenter[0] + FallingData.scale * FallingData.defaultShowGridWidth / 2,
+                screenCenter[1] + FallingData.scale * FallingData.defaultShowGridWidth * 9 / 32};
+        screenRectangle[3] = new double[]{screenCenter[0] - FallingData.scale * FallingData.defaultShowGridWidth / 2,
+                screenCenter[1] + FallingData.scale * FallingData.defaultShowGridWidth * 9 / 32};
+
+        for (int x = chunkBasePos[0] - 1; x < chunkBasePos[0] + chunkSize[0] + 1; x++) {
+            for(int y = chunkBasePos[1] - 1; y < chunkBasePos[1] + chunkSize[1] + 1; y++){
+                Chunk chunk = chunkAt(x, y);
+                if(chunk != null
+//                        && !outOf(new double[][]{{x * 64, y * 64}, {(x + 1) * 64, y * 64},
+//                                {(x + 1) * 64, (y + 1) * 64}, {x * 64, (y + 1) * 64}}, screenRectangle)
+                ){
+                    for(int xx = 0; xx < FallingData.chunkWidth; xx++) {
+                        for(int yy = 0; yy < FallingData.chunkWidth; yy++) {
+                            Element element = chunk.get(xx, yy);
+                            if (element != null) {
+                                float[] color = element.color();
+                                render.pixel.drawPixel((float) (x * FallingData.chunkWidth + xx),
+                                        (float) (y * FallingData.chunkWidth + yy), color[0], color[1], color[2], color[3]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int x = chunkBasePos[0] - 1; x < chunkBasePos[0] + chunkSize[0] + 1; x++) {
+            for(int y = chunkBasePos[1] - 1; y < chunkBasePos[1] + chunkSize[1] + 1; y++){
+                if (chunkAt(x,y) == null
+//                        || outOf(new double[][]{{x * 64, y * 64}, {(x + 1) * 64, y * 64},
+//                        {(x + 1) * 64, (y + 1) * 64}, {x * 64, (y + 1) * 64}}, screenRectangle)
+                )
+                    continue;
+                for (int xx = 0; xx < FallingData.chunkSleepLevel; xx++) {
+                    for (int yy = 0; yy < FallingData.chunkSleepLevel; yy++) {
+                        float drawX = x * FallingData.chunkWidth + xx * ((float) FallingData.chunkWidth / FallingData.chunkSleepLevel);
+                        float drawY = y * FallingData.chunkWidth + yy * ((float) FallingData.chunkWidth / FallingData.chunkSleepLevel);
+                        float drawWidth = (float) FallingData.chunkWidth / FallingData.chunkSleepLevel;
+                        float ratio = render.window().width() / (float) render.window().height();
+                        drawY -= 0.5f;
+                        drawX -= 0.5f;
                         float[] color = new float[]{1, 1, 1, 0.05f};
-                        if(!chunks[x][y].sleep(xx*chunks[0][0].width/chunks[0][0].level, yy*chunks[0][0].width/chunks[0][0].level)){
+                        if (!chunkAt(x,y).sleep(xx * FallingData.chunkWidth / FallingData.chunkSleepLevel,
+                                yy * FallingData.chunkWidth / FallingData.chunkSleepLevel)) {
                             color = new float[]{1, 1, 1, 0.2f};
                         }
-                        render.line.drawLine2D(drawX, drawY, drawX+drawWidth, drawY,
+                        render.line.drawLine2D(drawX, drawY, drawX + drawWidth, drawY,
                                 color[0], color[1], color[2], color[3]);
-                        render.line.drawLine2D(drawX, drawY, drawX, drawY+drawWidth,
+                        render.line.drawLine2D(drawX, drawY, drawX, drawY + drawWidth,
                                 color[0], color[1], color[2], color[3]);
-                        render.line.drawLine2D(drawX+drawWidth, drawY, drawX+drawWidth, drawY+drawWidth,
+                        render.line.drawLine2D(drawX + drawWidth, drawY, drawX + drawWidth, drawY + drawWidth,
                                 color[0], color[1], color[2], color[3]);
-                        render.line.drawLine2D(drawX, drawY+drawWidth, drawX+drawWidth, drawY+drawWidth,
+                        render.line.drawLine2D(drawX, drawY + drawWidth, drawX + drawWidth, drawY + drawWidth,
                                 color[0], color[1], color[2], color[3]);
                     }
                 }
             }
         }
+
+        render.pixel.flush();
+        render.line.flush();
     }
 }

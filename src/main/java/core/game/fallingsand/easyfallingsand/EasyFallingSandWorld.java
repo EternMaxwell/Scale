@@ -1,6 +1,8 @@
 package core.game.fallingsand.easyfallingsand;
 
 import core.game.fallingsand.Grid;
+import core.game.fallingsand.fulltry.FallingData;
+import core.game.fallingsand.fulltry.FallingGrid;
 import core.render.EasyRender;
 import core.render.Window;
 import org.joml.Matrix4f;
@@ -21,7 +23,9 @@ public class EasyFallingSandWorld extends core.game.fallingsand.FallingSandWorld
     ElementPlacement elementPlacement;
     @Override
     public void init(Window window) {
+        FallingData.startup();
         grid = new ChunkAndSleepingBasedGrid(16, 16);
+        grid = new FallingGrid();
         this.window = window;
         viewMatrix.ortho2D(0, 1024, 0, 1024);
         elementPlacement = new ElementPlacement(grid);
@@ -42,20 +46,20 @@ public class EasyFallingSandWorld extends core.game.fallingsand.FallingSandWorld
 
     @Override
     public void render(EasyRender render) {
-        render.pixel.setPixelSize(1);
-        render.pixel.setViewMatrix(viewMatrix);
-
-        for(int x = 0; x < 1024; x++){
-            for(int y = 0; y < 1024; y++){
-                if(grid.get(x, y) != null){
-                    float[] color = grid.get(x, y).color();
-                    if(!grid.get(x,y).freeFall()){
-                        //color = new float[]{color[0]*0.5f, color[1]*0.5f, color[2]*0.5f, color[3]};
-                    }
-                    render.pixel.drawPixel(x+0.5f,y+0.5f,color[0],color[1],color[2],color[3]);
-                }
-            }
-        }
+//        render.pixel.setPixelSize(1);
+//        render.pixel.setViewMatrix(viewMatrix);
+//
+//        for(int x = 0; x < 1024; x++){
+//            for(int y = 0; y < 1024; y++){
+//                if(grid.get(x, y) != null){
+//                    float[] color = grid.get(x, y).color();
+//                    if(!grid.get(x,y).freeFall()){
+//                        //color = new float[]{color[0]*0.5f, color[1]*0.5f, color[2]*0.5f, color[3]};
+//                    }
+//                    render.pixel.drawPixel(x+0.5f,y+0.5f,color[0],color[1],color[2],color[3]);
+//                }
+//            }
+//        }
 
         int startH = 0;
 
@@ -63,6 +67,12 @@ public class EasyFallingSandWorld extends core.game.fallingsand.FallingSandWorld
                 "grid step time: " + String.format("%.2f",gridStepTime) + "ms", new Font("Arial", Font.PLAIN, 12));
         startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
                 "mspt: " + String.format("%.2f",mspt) + "ms", new Font("Arial", Font.PLAIN, 12));
+        startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
+                "place-radius: " + elementPlacement.radius, new Font("Arial", Font.PLAIN, 12));
+        startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
+                "place-density: " + String.format("%.5f", elementPlacement.density), new Font("Arial", Font.PLAIN, 12));
+        startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
+                "place-type: " + elementPlacement.id, new Font("Arial", Font.PLAIN, 12));
 
         render.pixel.flush();
 
