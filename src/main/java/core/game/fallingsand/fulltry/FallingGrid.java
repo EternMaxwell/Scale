@@ -141,9 +141,10 @@ public class FallingGrid extends Grid {
         chunks[x - chunkBasePos[0]][y - chunkBasePos[1]] = new Chunk(x, y);
         currentChunkNum++;
         for(int i = 0; i <= FallingData.chunkWidth; i++){
-            awake((x - chunkBasePos[0]) * FallingData.chunkWidth + i, (y - chunkBasePos[1]) * FallingData.chunkWidth + FallingData.chunkWidth - 1);
-            awake((x - chunkBasePos[0]) * FallingData.chunkWidth, (y - chunkBasePos[1]) * FallingData.chunkWidth + i);
-            awake((x - chunkBasePos[0]) * FallingData.chunkWidth + FallingData.chunkWidth - 1, (y - chunkBasePos[1]) * FallingData.chunkWidth + i);
+            awake((x - chunkBasePos[0]) * FallingData.chunkWidth + i, (y - chunkBasePos[1]) * FallingData.chunkWidth + FallingData.chunkWidth);
+            awake((x - chunkBasePos[0]) * FallingData.chunkWidth - 1, (y - chunkBasePos[1]) * FallingData.chunkWidth + i);
+            awake((x - chunkBasePos[0]) * FallingData.chunkWidth + FallingData.chunkWidth, (y - chunkBasePos[1]) * FallingData.chunkWidth + i -1);
+            awake((x - chunkBasePos[0]) * FallingData.chunkWidth + i - 1, (y - chunkBasePos[1]) * FallingData.chunkWidth - 1);
         }
 
         return chunks[x - chunkBasePos[0]][y - chunkBasePos[1]];

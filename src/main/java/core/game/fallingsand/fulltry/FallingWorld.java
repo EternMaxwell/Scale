@@ -15,18 +15,22 @@ import static org.lwjgl.glfw.GLFW.glfwGetTime;
 
 public class FallingWorld extends FallingSandWorld {
     Grid grid;
+    FallingInput input;
     double mspt = 0;
     double gridStepTime = 0;
     double updateTimeRate = 0.15;
     Window window;
     @Override
     public void init(Window window) {
+        FallingData.startup();
         grid = new FallingGrid();
+        input = new FallingInput(grid);
         this.window = window;
     }
 
     @Override
     public void input() {
+        input.input(window.id());
     }
 
     @Override
@@ -46,8 +50,19 @@ public class FallingWorld extends FallingSandWorld {
                 "grid step time: " + String.format("%.2f",gridStepTime) + "ms", new Font("Arial", Font.PLAIN, 12));
         startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
                 "mspt: " + String.format("%.2f",mspt) + "ms", new Font("Arial", Font.PLAIN, 12));
+        startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
+                "place-radius: " + input.radius, new Font("Arial", Font.PLAIN, 12));
+        startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
+                "place-density: " + String.format("%.5f", input.density), new Font("Arial", Font.PLAIN, 12));
+        startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
+                "place-type: " + input.id, new Font("Arial", Font.PLAIN, 12));
+        startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
+                "chunkNum: " + FallingData.chunkNum, new Font("Arial", Font.PLAIN, 12));
+        startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
+                "enableChunkUpdate: " + FallingData.enableChunkUpdate, new Font("Arial", Font.PLAIN, 12));
 
         grid.render(render);
+        input.render(render);
     }
 
     @Override

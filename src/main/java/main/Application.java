@@ -5,6 +5,7 @@ import core.TickTimer;
 import core.game.CurvedSpaceTest;
 import core.game.Tests;
 import core.game.fallingsand.easyfallingsand.EasyFallingSandWorld;
+import core.game.fallingsand.fulltry.FallingWorld;
 import core.render.EasyRender;
 import core.render.Window;
 import org.joml.Matrix4f;
@@ -49,9 +50,9 @@ public class Application {
         window.setFocused(true);
         window.createWindow();
         timer = new FrameTimer(60);
-        tickTimer = new TickTimer(60);
+        tickTimer = new TickTimer(30);
         //====INITIALIZE THE GAME====//
-        test = new EasyFallingSandWorld();
+        test = new FallingWorld();
         test.init(window);
 
         //====INITIALIZE THE RENDERER====//
