@@ -73,6 +73,8 @@ public class EasyFallingSandWorld extends core.game.fallingsand.FallingSandWorld
                 "place-density: " + String.format("%.5f", elementPlacement.density), new Font("Arial", Font.PLAIN, 12));
         startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
                 "place-type: " + elementPlacement.id, new Font("Arial", Font.PLAIN, 12));
+        startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
+                "chunkNum: " + FallingData.chunkNum, new Font("Arial", Font.PLAIN, 12));
 
         render.pixel.flush();
 

@@ -11,6 +11,7 @@ public class FallingData {
     public static int chunkSleepLevel;
     public static int chunkSleepBitShift;
     public static int[] chunkBasePos;
+    public static int chunkNum;
 
     public static void startup() {
         scale = 1;
@@ -21,5 +22,6 @@ public class FallingData {
         chunkSleepBitShift = 4;
         chunkSleepLevel = chunkWidth / (1 << chunkSleepBitShift);
         chunkBasePos = new int[]{0, 0};
+        chunkNum = 0;
     }
 }

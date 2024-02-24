@@ -117,7 +117,7 @@ public class FallingGrid extends Grid {
             chunkBasePos[0] = x;
             chunkSize[0] = chunks.length;
         }else if(x >= chunkBasePos[0] + chunkSize[0]){
-            Chunk[][] newChunks = new Chunk[x - chunkBasePos[0]][chunkSize[1]];
+            Chunk[][] newChunks = new Chunk[x - chunkBasePos[0] + 1][chunkSize[1]];
             System.arraycopy(chunks, 0, newChunks, 0, chunks.length);
             chunks = newChunks;
             chunkSize[0] = chunks.length;
@@ -132,7 +132,7 @@ public class FallingGrid extends Grid {
             chunkSize[1] = chunks[0].length;
         }else if(y >= chunkBasePos[1] + chunkSize[1]){
             for(int i = 0; i < chunks.length; i++){
-                Chunk[] newChunks = new Chunk[y - chunkBasePos[1]];
+                Chunk[] newChunks = new Chunk[y - chunkBasePos[1] + 1];
                 System.arraycopy(chunks[i], 0, newChunks, 0, chunks[i].length);
                 chunks[i] = newChunks;
             }
@@ -140,6 +140,12 @@ public class FallingGrid extends Grid {
         }
         chunks[x - chunkBasePos[0]][y - chunkBasePos[1]] = new Chunk(x, y);
         currentChunkNum++;
+        for(int i = 0; i <= FallingData.chunkWidth; i++){
+            awake((x - chunkBasePos[0]) * FallingData.chunkWidth + i, (y - chunkBasePos[1]) * FallingData.chunkWidth + FallingData.chunkWidth - 1);
+            awake((x - chunkBasePos[0]) * FallingData.chunkWidth, (y - chunkBasePos[1]) * FallingData.chunkWidth + i);
+            awake((x - chunkBasePos[0]) * FallingData.chunkWidth + FallingData.chunkWidth - 1, (y - chunkBasePos[1]) * FallingData.chunkWidth + i);
+        }
+
         return chunks[x - chunkBasePos[0]][y - chunkBasePos[1]];
     }
 
@@ -238,15 +244,14 @@ public class FallingGrid extends Grid {
         for(int x = chunkBasePos[0]; x < chunkBasePos[0] + chunkSize[0]; x++){
             for(int y = chunkBasePos[1]; y < chunkBasePos[1] + chunkSize[1]; y++){
                 if(chunkAt(x, y) != null){
-                    realPos[0] = (x + 0.5) * 64;
-                    realPos[1] = (y + 0.5) * 64;
-                    realPosOfResult[0] = (result[0] + 0.5) * 64;
-                    realPosOfResult[1] = (result[1] + 0.5) * 64;
+                    realPos[0] = (x + 0.5) * FallingData.chunkWidth;
+                    realPos[1] = (y + 0.5) * FallingData.chunkWidth;
+                    realPosOfResult[0] = (result[0] + 0.5) * FallingData.chunkWidth;
+                    realPosOfResult[1] = (result[1] + 0.5) * FallingData.chunkWidth;
                     if(Math.pow(realPos[0] - FallingData.cameraCentrePos[0], 2) + Math.pow(realPos[1] - FallingData.cameraCentrePos[1], 2) >
                             Math.pow(realPosOfResult[0] - FallingData.cameraCentrePos[0], 2) + Math.pow(realPosOfResult[1] - FallingData.cameraCentrePos[1], 2)){
                         result = new int[]{x, y};
                     }
-                    break;
                 }
             }
         }
@@ -269,7 +274,8 @@ public class FallingGrid extends Grid {
             next = false;
             for (int x = chunkBasePos[0] - 1; x < chunkBasePos[0] + chunkSize[0] + 1; x++) {
                 for(int y = chunkBasePos[1] - 1; y < chunkBasePos[1] + chunkSize[1] + 1; y++){
-                    if(chunkAt(x, y) == null && !outOf(new double[][]{{x * 64, y * 64}, {(x + 1) * 64, y * 64}, {(x + 1) * 64, (y + 1) * 64}, {x * 64, (y + 1) * 64}}, screenRectangle)){
+                    if(chunkAt(x, y) == null && !outOf(new double[][]{{x * 64, y * 64}, {(x + 1) * 64, y * 64},
+                            {(x + 1) * 64, (y + 1) * 64}, {x * 64, (y + 1) * 64}}, screenRectangle)){
                         insertChunk(x, y);
                         next = true;
                     }
@@ -281,20 +287,26 @@ public class FallingGrid extends Grid {
             removeChunk(removeChunk[0], removeChunk[1]);
         }
         FallingData.chunkBasePos = chunkBasePos;
+        FallingData.chunkNum = currentChunkNum;
     }
 
     public boolean outOf(double[][] obj, double[][] mother){
-        double minX = 0, minY = 0, maxX = 0, maxY = 0;
-        for(int i = 0; i < 4; i++){
-            minX = Math.min(mother[i][0], mother[(i+1)%4][0]);
-            minY = Math.min(mother[i][1], mother[(i+1)%4][1]);
-            maxX = Math.max(mother[i][0], mother[(i+1)%4][0]);
-            maxY = Math.max(mother[i][1], mother[(i+1)%4][1]);
+        double minX = mother[0][0], minY = mother[0][1], maxX = mother[0][0], maxY = mother[0][1];
+        for(int i = 1; i < 4; i++){
+            minX = Math.min(mother[i][0], minX);
+            minY = Math.min(mother[i][1], minY);
+            maxX = Math.max(mother[i][0], maxX);
+            maxY = Math.max(mother[i][1], maxY);
         }
-        for(int i = 0; i < 4; i++){
-            if(obj[i][0] < minX || obj[i][0] > maxX || obj[i][1] < minY || obj[i][1] > maxY){
-                return true;
-            }
+        double objMinX = obj[0][0], objMinY = obj[0][1], objMaxX = obj[0][0], objMaxY = obj[0][1];
+        for(int i = 1; i < 4; i++){
+            objMinX = Math.min(obj[i][0], objMinX);
+            objMinY = Math.min(obj[i][1], objMinY);
+            objMaxX = Math.max(obj[i][0], objMaxX);
+            objMaxY = Math.max(obj[i][1], objMaxY);
+        }
+        if(objMaxX < minX || objMinX > maxX || objMaxY < minY || objMinY > maxY){
+            return true;
         }
         return false;
     }
@@ -371,19 +383,21 @@ public class FallingGrid extends Grid {
 
     @Override
     public double step() {
-        updateChunks();
         double start = System.nanoTime();
+        updateChunks();
         for (Chunk[] chunk : chunks) {
             for (Chunk value : chunk) {
                 if(value != null)
                     value.resetSleep();
             }
         }
-        for(int y = 0; y < chunks[0].length * chunks[0][0].width; y++){
+        for(int y = 0; y < chunkSize[1] * FallingData.chunkWidth; y++){
             if(inverse) {
-                for (int x = chunks.length * chunks[0][0].width - 1; x >= 0; x--) {
+                for (int x = chunkSize[0] * FallingData.chunkWidth - 1; x >= 0; x--) {
+                    if(chunks[x>>6][y>>6] == null)
+                        continue;
                     if(chunks[x>>6][y>>6].sleep(x & 63, y & 63)){
-                        x -= chunks[0][0].width/chunks[0][0].level - 1;
+                        x -= FallingData.chunkWidth/FallingData.chunkSleepLevel - 1;
                         continue;
                     }
                     if (chunks[x >> 6][y >> 6].get(x & 63, y & 63) != null) {
@@ -391,9 +405,11 @@ public class FallingGrid extends Grid {
                     }
                 }
             }else {
-                for (int x = 0; x < chunks.length * chunks[0][0].width; x++) {
+                for (int x = 0; x < chunkSize[0] * FallingData.chunkWidth; x++) {
+                    if(chunks[x>>6][y>>6] == null)
+                        continue;
                     if(chunks[x>>6][y>>6].sleep(x & 63, y & 63)){
-                        x += chunks[0][0].width/chunks[0][0].level - 1;
+                        x += FallingData.chunkWidth/FallingData.chunkSleepLevel - 1;
                         continue;
                     }
                     if (chunks[x >> 6][y >> 6].get(x & 63, y & 63) != null) {
@@ -449,8 +465,8 @@ public class FallingGrid extends Grid {
             for(int y = chunkBasePos[1] - 1; y < chunkBasePos[1] + chunkSize[1] + 1; y++){
                 Chunk chunk = chunkAt(x, y);
                 if(chunk != null
-//                        && !outOf(new double[][]{{x * 64, y * 64}, {(x + 1) * 64, y * 64},
-//                                {(x + 1) * 64, (y + 1) * 64}, {x * 64, (y + 1) * 64}}, screenRectangle)
+                        && !outOf(new double[][]{{x * 64, y * 64}, {(x + 1) * 64, y * 64},
+                                {(x + 1) * 64, (y + 1) * 64}, {x * 64, (y + 1) * 64}}, screenRectangle)
                 ){
                     for(int xx = 0; xx < FallingData.chunkWidth; xx++) {
                         for(int yy = 0; yy < FallingData.chunkWidth; yy++) {
@@ -469,8 +485,8 @@ public class FallingGrid extends Grid {
         for (int x = chunkBasePos[0] - 1; x < chunkBasePos[0] + chunkSize[0] + 1; x++) {
             for(int y = chunkBasePos[1] - 1; y < chunkBasePos[1] + chunkSize[1] + 1; y++){
                 if (chunkAt(x,y) == null
-//                        || outOf(new double[][]{{x * 64, y * 64}, {(x + 1) * 64, y * 64},
-//                        {(x + 1) * 64, (y + 1) * 64}, {x * 64, (y + 1) * 64}}, screenRectangle)
+                        || outOf(new double[][]{{x * 64, y * 64}, {(x + 1) * 64, y * 64},
+                        {(x + 1) * 64, (y + 1) * 64}, {x * 64, (y + 1) * 64}}, screenRectangle)
                 )
                     continue;
                 for (int xx = 0; xx < FallingData.chunkSleepLevel; xx++) {
