@@ -12,6 +12,7 @@ public class FallingData {
     public static int chunkSleepBitShift;
     public static int[] chunkBasePos;
     public static int chunkNum;
+    public static boolean enableChunkUpdate;
 
     public static void startup() {
         scale = 1;
@@ -19,9 +20,10 @@ public class FallingData {
         cameraCentrePos = new double[]{0, 0};
         chunkMaxNum = 256;
         chunkWidth = 64;
-        chunkSleepBitShift = 4;
+        chunkSleepBitShift = FallingGrid.Chunk.bitShift;
         chunkSleepLevel = chunkWidth / (1 << chunkSleepBitShift);
         chunkBasePos = new int[]{0, 0};
         chunkNum = 0;
+        enableChunkUpdate = true;
     }
 }

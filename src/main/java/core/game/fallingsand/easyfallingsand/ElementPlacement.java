@@ -15,6 +15,7 @@ public class ElementPlacement {
     public Elements elements;
     public Grid grid;
     public int id = 0;
+    private boolean lastTickChunkUpdateKey = false;
     public int radius = 10;
     public float density = 0.1f;
     private final int[] lastMousePos = new int[2];
@@ -81,6 +82,14 @@ public class ElementPlacement {
         }
         if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
             FallingData.scale *= 1.02f;
+        }
+        if(glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS){
+            if(!lastTickChunkUpdateKey){
+                FallingData.enableChunkUpdate = !FallingData.enableChunkUpdate;
+            }
+            lastTickChunkUpdateKey = true;
+        }else{
+            lastTickChunkUpdateKey = false;
         }
 
         double[] xpos = new double[1];

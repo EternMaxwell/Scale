@@ -14,10 +14,10 @@ public class FallingGrid extends Grid {
         public boolean[][] sleepDetectGrid;
         public int x;
         public int y;
-        public final int width = 64;
-        public final int bitShift = 4;
-        public final int level = width/(1<<bitShift);
-        public final int levelWidth = width/level;
+        public static final int width = 64;
+        public final static int bitShift = 4;
+        public static final int level = width/(1<<bitShift);
+        public static final int levelWidth = width/level;
 
         public Chunk(int x, int y){
             this.x = x;
@@ -384,7 +384,8 @@ public class FallingGrid extends Grid {
     @Override
     public double step() {
         double start = System.nanoTime();
-        updateChunks();
+        if(FallingData.enableChunkUpdate)
+            updateChunks();
         for (Chunk[] chunk : chunks) {
             for (Chunk value : chunk) {
                 if(value != null)
@@ -494,7 +495,6 @@ public class FallingGrid extends Grid {
                         float drawX = x * FallingData.chunkWidth + xx * ((float) FallingData.chunkWidth / FallingData.chunkSleepLevel);
                         float drawY = y * FallingData.chunkWidth + yy * ((float) FallingData.chunkWidth / FallingData.chunkSleepLevel);
                         float drawWidth = (float) FallingData.chunkWidth / FallingData.chunkSleepLevel;
-                        float ratio = render.window().width() / (float) render.window().height();
                         drawY -= 0.5f;
                         drawX -= 0.5f;
                         float[] color = new float[]{1, 1, 1, 0.05f};
