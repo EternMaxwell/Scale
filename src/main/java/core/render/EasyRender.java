@@ -2,19 +2,14 @@ package core.render;
 
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
-import static org.lwjgl.stb.STBImage.*;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.lwjgl.opengl.GL46.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -1364,7 +1359,20 @@ public class EasyRender {
             vertexCount = 0;
         }
 
-        public int drawText(float x, float y, float h, float r, float g, float b, float a, String text, Font font) {
+        /**
+         * draw a text with the given font and position with the bottom left as the origin
+         * @param x the x position of the text
+         * @param y the y position of the text
+         * @param h the height of the text
+         * @param r the red value of the text
+         * @param g the green value of the text
+         * @param b the blue value of the text
+         * @param a the alpha value of the text
+         * @param text the text to draw
+         * @param font the font to use
+         * @return the width and height of the text
+         */
+        public int[] drawTextLB(float x, float y, float h, float r, float g, float b, float a, String text, Font font) {
             Graphics2D g2d = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics();
             g2d.setFont(font);
             FontMetrics metrics = g2d.getFontMetrics(font);
@@ -1392,17 +1400,6 @@ public class EasyRender {
             }
             buffer.flip();
 
-//            //Write the image to a file
-//            try {
-//                ImageIO.write(image, "png", new File("text.png"));
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//            //read the image from the file
-//            stbi_set_flip_vertically_on_load(true);
-//            buffer = stbi_load("text.png", new int[1], new int[1], new int[1], 4);
-
             glBindTexture(GL_TEXTURE_2D, texture);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.getWidth(), image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
             glGenerateMipmap(GL_TEXTURE_2D);
@@ -1421,11 +1418,259 @@ public class EasyRender {
             glBindSampler(1, 0);
             glActiveTexture(0);
 
-            return height;
+            return new int[]{width, height};
         }
 
-        public int drawText(float x, float y, float h, float r, float g, float b, float a, String text){
-            return drawText(x, y, h, r, g, b, a, text, new Font(Font.MONOSPACED, Font.PLAIN, 16));
+        /**
+         * draw a text with the given font and position with the top left as the origin
+         * @param x the x position of the text
+         * @param y the y position of the text
+         * @param h the height of the text
+         * @param r the red value of the text
+         * @param g the green value of the text
+         * @param b the blue value of the text
+         * @param a the alpha value of the text
+         * @param text the text to draw
+         * @param font the font to use
+         * @return the width and height of the text
+         */
+        public int[] drawTextLT(float x, float y, float h, float r, float g, float b, float a, String text, Font font) {
+            Graphics2D g2d = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics();
+            g2d.setFont(font);
+            FontMetrics metrics = g2d.getFontMetrics(font);
+            int width = metrics.stringWidth(text);
+            int height = metrics.getHeight();
+            g2d.dispose();
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            g2d = image.createGraphics();
+            //g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g2d.setBackground(new Color(0,0,0,0));
+            g2d.setFont(font);
+            g2d.setPaint(new Color(255,255,255,255));
+            int h1 = metrics.getAscent();
+            g2d.drawString(text, 0, h1);
+            g2d.dispose();
+
+            ByteBuffer buffer = MemoryUtil.memAlloc(image.getWidth() * image.getHeight() * 4);
+            for (int j = image.getHeight()-1; j >=0; j--) {
+                for (int i = 0; i < image.getWidth(); i++) {
+                    buffer.put((byte) (image.getRGB(i, j) >> 16 & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) >> 8 & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) >> 24 & 0xFF));
+                }
+            }
+            buffer.flip();
+
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.getWidth(), image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+            glGenerateMipmap(GL_TEXTURE_2D);
+            MemoryUtil.memFree(buffer);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            if(h <= 0){
+                h = height;
+            }
+            draw(x, y - height, h * width / height, h, r, g, b, a, 0, 0, 1, 1);
+
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glBindSampler(1, sampler);
+            flush();
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindSampler(1, 0);
+            glActiveTexture(0);
+
+            return new int[]{width, height};
+        }
+
+        /**
+         * draw a text with the given font and position with the bottom right as the origin
+         * @param x the x position of the text
+         * @param y the y position of the text
+         * @param h the height of the text
+         * @param r the red value of the text
+         * @param g the green value of the text
+         * @param b the blue value of the text
+         * @param a the alpha value of the text
+         * @param text the text to draw
+         * @param font the font to use
+         * @return the width and height of the text
+         */
+        public int[] drawTextRB(float x, float y, float h, float r, float g, float b, float a, String text, Font font) {
+
+            Graphics2D g2d = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics();
+            g2d.setFont(font);
+            FontMetrics metrics = g2d.getFontMetrics(font);
+            int width = metrics.stringWidth(text);
+            int height = metrics.getHeight();
+            g2d.dispose();
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            g2d = image.createGraphics();
+            //g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g2d.setBackground(new Color(0,0,0,0));
+            g2d.setFont(font);
+            g2d.setPaint(new Color(255,255,255,255));
+            int h1 = metrics.getAscent();
+            g2d.drawString(text, 0, h1);
+            g2d.dispose();
+
+            ByteBuffer buffer = MemoryUtil.memAlloc(image.getWidth() * image.getHeight() * 4);
+            for (int j = image.getHeight()-1; j >=0; j--) {
+                for (int i = 0; i < image.getWidth(); i++) {
+                    buffer.put((byte) (image.getRGB(i, j) >> 16 & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) >> 8 & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) >> 24 & 0xFF));
+                }
+            }
+            buffer.flip();
+
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.getWidth(), image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+            glGenerateMipmap(GL_TEXTURE_2D);
+            MemoryUtil.memFree(buffer);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            if(h <= 0){
+                h = height;
+            }
+            draw(x - width, y, h * width / height, h, r, g, b, a, 0, 0, 1, 1);
+
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glBindSampler(1, sampler);
+            flush();
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindSampler(1, 0);
+            glActiveTexture(0);
+
+            return new int[]{width, height};
+        }
+
+        /**
+         * draw a text with the given font and position with the top right as the origin
+         * @param x the x position of the text
+         * @param y the y position of the text
+         * @param h the height of the text
+         * @param r the red value of the text
+         * @param g the green value of the text
+         * @param b the blue value of the text
+         * @param a the alpha value of the text
+         * @param text the text to draw
+         * @param font the font to use
+         * @return the width and height of the text
+         */
+        public int[] drawTextRT(float x, float y, float h, float r, float g, float b, float a, String text, Font font) {
+
+            Graphics2D g2d = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics();
+            g2d.setFont(font);
+            FontMetrics metrics = g2d.getFontMetrics(font);
+            int width = metrics.stringWidth(text);
+            int height = metrics.getHeight();
+            g2d.dispose();
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            g2d = image.createGraphics();
+            //g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g2d.setBackground(new Color(0,0,0,0));
+            g2d.setFont(font);
+            g2d.setPaint(new Color(255,255,255,255));
+            int h1 = metrics.getAscent();
+            g2d.drawString(text, 0, h1);
+            g2d.dispose();
+
+            ByteBuffer buffer = MemoryUtil.memAlloc(image.getWidth() * image.getHeight() * 4);
+            for (int j = image.getHeight()-1; j >=0; j--) {
+                for (int i = 0; i < image.getWidth(); i++) {
+                    buffer.put((byte) (image.getRGB(i, j) >> 16 & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) >> 8 & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) >> 24 & 0xFF));
+                }
+            }
+            buffer.flip();
+
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.getWidth(), image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+            glGenerateMipmap(GL_TEXTURE_2D);
+            MemoryUtil.memFree(buffer);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            if(h <= 0){
+                h = height;
+            }
+            draw(x - width, y - height, h * width / height, h, r, g, b, a, 0, 0, 1, 1);
+
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glBindSampler(1, sampler);
+            flush();
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindSampler(1, 0);
+            glActiveTexture(0);
+
+            return new int[]{width, height};
+        }
+
+        /**
+         * draw a text with the given position with the center as the origin
+         * @param x the x position of the text
+         * @param y the y position of the text
+         * @param h the height of the text
+         * @param r the red value of the text
+         * @param g the green value of the text
+         * @param b the blue value of the text
+         * @param a the alpha value of the text
+         * @param text the text to draw
+         * @return the width and height of the text
+         */
+        public int[] drawTextLB(float x, float y, float h, float r, float g, float b, float a, String text){
+            return drawTextLB(x, y, h, r, g, b, a, text, new Font(Font.MONOSPACED, Font.PLAIN, 16));
+        }
+
+        /**
+         * draw a text with the given position with the center as the origin
+         * @param x the x position of the text
+         * @param y the y position of the text
+         * @param h the height of the text
+         * @param r the red value of the text
+         * @param g the green value of the text
+         * @param b the blue value of the text
+         * @param a the alpha value of the text
+         * @param text the text to draw
+         * @return the width and height of the text
+         */
+        public int[] drawTextLT(float x, float y, float h, float r, float g, float b, float a, String text){
+            return drawTextLT(x, y, h, r, g, b, a, text, new Font(Font.MONOSPACED, Font.PLAIN, 16));
+        }
+
+        /**
+         * draw a text with the given position with the center as the origin
+         * @param x the x position of the text
+         * @param y the y position of the text
+         * @param h the height of the text
+         * @param r the red value of the text
+         * @param g the green value of the text
+         * @param b the blue value of the text
+         * @param a the alpha value of the text
+         * @param text the text to draw
+         * @return the width and height of the text
+         */
+        public int[] drawTextRB(float x, float y, float h, float r, float g, float b, float a, String text){
+            return drawTextRB(x, y, h, r, g, b, a, text, new Font(Font.MONOSPACED, Font.PLAIN, 16));
+        }
+
+        /**
+         * draw a text with the given position with the center as the origin
+         * @param x the x position of the text
+         * @param y the y position of the text
+         * @param h the height of the text
+         * @param r the red value of the text
+         * @param g the green value of the text
+         * @param b the blue value of the text
+         * @param a the alpha value of the text
+         * @param text the text to draw
+         * @return the width and height of the text
+         */
+        public int[] drawTextRT(float x, float y, float h, float r, float g, float b, float a, String text){
+            return drawTextRT(x, y, h, r, g, b, a, text, new Font(Font.MONOSPACED, Font.PLAIN, 16));
         }
 
         private void draw(float x1, float y1, float w, float h, float r, float g, float b, float a, float s1, float t1, float sl, float tl) {

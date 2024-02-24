@@ -2,12 +2,8 @@ package core.game.fallingsand.fulltry;
 
 import core.game.fallingsand.FallingSandWorld;
 import core.game.fallingsand.Grid;
-import core.game.fallingsand.easyfallingsand.ChunkAndSleepingBasedGrid;
-import core.game.fallingsand.easyfallingsand.ElementPlacement;
 import core.render.EasyRender;
 import core.render.Window;
-import org.joml.Matrix4f;
-import org.joml.Vector4f;
 
 import java.awt.*;
 
@@ -46,20 +42,20 @@ public class FallingWorld extends FallingSandWorld {
 
         int startH = 0;
 
-        startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
-                "grid step time: " + String.format("%.2f",gridStepTime) + "ms", new Font("Arial", Font.PLAIN, 12));
-        startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
-                "mspt: " + String.format("%.2f",mspt) + "ms", new Font("Arial", Font.PLAIN, 12));
-        startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
-                "place-radius: " + input.radius, new Font("Arial", Font.PLAIN, 12));
-        startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
-                "place-density: " + String.format("%.5f", input.density), new Font("Arial", Font.PLAIN, 12));
-        startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
-                "place-type: " + input.id, new Font("Arial", Font.PLAIN, 12));
-        startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
-                "chunkNum: " + FallingData.chunkNum, new Font("Arial", Font.PLAIN, 12));
-        startH += render.text.drawText(5,startH,0,1,1,1,0.8f,
-                "enableChunkUpdate: " + FallingData.enableChunkUpdate, new Font("Arial", Font.PLAIN, 12));
+        startH += render.text.drawTextLB(5,startH,0,1,1,1,0.8f,
+                "grid step time: " + String.format("%.2f",gridStepTime) + "ms", new Font("Arial", Font.PLAIN, 12))[1];
+        startH += render.text.drawTextLB(5,startH,0,1,1,1,0.8f,
+                "mspt: " + String.format("%.2f",mspt) + "ms", new Font("Arial", Font.PLAIN, 12))[1];
+        startH += render.text.drawTextLB(5,startH,0,1,1,1,0.8f,
+                "place-radius: " + input.radius, new Font("Arial", Font.PLAIN, 12))[1];
+        startH += render.text.drawTextLB(5,startH,0,1,1,1,0.8f,
+                "place-density: " + String.format("%.5f", input.density), new Font("Arial", Font.PLAIN, 12))[1];
+        startH += render.text.drawTextLB(5,startH,0,1,1,1,0.8f,
+                "place-type: " + input.id, new Font("Arial", Font.PLAIN, 12))[1];
+        startH += render.text.drawTextLB(5,startH,0,1,1,1,0.8f,
+                "chunkNum: " + FallingData.chunkNum, new Font("Arial", Font.PLAIN, 12))[1];
+        startH += render.text.drawTextLB(5,startH,0,1,1,1,0.8f,
+                "enableChunkUpdate: " + FallingData.enableChunkUpdate, new Font("Arial", Font.PLAIN, 12))[1];
 
         grid.render(render);
         input.render(render);

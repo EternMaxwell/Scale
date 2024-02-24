@@ -51,4 +51,13 @@ public abstract class Element {
      * @return if the element is in free fall.
      */
     public abstract boolean freeFall();
+
+    /**
+     * random tick the element.
+     * <p>this method is called randomly which acts the same as random tick in minecraft</p>
+     * @return if this random tick make sense - in some cases this may not do anything but just add a counter to the element.
+     */
+    public boolean randomTick(){
+        return false;
+    }
 }
