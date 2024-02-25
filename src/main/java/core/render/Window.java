@@ -836,6 +836,14 @@ public class Window {
     }
 
     /**
+     * get the ratio of the window
+     * @return the ratio of the window
+     */
+    public float ratio() {
+        return (float)width / (float)height;
+    }
+
+    /**
      * get the title of the window
      * @return the title of the window
      */
