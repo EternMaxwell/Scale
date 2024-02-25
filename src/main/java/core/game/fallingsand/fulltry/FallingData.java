@@ -13,6 +13,7 @@ public class FallingData {
     public static int[] chunkBasePos;
     public static int chunkNum;
     public static boolean enableChunkUpdate;
+    public static Window window;
 
     public static void startup() {
         scale = 1;

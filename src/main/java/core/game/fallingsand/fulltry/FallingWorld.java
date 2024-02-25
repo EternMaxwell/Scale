@@ -19,6 +19,7 @@ public class FallingWorld extends FallingSandWorld {
     @Override
     public void init(Window window) {
         FallingData.startup();
+        FallingData.window = window;
         grid = new FallingGrid();
         input = new FallingInput(grid);
         this.window = window;
@@ -56,6 +57,8 @@ public class FallingWorld extends FallingSandWorld {
                 "chunkNum: " + FallingData.chunkNum, new Font("Arial", Font.PLAIN, 12))[1];
         startH += render.text.drawTextLB(5,startH,0,1,1,1,0.8f,
                 "enableChunkUpdate: " + FallingData.enableChunkUpdate, new Font("Arial", Font.PLAIN, 12))[1];
+        startH += render.text.drawTextLB(5,startH,0,1,1,1,0.8f,
+                "scale: " + FallingData.scale, new Font("Arial", Font.PLAIN, 12))[1];
 
         grid.render(render);
         input.render(render);

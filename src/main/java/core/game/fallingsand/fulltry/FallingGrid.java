@@ -7,6 +7,8 @@ import core.render.EasyRender;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
+import static org.lwjgl.glfw.GLFW.glfwGetWindowSize;
+
 public class FallingGrid extends Grid {
     public static class Chunk{
         public Element[][] grid;
@@ -259,17 +261,28 @@ public class FallingGrid extends Grid {
         return result;
     }
 
-    public void updateChunks(){
+    public double[][] getScreenRectangle(long windowId){
         double[][] screenRectangle = new double[4][];
         double[] screenCenter = FallingData.cameraCentrePos;
-        screenRectangle[0] = new double[]{screenCenter[0] - FallingData.scale * FallingData.defaultShowGridWidth / 2,
+
+        int[] width = new int[1];
+        int[] height = new int[1];
+        glfwGetWindowSize(windowId, width, height);
+        float ratio = (float) width[0] / (height[0] * 16 / 9f);
+
+        screenRectangle[0] = new double[]{screenCenter[0] - FallingData.scale * FallingData.defaultShowGridWidth * ratio / 2,
                 screenCenter[1] - FallingData.scale * FallingData.defaultShowGridWidth * 9 / 32};
-        screenRectangle[1] = new double[]{screenCenter[0] + FallingData.scale * FallingData.defaultShowGridWidth / 2,
+        screenRectangle[1] = new double[]{screenCenter[0] + FallingData.scale * FallingData.defaultShowGridWidth * ratio / 2,
                 screenCenter[1] - FallingData.scale * FallingData.defaultShowGridWidth * 9 / 32};
-        screenRectangle[2] = new double[]{screenCenter[0] + FallingData.scale * FallingData.defaultShowGridWidth / 2,
+        screenRectangle[2] = new double[]{screenCenter[0] + FallingData.scale * FallingData.defaultShowGridWidth * ratio / 2,
                 screenCenter[1] + FallingData.scale * FallingData.defaultShowGridWidth * 9 / 32};
-        screenRectangle[3] = new double[]{screenCenter[0] - FallingData.scale * FallingData.defaultShowGridWidth / 2,
+        screenRectangle[3] = new double[]{screenCenter[0] - FallingData.scale * FallingData.defaultShowGridWidth * ratio / 2,
                 screenCenter[1] + FallingData.scale * FallingData.defaultShowGridWidth * 9 / 32};
+        return screenRectangle;
+    }
+
+    public void updateChunks(){
+        double[][] screenRectangle = getScreenRectangle(FallingData.window.id());
         boolean next = true;
         while(next) {
             next = false;
@@ -452,16 +465,7 @@ public class FallingGrid extends Grid {
         render.line.setViewMatrix(viewMatrix);
         render.pixel.setPixelSize(1);
 
-        double[][] screenRectangle = new double[4][];
-        double[] screenCenter = FallingData.cameraCentrePos;
-        screenRectangle[0] = new double[]{screenCenter[0] - FallingData.scale * FallingData.defaultShowGridWidth / 2,
-                screenCenter[1] - FallingData.scale * FallingData.defaultShowGridWidth * 9 / 32};
-        screenRectangle[1] = new double[]{screenCenter[0] + FallingData.scale * FallingData.defaultShowGridWidth / 2,
-                screenCenter[1] - FallingData.scale * FallingData.defaultShowGridWidth * 9 / 32};
-        screenRectangle[2] = new double[]{screenCenter[0] + FallingData.scale * FallingData.defaultShowGridWidth / 2,
-                screenCenter[1] + FallingData.scale * FallingData.defaultShowGridWidth * 9 / 32};
-        screenRectangle[3] = new double[]{screenCenter[0] - FallingData.scale * FallingData.defaultShowGridWidth / 2,
-                screenCenter[1] + FallingData.scale * FallingData.defaultShowGridWidth * 9 / 32};
+        double[][] screenRectangle = getScreenRectangle(FallingData.window.id());
 
         for (int x = chunkBasePos[0] - 1; x < chunkBasePos[0] + chunkSize[0] + 1; x++) {
             for(int y = chunkBasePos[1] - 1; y < chunkBasePos[1] + chunkSize[1] + 1; y++){
