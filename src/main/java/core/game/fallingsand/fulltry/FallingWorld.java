@@ -19,6 +19,7 @@ public class FallingWorld extends FallingSandWorld {
     @Override
     public void init(Window window) {
         FallingData.startup();
+        FallingData.inputTool = new InputTool(window);
         FallingData.window = window;
         grid = new FallingGrid();
         input = new FallingInput(grid);
@@ -27,6 +28,7 @@ public class FallingWorld extends FallingSandWorld {
 
     @Override
     public void input() {
+        FallingData.inputTool.input();
         input.input(window.id());
     }
 
@@ -45,21 +47,26 @@ public class FallingWorld extends FallingSandWorld {
         int x = window.width();
 
         startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
-                "grid step time: " + String.format("%.2f",gridStepTime) + "ms", new Font("Arial", Font.PLAIN, 12))[1];
+                "grid step time: " + String.format("%.2f",gridStepTime) + "ms",
+                new Font("Arial", Font.PLAIN, 12))[1];
         startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
-                "mspt: " + String.format("%.2f",mspt) + "ms", new Font("Arial", Font.PLAIN, 12))[1];
+                "mspt: " + String.format("%.2f",mspt) + "ms",
+                new Font("Arial", Font.PLAIN, 12))[1];
         startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
                 "place-radius: " + input.radius, new Font("Arial", Font.PLAIN, 12))[1];
         startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
-                "place-density: " + String.format("%.5f", input.density), new Font("Arial", Font.PLAIN, 12))[1];
+                "place-density: " + String.format("%.5f", input.density),
+                new Font("Arial", Font.PLAIN, 12))[1];
         startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
                 "place-type: " + input.id, new Font("Arial", Font.PLAIN, 12))[1];
         startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
                 "chunkNum: " + FallingData.chunkNum, new Font("Arial", Font.PLAIN, 12))[1];
         startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
-                "enableChunkUpdate: " + FallingData.enableChunkUpdate, new Font("Arial", Font.PLAIN, 12))[1];
+                "enableChunkUpdate: " + FallingData.enableChunkUpdate,
+                new Font("Arial", Font.PLAIN, 12))[1];
         startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
-                "scale: " + String.format("%.4f",FallingData.scale), new Font("Arial", Font.PLAIN, 12))[1];
+                "scale: " + String.format("%.4f",FallingData.scale),
+                new Font("Arial", Font.PLAIN, 12))[1];
 
         grid.render(render);
         input.render(render);

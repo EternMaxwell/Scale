@@ -57,7 +57,7 @@ public abstract class Element {
      * <p>this method is called randomly which acts the same as random tick in minecraft</p>
      * @return if this random tick make sense - in some cases this may not do anything but just add a counter to the element.
      */
-    public boolean randomTick(){
+    public boolean randomTick(Grid grid, int x, int y, int tick){
         return false;
     }
 }

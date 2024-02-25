@@ -1,10 +1,11 @@
 package core;
 
+import static org.lwjgl.glfw.GLFW.*;
+
 public class FrameTimer {
-    private long lastTime;
     private long currentTime;
-    private long deltaTime;
     private long sleepTime;
+    private long targetTime = 0;
     private double fps;
     private double frameTime;
     private long frameCount;
@@ -12,8 +13,7 @@ public class FrameTimer {
     public FrameTimer(double fps) {
         this.fps = fps;
         frameTime = 1000.0 / fps;
-        lastTime = System.nanoTime();
-        frameCount=1;
+        frameCount=0;
     }
 
     /**
@@ -21,9 +21,16 @@ public class FrameTimer {
      * <p>this method will stop the thread until the next frame</p>
      */
     public void frame(){
+        if(targetTime == 0){
+            targetTime = currentTime;
+        }
+        targetTime += (long) (frameTime * 1000000);
         currentTime = System.nanoTime();
-        deltaTime = currentTime - lastTime;
-        sleepTime = (long) (frameTime * 1000000 - deltaTime);
+        sleepTime = targetTime - currentTime;
+        if(sleepTime < 0){
+            targetTime = currentTime;
+            sleepTime = 0;
+        }
         if(sleepTime > 0){
             try {
                 Thread.sleep(sleepTime / 1000000);
@@ -32,7 +39,6 @@ public class FrameTimer {
             }
         }
         frameCount++;
-        lastTime = System.nanoTime();
     }
 
     /**

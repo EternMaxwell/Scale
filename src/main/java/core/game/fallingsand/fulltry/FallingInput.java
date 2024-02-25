@@ -26,13 +26,13 @@ public class FallingInput {
 
     public void input(long window) {
         Random random = new Random();
-        if (glfwGetKey(window, GLFW_KEY_EQUAL) == GLFW_PRESS) {
+        if (FallingData.inputTool.isKeyJustPressed(GLFW_KEY_EQUAL)) {
             id = (id + 1) % 3;
         }
-        if (glfwGetKey(window, GLFW_KEY_MINUS) == GLFW_PRESS) {
+        if (FallingData.inputTool.isKeyJustPressed(GLFW_KEY_MINUS)) {
             id = (id - 1) % 3;
             if (id < 0)
-                id += 2;
+                id += 3;
         }
         if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
             radius++;

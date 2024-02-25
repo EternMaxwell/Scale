@@ -49,6 +49,8 @@ public class Application {
         window.setVisible(false);
         window.setFocused(true);
         window.createWindow();
+//        window.setRefreshRate(60);
+//        glfwSwapInterval(0);
         timer = new FrameTimer(60);
         tickTimer = new TickTimer(30);
         //====INITIALIZE THE GAME====//

@@ -15,6 +15,8 @@ public class FallingData {
     public static boolean enableChunkUpdate;
     public static Window window;
 
+    public static InputTool inputTool;
+
     public static void startup() {
         scale = 1;
         defaultShowGridWidth = 512;
