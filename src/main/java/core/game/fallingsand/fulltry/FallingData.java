@@ -16,6 +16,7 @@ public class FallingData {
     public static Window window;
 
     public static InputTool inputTool;
+    public static boolean invalidPassThrough = false;
 
     public static void startup() {
         scale = 1;

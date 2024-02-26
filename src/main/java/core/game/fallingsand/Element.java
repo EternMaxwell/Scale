@@ -48,6 +48,7 @@ public abstract class Element {
 
     /**
      * get if the element is in free fall.
+     *
      * @return if the element is in free fall.
      */
     public abstract boolean freeFall();
@@ -55,15 +56,31 @@ public abstract class Element {
     /**
      * random tick the element.
      * <p>this method is called randomly which acts the same as random tick in minecraft</p>
+     *
      * @return if this random tick make sense - in some cases this may not do anything but just add a counter to the element.
      */
-    public boolean randomTick(Grid grid, int x, int y, int tick, int intensity){
+    public boolean randomTick(Grid grid, int x, int y, int tick, int intensity) {
         return false;
     }
 
     /**
      * get the default color of the element.
+     *
      * @return the default color.
      */
     public abstract float[] defaultColor();
+
+    /**
+     * do something when receiving heat.
+     *
+     * @param grid the grid.
+     * @param x    the x position.
+     * @param y    the y position.
+     * @param tick the tick.
+     * @param heat the heat.
+     * @return if the heat make sense.
+     */
+    public boolean heat(Grid grid, int x, int y, int tick, float heat) {
+        return false;
+    }
 }
