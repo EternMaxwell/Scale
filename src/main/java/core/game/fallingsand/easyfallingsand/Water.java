@@ -75,23 +75,34 @@ public class Water extends Element {
 
         if (!moved) {
             velocity = 0.7f;
-            for (int i = 5; i > 0; i--) {
+            int dirL = 0;
+            int idirL = 0;
+            boolean dirBlock = false;
+            boolean idirBlock = false;
+            for (int i = 1; i <= 5; i++) {
                 Element side = grid.get(x + dir * i, iy);
-                if (side == null && grid.valid(x + dir * i, iy)) {
-                    grid.set(x + dir * i, iy, this);
-                    grid.set(x, iy, null);
-                    moved = true;
-                    break;
+                if (side == null && grid.valid(x + dir * i, iy) && !dirBlock) {
+                    dirL++;
                 } else {
-                    side = grid.get(x - dir * i, iy);
-                    if (side == null && grid.valid(x - dir * i, iy)) {
-                        grid.set(x - dir * i, iy, this);
-                        grid.set(x, iy, null);
-                        moved = true;
-                        break;
-                    }
+                    dirBlock = true;
+                }
+                side = grid.get(x - dir * i, iy);
+                if (side == null && grid.valid(x - dir * i, iy) && !idirBlock) {
+                    idirL++;
+                } else {
+                    idirBlock = true;
                 }
             }
+            if (dirL > 0 || idirL > 0)
+                if (dirL >= idirL) {
+                    grid.set(x + dir * dirL, iy, this);
+                    grid.set(x, iy, null);
+                    moved = true;
+                } else {
+                    grid.set(x - dir * idirL, iy, this);
+                    grid.set(x, iy, null);
+                    moved = true;
+                }
         }
 
         if (moved) {
