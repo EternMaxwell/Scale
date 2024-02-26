@@ -159,4 +159,13 @@ public class Sand extends Element {
     public boolean freeFall() {
         return falling;
     }
+
+    /**
+     * get the default color of the element.
+     * @return the default color.
+     */
+    @Override
+    public float[] defaultColor() {
+        return new float[]{0.8f, 0.8f, 0.01f, 1};
+    }
 }

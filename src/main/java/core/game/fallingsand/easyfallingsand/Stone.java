@@ -84,4 +84,13 @@ public class Stone extends Element{
     public boolean freeFall() {
         return false;
     }
+
+    /**
+     * get the default color of the element.
+     * @return the default color.
+     */
+    @Override
+    public float[] defaultColor() {
+        return new float[]{0.45f, 0.45f, 0.45f, 1};
+    }
 }

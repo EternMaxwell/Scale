@@ -170,4 +170,13 @@ public class Water extends Element {
     public boolean freeFall() {
         return falling;
     }
+
+    /**
+     * get the default color of the element.
+     * @return the default color.
+     */
+    @Override
+    public float[] defaultColor() {
+        return new float[]{0.1f, 0.1f, 1, 0.8f};
+    }
 }

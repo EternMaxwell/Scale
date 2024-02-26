@@ -60,4 +60,10 @@ public abstract class Element {
     public boolean randomTick(Grid grid, int x, int y, int tick, int intensity){
         return false;
     }
+
+    /**
+     * get the default color of the element.
+     * @return the default color.
+     */
+    public abstract float[] defaultColor();
 }
