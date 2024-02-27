@@ -26,11 +26,11 @@ public abstract class FluidSolid extends Element {
         //falling
         for (int i = 0; i < distance; i++) {
             Element below = grid.get(x, iy - 1);
-            if (below == null && (grid.valid(x, iy - 1) || FallingData.invalidPassThrough)) {
+            if ((below == null || below.type() == FallingType.GAS) && (grid.valid(x, iy - 1) || FallingData.invalidPassThrough)) {
                 falling = true;
                 moved = true;
                 grid.set(x, iy -1, this);
-                grid.set(x, iy, null);
+                grid.set(x, iy, below);
                 lastTick = tick;
                 iy--;
             }else if(below != null){
@@ -75,15 +75,15 @@ public abstract class FluidSolid extends Element {
         //if the block is empty then move to it
         int dir = Math.random()>=0.5?1:-1;
         Element side = grid.get(x + dir, iy - 1);
-        if (side == null && grid.valid(x + dir, iy - 1)) {
+        if ((side == null || side.type() == FallingType.GAS) && (grid.valid(x + dir, iy - 1) || FallingData.invalidPassThrough)) {
             grid.set(x + dir, iy - 1, this);
-            grid.set(x, iy, null);
+            grid.set(x, iy, side);
             moved = true;
         } else {
             side = grid.get(x - dir, iy - 1);
-            if (side == null && grid.valid(x - dir, iy - 1)) {
+            if ((side == null || side.type() == FallingType.GAS) && (grid.valid(x - dir, iy - 1) || FallingData.invalidPassThrough)) {
                 grid.set(x - dir, iy - 1, this);
-                grid.set(x, iy, null);
+                grid.set(x, iy, side);
                 moved = true;
             }
         }
