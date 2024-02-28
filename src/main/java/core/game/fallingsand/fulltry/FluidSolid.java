@@ -130,4 +130,22 @@ public abstract class FluidSolid extends Element {
 
         return moved;
     }
+
+    /**
+     * get if the element is free fall.
+     * @return true if the element is free fall.
+     */
+    @Override
+    public boolean freeFall(){
+        return falling;
+    }
+
+    /**
+     * get the last step tick.
+     * @return the last step tick.
+     */
+    @Override
+    public int lastStepTick() {
+        return lastTick;
+    }
 }
