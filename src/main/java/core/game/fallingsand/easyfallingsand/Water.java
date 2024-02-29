@@ -11,6 +11,7 @@ public class Water extends Element {
     int lastStepTick = -1;
     float[] color;
     float velocity = 0.7f;
+    int dir = Math.random() > 0.5 ? 1 : -1;
 
     public Water() {
         color = new float[]{0.1f, 0.1f, 1, 0.8f};
@@ -38,7 +39,8 @@ public class Water extends Element {
                 lastStepTick = tick;
                 iy--;
             } else if (below != null) {
-                falling = grid.get(x, iy - 1).freeFall();
+                if(falling != grid.get(x, iy - 1).freeFall())
+                    falling = grid.get(x, iy - 1).freeFall();
                 break;
             } else {
                 falling = false;
@@ -57,8 +59,6 @@ public class Water extends Element {
         if(!falling)
             velocity = 0.7f;
 
-        int dir = new Random().nextInt(2);
-        dir = dir == 0 ? -1 : 1;
         Element diagnose = grid.get(x + dir, iy - 1);
         if (diagnose == null && grid.valid(x + dir, iy - 1)) {
             grid.set(x + dir, iy - 1, this);
@@ -76,33 +76,44 @@ public class Water extends Element {
         if (!moved) {
             velocity = 0.7f;
             int dirL = 0;
-            int idirL = 0;
             boolean dirBlock = false;
-            boolean idirBlock = false;
             for (int i = 1; i <= 5; i++) {
                 Element side = grid.get(x + dir * i, iy);
-                if (side == null && grid.valid(x + dir * i, iy) && !dirBlock) {
+                if (side == null && grid.valid(x + dir * i, iy)) {
                     dirL++;
                 } else {
                     dirBlock = true;
-                }
-                side = grid.get(x - dir * i, iy);
-                if (side == null && grid.valid(x - dir * i, iy) && !idirBlock) {
-                    idirL++;
-                } else {
-                    idirBlock = true;
+                    break;
                 }
             }
-            if (dirL > 0 || idirL > 0)
-                if (dirL >= idirL) {
+            if (dirL > 0) {
+                grid.set(x + dir * dirL, iy, this);
+                grid.set(x, iy, null);
+                if(dirBlock) {
+                    //dir = -dir;
+                }
+                moved = true;
+            }else {
+                dir = -dir;
+                for (int i = 1; i <= 5; i++) {
+                    Element side = grid.get(x + dir * i, iy);
+                    if (side == null && grid.valid(x + dir * i, iy)) {
+                        dirL++;
+                    } else {
+                        dirBlock = true;
+                        break;
+                    }
+                }
+                if (dirL > 0) {
                     grid.set(x + dir * dirL, iy, this);
                     grid.set(x, iy, null);
+                    if (dirBlock) {
+                        //dir = -dir;
+                    }
                     moved = true;
-                } else {
-                    grid.set(x - dir * idirL, iy, this);
-                    grid.set(x, iy, null);
-                    moved = true;
-                }
+                }else
+                    grid.set(x, iy, this);
+            }
         }
 
         if (moved) {

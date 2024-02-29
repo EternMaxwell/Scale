@@ -1,5 +1,6 @@
 package core.game.fallingsand.fulltry;
 
+import core.game.fallingsand.fulltry.ui.UIManager;
 import core.render.Window;
 
 public class FallingData {
@@ -17,6 +18,8 @@ public class FallingData {
 
     public static InputTool inputTool;
     public static boolean invalidPassThrough = false;
+    public static boolean pause = false;
+    public static UIManager uiManager;
 
     public static void startup() {
         scale = 1;

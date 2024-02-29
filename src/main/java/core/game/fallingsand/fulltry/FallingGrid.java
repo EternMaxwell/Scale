@@ -397,6 +397,7 @@ public class FallingGrid extends Grid {
 
     @Override
     public double step() {
+        if(FallingData.pause) return 0;
         double start = System.nanoTime();
         if(FallingData.enableChunkUpdate)
             updateChunks();

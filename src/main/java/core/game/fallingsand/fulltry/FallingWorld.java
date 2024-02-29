@@ -2,6 +2,7 @@ package core.game.fallingsand.fulltry;
 
 import core.game.fallingsand.FallingSandWorld;
 import core.game.fallingsand.Grid;
+import core.game.fallingsand.fulltry.ui.UIManager;
 import core.render.EasyRender;
 import core.render.Window;
 
@@ -16,6 +17,7 @@ public class FallingWorld extends FallingSandWorld {
     double gridStepTime = 0;
     double updateTimeRate = 0.15;
     Window window;
+    UIManager uiManager;
     @Override
     public void init(Window window) {
         FallingData.startup();
@@ -24,11 +26,14 @@ public class FallingWorld extends FallingSandWorld {
         grid = new FallingGrid();
         input = new FallingInput(grid);
         this.window = window;
+        uiManager = new UIManager();
+        FallingData.uiManager = uiManager;
     }
 
     @Override
     public void input() {
         FallingData.inputTool.input();
+        uiManager.handleInput();
         input.input(window.id());
     }
 
@@ -38,6 +43,7 @@ public class FallingWorld extends FallingSandWorld {
         gridStepTime = gridStepTime * (1 - updateTimeRate) + updateTimeRate * grid.step();
         double end = glfwGetTime();
         mspt = mspt * (1 - updateTimeRate) + updateTimeRate * (end - start) * 1000;
+        uiManager.update();
     }
 
     @Override
@@ -67,9 +73,13 @@ public class FallingWorld extends FallingSandWorld {
         startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
                 "scale: " + String.format("%.4f",FallingData.scale),
                 new Font("Arial", Font.PLAIN, 12))[1];
+        startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
+                "currentPage: " + String.format("%20s",FallingData.uiManager.currentName),
+                new Font("Arial", Font.PLAIN, 12))[1];
 
         grid.render(render);
         input.render(render);
+        uiManager.render(render);
     }
 
     @Override
