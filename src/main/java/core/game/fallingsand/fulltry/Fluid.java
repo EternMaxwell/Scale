@@ -8,6 +8,8 @@ public abstract class Fluid extends Element {
     int lastTick = -1;
     float sinkingProcess = 0.0f;
     float velocity = 0.7f;
+    int dir = Math.random() > 0.5? 1: -1;
+    int lastBlocked = 0;
 
     /**
      * @return the dispersion rate.
@@ -94,7 +96,6 @@ public abstract class Fluid extends Element {
         }
         //check the block at the bottom left and right
         //if the block is empty then move to it
-        int dir = Math.random()>=0.5?1:-1;
         Element side = grid.get(x + dir, iy - 1);
         if ((side == null || side.type() == FallingType.GAS) && (grid.valid(x + dir, iy - 1) || FallingData.invalidPassThrough)) {
             grid.set(x + dir, iy - 1, this);
@@ -145,39 +146,44 @@ public abstract class Fluid extends Element {
             }
         }
         //check the left and right blocks
-        int dirL = 0;
-        int idirL = 0;
-        boolean dirLM = false;
-        boolean idirLM = false;
         if (!moved) {
-            for(int i = 1; i <= dispersionRate(); i++){
-                if(!dirLM){
-                    side = grid.get(x + dir * i, iy);
-                    if(side == null || side.type() == FallingType.GAS){
-                        dirL = i;
-                    }else
-                        dirLM = true;
-                }
-                if(!idirLM){
-                    side = grid.get(x - dir * i, iy);
-                    if(side == null || side.type() == FallingType.GAS){
-                        idirL = i;
-                    }else
-                        idirLM = true;
+            int dirL = 0;
+            boolean dirBlock = false;
+            for(int i = 1; i <= dispersionRate(); i++) {
+                side = grid.get(x + dir * i, iy);
+                if ((side == null || side.type() == FallingType.GAS) && (grid.valid(x + dir * i, iy) || FallingData.invalidPassThrough)) {
+                    dirL = i;
+                } else {
+                    dirBlock = true;
+                    break;
                 }
             }
-            if(!(dirL == 0 && idirL == 0)){
-                if(dirL < idirL){
-                    side = grid.get(x + dir * dirL, iy);
-                    grid.set(x + dir * idirL, iy, this);
-                    grid.set(x, iy, side);
-                }else {
-                    side = grid.get(x - dir * idirL, iy);
-                    grid.set(x - dir * dirL, iy, this);
-                    grid.set(x, iy, side);
-                }
+            if(dirL > 0) {
+                grid.set(x + dir * dirL, iy, this);
+                grid.set(x, iy, side);
                 moved = true;
+            }else{
+                if(lastBlocked > 0 && dirBlock){
+                    lastBlocked = 0;
+                    dir = -dir;
+                    for(int i = 1; i <= dispersionRate(); i++){
+                        side = grid.get(x + dir * i, iy);
+                        if ((side == null || side.type() == FallingType.GAS) && (grid.valid(x + dir * i, iy) || FallingData.invalidPassThrough)) {
+                            dirL = i;
+                        } else {
+                            break;
+                        }
+                    }
+                    if(dirL > 0) {
+                        grid.set(x + dir * dirL, iy, this);
+                        grid.set(x, iy, side);
+                        moved = true;
+                    }
+                }else {
+                    grid.set(x, iy, this);
+                }
             }
+            lastBlocked += dirBlock? 1: 0;
         }
         //if moved then update lastTick
         if(moved){

@@ -52,7 +52,7 @@ public class Application {
 //        window.setRefreshRate(60);
 //        glfwSwapInterval(0);
         timer = new FrameTimer(60);
-        tickTimer = new TickTimer(30);
+        tickTimer = new TickTimer(60);
         //====INITIALIZE THE GAME====//
         test = new FallingWorld();
         test.init(window);

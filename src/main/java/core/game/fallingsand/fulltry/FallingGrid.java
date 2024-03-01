@@ -95,6 +95,7 @@ public class FallingGrid extends Grid {
     public int currentChunkNum;
     public int[] chunkSize;
     public int[] chunkBasePos;
+    public int toReverse = 0;
     private Matrix4f viewMatrix = new Matrix4f();
     private Matrix4f modelMatrix = new Matrix4f();
 
@@ -434,7 +435,11 @@ public class FallingGrid extends Grid {
                 }
             }
         }
-        inverse = !inverse;
+        toReverse++;
+        if(toReverse > 0) {
+            toReverse = 0;
+            inverse = !inverse;
+        }
         tick++;
         double stepTime = System.nanoTime() - start;
         return stepTime/1e6;
