@@ -11,8 +11,7 @@ import java.awt.*;
 import static org.lwjgl.glfw.GLFW.glfwGetTime;
 
 public class FallingWorld extends FallingSandWorld {
-    Grid grid;
-    FallingInput input;
+    public Grid grid;
     double mspt = 0;
     double gridStepTime = 0;
     double updateTimeRate = 0.15;
@@ -24,8 +23,8 @@ public class FallingWorld extends FallingSandWorld {
         FallingData.inputTool = new InputTool(window);
         FallingData.window = window;
         grid = new FallingGrid();
-        input = new FallingInput(grid);
         this.window = window;
+        FallingData.world = this;
         uiManager = new UIManager();
         FallingData.uiManager = uiManager;
     }
@@ -34,7 +33,6 @@ public class FallingWorld extends FallingSandWorld {
     public void input() {
         FallingData.inputTool.input();
         uiManager.handleInput();
-        input.input(window.id());
     }
 
     @Override
@@ -59,13 +57,6 @@ public class FallingWorld extends FallingSandWorld {
                 "mspt: " + String.format("%.2f",mspt) + "ms",
                 new Font("Arial", Font.PLAIN, 12))[1];
         startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
-                "place-radius: " + input.radius, new Font("Arial", Font.PLAIN, 12))[1];
-        startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
-                "place-density: " + String.format("%.5f", input.density),
-                new Font("Arial", Font.PLAIN, 12))[1];
-        startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
-                "place-type: " + input.id, new Font("Arial", Font.PLAIN, 12))[1];
-        startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
                 "chunkNum: " + FallingData.chunkNum, new Font("Arial", Font.PLAIN, 12))[1];
         startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
                 "enableChunkUpdate: " + FallingData.enableChunkUpdate,
@@ -78,7 +69,6 @@ public class FallingWorld extends FallingSandWorld {
                 new Font("Arial", Font.PLAIN, 12))[1];
 
         grid.render(render);
-        input.render(render);
         uiManager.render(render);
     }
 

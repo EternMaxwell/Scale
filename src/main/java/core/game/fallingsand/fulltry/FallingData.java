@@ -20,6 +20,7 @@ public class FallingData {
     public static boolean invalidPassThrough = false;
     public static boolean pause = false;
     public static UIManager uiManager;
+    public static FallingWorld world;
 
     public static void startup() {
         scale = 1;

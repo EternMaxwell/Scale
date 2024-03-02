@@ -1,8 +1,11 @@
 package core.game.fallingsand.fulltry.ui;
 
 import core.game.fallingsand.fulltry.FallingData;
+import core.game.fallingsand.fulltry.FallingInput;
 import core.game.fallingsand.fulltry.InputTool;
 import core.render.EasyRender;
+import org.joml.Matrix4f;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 import java.util.HashMap;
@@ -16,9 +19,10 @@ public class UIManager {
     public UIManager() {
         pages = new HashMap<>();
         addPage("default", new UIPage(this) {
+            FallingInput fallingInput = new FallingInput(FallingData.world.grid);
             @Override
             public void render(EasyRender render) {
-
+                fallingInput.render(render);
             }
 
             @Override
@@ -30,6 +34,7 @@ public class UIManager {
                 if(FallingData.inputTool.isKeyJustPressed(GLFW_KEY_P)) {
                     FallingData.pause = !FallingData.pause;
                 }
+                fallingInput.input(FallingData.window.id());
             }
 
             @Override
@@ -41,7 +46,15 @@ public class UIManager {
         addPage("menu", new UIPage(this) {
             @Override
             public void render(EasyRender render) {
+                render.triangle.setViewMatrix(new Matrix4f().identity());
+                render.triangle.drawTriangle2D(-render.window.ratio(), -1, render.window.ratio(), -1,
+                        render.window.ratio(), 1, 0,0,0,0.5f);
+                render.triangle.drawTriangle2D(-render.window.ratio(), -1, -render.window.ratio(), 1,
+                        render.window.ratio(), 1, 0,0,0,0.5f);
 
+                render.text.drawTextLB(5,0,0,1,1,1,1,"MENU", new java.awt.Font("Arial", java.awt.Font.PLAIN, 16));
+                render.triangle.flush();
+                render.text.flush();
             }
 
             @Override
