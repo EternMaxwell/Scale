@@ -174,7 +174,6 @@ public class Application {
         renderer.point.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
         int height = window.height();
         int width = window.width();
-        renderer.text.setProjectionMatrix(new Matrix4f().ortho(0, width, 0, height, -1, 1));
 //
 //        float rate = 1.35f;
 //        renderer.image.drawTexture(-1 * rate,-1 * rate,2 * rate,2 * rate,1,1, 1,0.8f,0,0,1,1, testTexture, testSampler);

@@ -5,6 +5,7 @@ import core.game.fallingsand.Grid;
 import core.game.fallingsand.fulltry.ui.UIManager;
 import core.render.EasyRender;
 import core.render.Window;
+import org.joml.Matrix4f;
 
 import java.awt.*;
 
@@ -50,6 +51,8 @@ public class FallingWorld extends FallingSandWorld {
         int startH = window.height();
         int x = window.width();
 
+
+        render.text.setProjectionMatrix(new Matrix4f().ortho(0, render.window.width(), 0, render.window.height(), -1, 1));
         startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
                 "grid step time: " + String.format("%.2f",gridStepTime) + "ms",
                 new Font("Arial", Font.PLAIN, 12))[1];

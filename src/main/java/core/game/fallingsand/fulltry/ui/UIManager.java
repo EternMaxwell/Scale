@@ -47,12 +47,13 @@ public class UIManager {
             @Override
             public void render(EasyRender render) {
                 render.triangle.setViewMatrix(new Matrix4f().identity());
+                render.text.setProjectionMatrix(new Matrix4f().ortho(-render.window.ratio(), render.window.ratio(), -1, 1, -1, 1));
                 render.triangle.drawTriangle2D(-render.window.ratio(), -1, render.window.ratio(), -1,
                         render.window.ratio(), 1, 0,0,0,0.5f);
                 render.triangle.drawTriangle2D(-render.window.ratio(), -1, -render.window.ratio(), 1,
                         render.window.ratio(), 1, 0,0,0,0.5f);
 
-                render.text.drawTextLB(5,0,0,1,1,1,1,"MENU", new java.awt.Font("Arial", java.awt.Font.PLAIN, 16));
+                render.text.drawTextRelative(0,0,0.1f,1,1,1,1,"MENU", new java.awt.Font("Arial", java.awt.Font.PLAIN, 128), 0.5f, 0.5f);
                 render.triangle.flush();
                 render.text.flush();
             }

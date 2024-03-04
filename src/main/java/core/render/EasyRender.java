@@ -1359,6 +1359,55 @@ public class EasyRender {
             vertexCount = 0;
         }
 
+        public int[] drawTextRelative(float x, float y, float h, float r, float g, float b, float a, String text, Font font, float xCenter, float yCenter){
+            Graphics2D g2d = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics();
+            g2d.setFont(font);
+            FontMetrics metrics = g2d.getFontMetrics(font);
+            int width = metrics.stringWidth(text);
+            int height = metrics.getHeight();
+            g2d.dispose();
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            g2d = image.createGraphics();
+            //g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g2d.setBackground(new Color(0,0,0,0));
+            g2d.setFont(font);
+            g2d.setPaint(new Color(255,255,255,255));
+            int h1 = metrics.getAscent();
+            g2d.drawString(text, 0, h1);
+            g2d.dispose();
+
+            ByteBuffer buffer = MemoryUtil.memAlloc(image.getWidth() * image.getHeight() * 4);
+            for (int j = image.getHeight()-1; j >=0; j--) {
+                for (int i = 0; i < image.getWidth(); i++) {
+                    buffer.put((byte) (image.getRGB(i, j) >> 16 & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) >> 8 & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) & 0xFF));
+                    buffer.put((byte) (image.getRGB(i, j) >> 24 & 0xFF));
+                }
+            }
+            buffer.flip();
+
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.getWidth(), image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+            glGenerateMipmap(GL_TEXTURE_2D);
+            MemoryUtil.memFree(buffer);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            if(h <= 0){
+                h = height;
+            }
+            draw(x - xCenter * h * width / height, y - yCenter * h, h * width / height, h, r, g, b, a, 0, 0, 1, 1);
+
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glBindSampler(1, sampler);
+            flush();
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindSampler(1, 0);
+            glActiveTexture(0);
+
+            return new int[]{width, height};
+        }
+
         /**
          * draw a text with the given font and position with the bottom left as the origin
          * @param x the x position of the text
@@ -1533,7 +1582,7 @@ public class EasyRender {
             if(h <= 0){
                 h = height;
             }
-            draw(x - width, y, h * width / height, h, r, g, b, a, 0, 0, 1, 1);
+            draw(x - h * width / height, y, h * width / height, h, r, g, b, a, 0, 0, 1, 1);
 
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, texture);
@@ -1596,7 +1645,7 @@ public class EasyRender {
             if(h <= 0){
                 h = height;
             }
-            draw(x - width, y - height, h * width / height, h, r, g, b, a, 0, 0, 1, 1);
+            draw(x - h * width / height, y - h, h * width / height, h, r, g, b, a, 0, 0, 1, 1);
 
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, texture);
