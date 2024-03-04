@@ -55,9 +55,16 @@ public abstract class FluidSolid extends Element {
         //if didn't move then check the block below
         //if the block below is liquid then move to it
         Element below = grid.get(x, iy - 1);
+        Element above = grid.get(x, iy + 1);
         if(below!=null && below.type() == FallingType.FLUID){
             if(below.density() >= density()){
                 sinkingProcess = 0.0f;
+                if(above == null || above.type() != FallingType.FLUID || (above.type() == FallingType.FLUID && above.density() <= density())) {
+                    grid.set(x, iy - 1, this);
+                    grid.set(x, iy, below);
+                    lastTick = tick;
+                    return true;
+                }
             }else {
                 sinkingProcess += (density() - below.density())/density();
                 lastTick = tick;

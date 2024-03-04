@@ -4,6 +4,7 @@ import core.game.fallingsand.Element;
 import core.game.fallingsand.Grid;
 
 public abstract class Solid extends Element {
+
     /**
      * @return Solid type.
      */

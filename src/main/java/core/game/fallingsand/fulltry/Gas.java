@@ -6,6 +6,7 @@ import core.game.fallingsand.Grid;
 public abstract class Gas extends Element {
     int lastStepTick = -1;
     float sinkingProcess = 0.0f;
+    public static final float AIR_DENSITY = 0.05f;
 
     /**
      * @return Gas type.
@@ -65,7 +66,7 @@ public abstract class Gas extends Element {
         int dir = Math.random() > 0.5 ? 1 : -1;
         Element diagonal = grid.get(x + dir, y + 1);
         if (diagonal == null && (grid.valid(x + dir, y + 1) || FallingData.invalidPassThrough)) {
-            sinkingProcess += 1 - density();
+            sinkingProcess += 1 - density()/AIR_DENSITY;
             if(sinkingProcess >= 1){
                 sinkingProcess = 0;
                 moved = true;
@@ -78,7 +79,7 @@ public abstract class Gas extends Element {
         } else {
             diagonal = grid.get(x - dir, y + 1);
             if (diagonal == null && (grid.valid(x - dir, y + 1) || FallingData.invalidPassThrough)) {
-                sinkingProcess += 1 - density();
+                sinkingProcess += 1 - density()/AIR_DENSITY;
                 if(sinkingProcess >= 1){
                     sinkingProcess = 0;
                     moved = true;

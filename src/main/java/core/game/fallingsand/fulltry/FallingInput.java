@@ -1,7 +1,7 @@
 package core.game.fallingsand.fulltry;
 
 import core.game.fallingsand.Grid;
-import core.game.fallingsand.easyfallingsand.Elements;
+import core.game.fallingsand.fulltry.elements.Elements;
 import core.render.EasyRender;
 import org.joml.Matrix4f;
 
@@ -27,62 +27,53 @@ public class FallingInput {
     public void input(long window) {
         Random random = new Random();
         if (FallingData.inputTool.isKeyJustPressed(GLFW_KEY_EQUAL)) {
-            id = (id + 1) % 3;
+            id = (id + 1) % elements.totalElements();
         }
         if (FallingData.inputTool.isKeyJustPressed(GLFW_KEY_MINUS)) {
-            id = (id - 1) % 3;
+            id = (id - 1) % elements.totalElements();
             if (id < 0)
-                id += 3;
+                id += elements.totalElements();
         }
-        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+        if (FallingData.inputTool.isKeyPressed(GLFW_KEY_UP)) {
             radius++;
         }
-        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        if (FallingData.inputTool.isKeyPressed(GLFW_KEY_DOWN)) {
             radius--;
             if (radius < 0) {
                 radius = 0;
             }
         }
-        if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+        if (FallingData.inputTool.isKeyPressed(GLFW_KEY_RIGHT)) {
             density += 0.01f;
             if (density > 1) {
                 density = 1;
             }
         }
-        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+        if (FallingData.inputTool.isKeyPressed(GLFW_KEY_LEFT)) {
             density -= 0.01f;
             if (density < 0) {
                 density = 0;
             }
         }
-        if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
-            id = 0;
-        }
-        if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
-            id = 1;
-        }
-        if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
-            id = 2;
-        }
-        if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
+        if(FallingData.inputTool.isKeyPressed(GLFW_KEY_S)){
             FallingData.cameraCentrePos[1] -= 4;
         }
-        if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
+        if(FallingData.inputTool.isKeyPressed(GLFW_KEY_W)){
             FallingData.cameraCentrePos[1] += 4;
         }
-        if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
+        if(FallingData.inputTool.isKeyPressed(GLFW_KEY_A)){
             FallingData.cameraCentrePos[0] -= 4;
         }
-        if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
+        if(FallingData.inputTool.isKeyPressed(GLFW_KEY_D)){
             FallingData.cameraCentrePos[0] += 4;
         }
-        if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS){
+        if(FallingData.inputTool.isKeyPressed(GLFW_KEY_E)){
             FallingData.scale *= 0.98f;
         }
-        if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
+        if(FallingData.inputTool.isKeyPressed(GLFW_KEY_Q)){
             FallingData.scale *= 1.02f;
         }
-        if(glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS){
+        if(FallingData.inputTool.isKeyJustPressed(GLFW_KEY_TAB)){
             if(!lastTickChunkUpdateKey){
                 FallingData.enableChunkUpdate = !FallingData.enableChunkUpdate;
             }
@@ -189,7 +180,7 @@ public class FallingInput {
         render.line.drawLine2D(x1 + length, y1 - length, x1 + length, y1 + length, 1, 0, 0, 0.5f);
         render.line.drawLine2D(x1 - length, y1 + length, x1 + length, y1 + length, 1, 0, 0, 0.5f);
 
-        float color[] = elements.getFromId(id).color();
+        float color[] = elements.getFromId(id).defaultColor();
         for (int x = 0; x < 32; x++)
             for (int y = 0; y < 32; y++) {
                 if (random.nextFloat() < density)

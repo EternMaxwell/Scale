@@ -2,6 +2,7 @@ package core.game.fallingsand.fulltry;
 
 import core.game.fallingsand.Element;
 import core.game.fallingsand.Grid;
+import core.game.fallingsand.fulltry.elements.Elements;
 
 public abstract class Fluid extends Element {
     boolean falling = true;
@@ -75,6 +76,7 @@ public abstract class Fluid extends Element {
             velocity *= 0.985f;
             return true;
         }
+
         //if didn't move then check the block below
         //if the block below is liquid then move to it
         Element below = grid.get(x, iy - 1);
@@ -92,52 +94,51 @@ public abstract class Fluid extends Element {
                     return true;
                 }
             }
-            return false;
         }
         //check the block at the bottom left and right
         //if the block is empty then move to it
-        Element side = grid.get(x + dir, iy - 1);
-        if ((side == null || side.type() == FallingType.GAS) && (grid.valid(x + dir, iy - 1) || FallingData.invalidPassThrough)) {
+        Element diagnose = grid.get(x + dir, iy - 1);
+        if ((diagnose == null || diagnose.type() == FallingType.GAS) && (grid.valid(x + dir, iy - 1) || FallingData.invalidPassThrough)) {
             grid.set(x + dir, iy - 1, this);
-            grid.set(x, iy, side);
+            grid.set(x, iy, diagnose);
             moved = true;
         } else {
-            side = grid.get(x - dir, iy - 1);
-            if ((side == null || side.type() == FallingType.GAS) && (grid.valid(x - dir, iy - 1) || FallingData.invalidPassThrough)) {
+            diagnose = grid.get(x - dir, iy - 1);
+            if ((diagnose == null || diagnose.type() == FallingType.GAS) && (grid.valid(x - dir, iy - 1) || FallingData.invalidPassThrough)) {
                 grid.set(x - dir, iy - 1, this);
-                grid.set(x, iy, side);
+                grid.set(x, iy, diagnose);
                 moved = true;
             }
         }
         //if the block at the bottom left and right is liquid then try sinking
         if (!moved) {
-            side = grid.get(x + dir, iy-1);
-            if(side != null && (side.type() == FallingType.FLUID || side.type() == FallingType.FLUIDSOLID)){
-                if(side.density() >= density()){
+            diagnose = grid.get(x + dir, iy-1);
+            if(diagnose != null && (diagnose.type() == FallingType.FLUID || diagnose.type() == FallingType.FLUIDSOLID)){
+                if(diagnose.density() >= density()){
                     sinkingProcess = 0.0f;
                 }else {
-                    sinkingProcess += (density() - side.density()) / density();
+                    sinkingProcess += (density() - diagnose.density()) / density();
                     lastTick = tick;
                     grid.set(x, iy, this);
                     if (sinkingProcess >= 1) {
                         grid.set(x + dir, iy - 1, this);
-                        grid.set(x, iy, side);
+                        grid.set(x, iy, diagnose);
                         sinkingProcess = 0.0f;
                         moved = true;
                     }
                 }
             }else {
-                side = grid.get(x - dir, iy-1);
-                if(side != null && (side.type() == FallingType.FLUID || side.type() == FallingType.FLUIDSOLID)){
-                    if(side.density() >= density()){
+                diagnose = grid.get(x - dir, iy-1);
+                if(diagnose != null && (diagnose.type() == FallingType.FLUID || diagnose.type() == FallingType.FLUIDSOLID)){
+                    if(diagnose.density() >= density()){
                         sinkingProcess = 0.0f;
                     }else {
-                        sinkingProcess += (density() - side.density()) / density();
+                        sinkingProcess += (density() - diagnose.density()) / density();
                         lastTick = tick;
                         grid.set(x, iy, this);
                         if (sinkingProcess >= 1) {
                             grid.set(x - dir, iy - 1, this);
-                            grid.set(x, iy, side);
+                            grid.set(x, iy, diagnose);
                             sinkingProcess = 0.0f;
                             moved = true;
                         }
@@ -149,16 +150,25 @@ public abstract class Fluid extends Element {
         if (!moved) {
             int dirL = 0;
             boolean dirBlock = false;
+            Element side;
             for(int i = 1; i <= dispersionRate(); i++) {
                 side = grid.get(x + dir * i, iy);
                 if ((side == null || side.type() == FallingType.GAS) && (grid.valid(x + dir * i, iy) || FallingData.invalidPassThrough)) {
                     dirL = i;
                 } else {
-                    dirBlock = true;
+                    if(side != null && side.type() == FallingType.FLUIDSOLID && side.density() < density()){
+//                        Element sideAbove = grid.get(x + dir * i, iy + 1);
+                        if(Math.random() > 0.4) {
+                            dirL = i;
+                        }else
+                            dirBlock = true;
+                    }else
+                        dirBlock = true;
                     break;
                 }
             }
             if(dirL > 0) {
+                side = grid.get(x + dir * dirL, iy);
                 grid.set(x + dir * dirL, iy, this);
                 grid.set(x, iy, side);
                 moved = true;
@@ -175,6 +185,7 @@ public abstract class Fluid extends Element {
                         }
                     }
                     if(dirL > 0) {
+                        side = grid.get(x + dir * dirL, iy);
                         grid.set(x + dir * dirL, iy, this);
                         grid.set(x, iy, side);
                         moved = true;
@@ -183,7 +194,7 @@ public abstract class Fluid extends Element {
                     grid.set(x, iy, this);
                 }
             }
-            lastBlocked += dirBlock? 1: 0;
+            lastBlocked = dirBlock? lastBlocked + 1: 0;
         }
         //if moved then update lastTick
         if(moved){

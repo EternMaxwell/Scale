@@ -1,6 +1,7 @@
 package core.game.fallingsand;
 
 public abstract class Element {
+    protected float[] color;
 
     /**
      * update the element.
@@ -23,7 +24,9 @@ public abstract class Element {
      *
      * @return the color.
      */
-    public abstract float[] color();
+    public float[] color(){
+        return color;
+    }
 
     /**
      * get the id of the element.
