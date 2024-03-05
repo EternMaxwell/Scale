@@ -158,10 +158,10 @@ public abstract class Fluid extends Element {
                 } else {
                     if(side != null && side.type() == FallingType.FLUIDSOLID && side.density() < density()){
 //                        Element sideAbove = grid.get(x + dir * i, iy + 1);
-                        if(Math.random() > 0.4) {
+                        if(Math.random() > .4) {
                             dirL = i;
-                        }else
                             dirBlock = true;
+                        }
                     }else
                         dirBlock = true;
                     break;

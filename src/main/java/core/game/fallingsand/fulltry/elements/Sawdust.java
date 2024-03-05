@@ -5,8 +5,8 @@ import core.game.fallingsand.fulltry.FluidSolid;
 public class Sawdust extends FluidSolid {
 
     public Sawdust() {
-        float l = (float) Math.random();
-        color = new float[]{0.75f+0.15F*l, 0.7f+0.15f*l, 0.01f*(1f-l), 1};
+        float l = (float)(Math.random() * 0.2 + 0.8);
+        color = new float[]{defaultColor()[0] * l, defaultColor()[1] * l, defaultColor()[2] * l, 1};
     }
 
     /**
@@ -36,6 +36,6 @@ public class Sawdust extends FluidSolid {
      */
     @Override
     public float[] defaultColor() {
-        return new float[]{0.9f, 0.9f, 0.1f, 1};
+        return new float[]{73f/256, 57f/256, 0, 1};
     }
 }

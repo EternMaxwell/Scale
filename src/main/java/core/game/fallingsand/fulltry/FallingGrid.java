@@ -435,6 +435,7 @@ public class FallingGrid extends Grid {
                 }
             }
         }
+        randomTick();
         toReverse++;
         if(toReverse > 0) {
             toReverse = 0;
@@ -528,5 +529,14 @@ public class FallingGrid extends Grid {
 
         render.pixel.flush();
         render.line.flush();
+    }
+
+    public void randomTick(){
+
+    }
+
+    @Override
+    public int[] basePos() {
+        return new int[]{chunkBasePos[0] * FallingData.chunkWidth, chunkBasePos[1] * FallingData.chunkWidth};
     }
 }

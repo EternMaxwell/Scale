@@ -12,4 +12,9 @@ public abstract class Grid {
     public abstract boolean valid(int x, int y);
     public void render(EasyRender render){
     }
+    public int[] basePos(){
+        return new int[]{0, 0};
+    }
+    public void action(double x, double y, int action, double[] arguments){
+    }
 }

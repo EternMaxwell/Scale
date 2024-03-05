@@ -86,4 +86,18 @@ public abstract class Element {
     public boolean heat(Grid grid, int x, int y, int tick, float heat) {
         return false;
     }
+
+    /**
+     * do something when receiving damage.
+     *
+     * @param grid the grid.
+     * @param x    the x position.
+     * @param y    the y position.
+     * @param tick the tick.
+     * @param damage the damage.
+     * @return if the damage make sense.
+     */
+    public boolean damage(Grid grid, int x, int y, int tick, float damage) {
+        return false;
+    }
 }
