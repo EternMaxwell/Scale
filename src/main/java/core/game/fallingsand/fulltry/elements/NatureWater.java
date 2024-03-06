@@ -4,6 +4,8 @@ import core.game.fallingsand.fulltry.Fluid;
 
 public class NatureWater extends Fluid {
 
+    private static final float steamHeat = 100;
+
     public NatureWater(){
         color = new float[]{0.1f, 0.1f, 1f, 0.8f};
     }
@@ -44,5 +46,14 @@ public class NatureWater extends Fluid {
     @Override
     public int dispersionRate() {
         return 3;
+    }
+
+    @Override
+    public boolean heat(core.game.fallingsand.Grid grid, int x, int y, int tick, float heat) {
+        if(heat > 100){
+            grid.set(x, y, new Steam());
+            return true;
+        }
+        return false;
     }
 }

@@ -8,7 +8,7 @@ public class Wood extends Solid {
 
     private boolean burning = false;
     private int burnTime = 0;
-    private float life = 900;
+    private float life = 400;
     private final static float burnHeat = 100;
 
     public Wood() {

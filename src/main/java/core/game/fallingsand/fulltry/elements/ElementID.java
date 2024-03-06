@@ -7,4 +7,5 @@ public interface ElementID {
     public static final int SAWDUST = 3;
     public static final int WOOD = 4;
     public static final int SMOKE = 5;
+    public static final int STEAM = 6;
 }

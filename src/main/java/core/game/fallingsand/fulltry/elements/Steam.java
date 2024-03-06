@@ -1,11 +1,11 @@
 package core.game.fallingsand.fulltry.elements;
 
+import core.game.fallingsand.Element;
 import core.game.fallingsand.Grid;
 import core.game.fallingsand.fulltry.Gas;
 
-public class Smoke extends Gas {
-
-    public Smoke() {
+public class Steam extends Gas {
+    public Steam() {
         super(2000 + (int)(Math.random() * 800));
         color = defaultColor();
     }
@@ -17,7 +17,7 @@ public class Smoke extends Gas {
      */
     @Override
     public int id() {
-        return ElementID.SMOKE;
+        return ElementID.STEAM;
     }
 
     /**
@@ -27,7 +27,7 @@ public class Smoke extends Gas {
      */
     @Override
     public float density() {
-        return 0.03f;
+        return 0.026f;
     }
 
     /**
@@ -37,6 +37,15 @@ public class Smoke extends Gas {
      */
     @Override
     public float[] defaultColor() {
-        return new float[]{0.5f, 0.5f, 0.5f, 0.6f};
+        return new float[]{0.8f,0.8f,0.8f,0.4f};
+    }
+
+    @Override
+    public Element existTimeEndReplaceElement(){
+        if(Math.random() < 0.2){
+            return new NatureWater();
+        }else {
+            return null;
+        }
     }
 }

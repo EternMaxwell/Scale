@@ -29,8 +29,12 @@ public class Elements {
         return new Smoke();
     }
 
+    public Element steam(){
+        return new Steam();
+    }
+
     public int totalElements(){
-        return 6;
+        return 7;
     }
 
     public Element getFromId(int id) {
@@ -41,6 +45,7 @@ public class Elements {
             case 3 -> sawdust();
             case 4 -> wood();
             case 5 -> smoke();
+            case 6 -> steam();
             default -> null;
         };
     }
