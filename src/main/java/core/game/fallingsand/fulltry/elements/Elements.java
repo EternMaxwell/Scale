@@ -21,8 +21,16 @@ public class Elements {
         return new Sawdust();
     }
 
+    public Element wood(){
+        return new Wood();
+    }
+
+    public Element smoke(){
+        return new Smoke();
+    }
+
     public int totalElements(){
-        return 4;
+        return 6;
     }
 
     public Element getFromId(int id) {
@@ -31,6 +39,8 @@ public class Elements {
             case 1 -> yellow_sand();
             case 2 -> nature_water();
             case 3 -> sawdust();
+            case 4 -> wood();
+            case 5 -> smoke();
             default -> null;
         };
     }

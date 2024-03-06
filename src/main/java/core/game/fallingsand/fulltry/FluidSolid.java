@@ -61,9 +61,7 @@ public abstract class FluidSolid extends Element {
         Element left = grid.get(x - 1, iy);
         Element right = grid.get(x + 1, iy);
         if (above != null && above.type() == FallingType.FLUID) {
-            if (above.density() <= density()) {
-                floatingProcess = 0.0f;
-            } else {
+            if(above.density() > density()){
                 floatingProcess += (above.density() - density()) / above.density();
                 grid.set(x, iy, this);
                 if (floatingProcess >= 1) {
@@ -85,7 +83,6 @@ public abstract class FluidSolid extends Element {
         above = grid.get(x, iy + 1);
         if (below != null && below.type() == FallingType.FLUID) {
             if (below.density() >= density()) {
-                sinkingProcess = 0.0f;
                 if (sinkInLargeDensity && (above == null || !(left == null || (left.type() == FallingType.FLUID && left.density() >= density()))
                         && !(right == null || (right.type() == FallingType.FLUID && right.density() >= density())))) {
                     grid.set(x, iy - 1, this);
@@ -131,33 +128,31 @@ public abstract class FluidSolid extends Element {
         if (!moved) {
             side = grid.get(x + dir, iy - 1);
             if (side != null && side.type() == FallingType.FLUID) {
-                if (side.density() >= density()) {
-                    sinkingProcess = 0.0f;
-                } else {
-                    sinkingProcess += (density() - side.density()) / density();
-                    lastTick = tick;
-                    grid.set(x, iy, this);
-                    if (sinkingProcess >= 1) {
-                        grid.set(x + dir, iy - 1, this);
-                        grid.set(x, iy, side);
-                        sinkingProcess = 0.0f;
-                        moved = true;
-                    }
-                }
-            } else {
-                side = grid.get(x - dir, iy - 1);
-                if (side != null && side.type() == FallingType.FLUID) {
-                    if (side.density() >= density()) {
-                        sinkingProcess = 0.0f;
-                    } else {
+                if (side.density() < density()) {
+                    {
                         sinkingProcess += (density() - side.density()) / density();
                         lastTick = tick;
                         grid.set(x, iy, this);
                         if (sinkingProcess >= 1) {
-                            grid.set(x - dir, iy - 1, this);
+                            grid.set(x + dir, iy - 1, this);
                             grid.set(x, iy, side);
                             sinkingProcess = 0.0f;
                             moved = true;
+                        }
+                    }
+                } else {
+                    side = grid.get(x - dir, iy - 1);
+                    if (side != null && side.type() == FallingType.FLUID) {
+                        if (side.density() < density()) {
+                            sinkingProcess += (density() - side.density()) / density();
+                            lastTick = tick;
+                            grid.set(x, iy, this);
+                            if (sinkingProcess >= 1) {
+                                grid.set(x - dir, iy - 1, this);
+                                grid.set(x, iy, side);
+                                sinkingProcess = 0.0f;
+                                moved = true;
+                            }
                         }
                     }
                 }

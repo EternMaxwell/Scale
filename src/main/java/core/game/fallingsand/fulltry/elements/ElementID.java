@@ -5,4 +5,6 @@ public interface ElementID {
     public static final int YELLOW_SAND = 1;
     public static final int NATURE_WATER = 2;
     public static final int SAWDUST = 3;
+    public static final int WOOD = 4;
+    public static final int SMOKE = 5;
 }

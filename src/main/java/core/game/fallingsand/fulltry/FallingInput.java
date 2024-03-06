@@ -1,5 +1,6 @@
 package core.game.fallingsand.fulltry;
 
+import core.game.fallingsand.Element;
 import core.game.fallingsand.Grid;
 import core.game.fallingsand.fulltry.elements.Elements;
 import core.render.EasyRender;
@@ -97,7 +98,7 @@ public class FallingInput {
         x += (int) FallingData.cameraCentrePos[0];
         y += (int) FallingData.cameraCentrePos[1];
 
-        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        if (FallingData.inputTool.isMousePressed(GLFW_MOUSE_BUTTON_LEFT)) {
             float length = (float) Math.sqrt((x - lastMousePos[0]) * (x - lastMousePos[0]) + (y - lastMousePos[1]) * (y - lastMousePos[1]));
             if (length != 0) {
                 for (int i = 0; i <= length / radius; i++) {
@@ -126,7 +127,7 @@ public class FallingInput {
             }
         }
 
-        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+        if (FallingData.inputTool.isMousePressed(GLFW_MOUSE_BUTTON_RIGHT)) {
             float length = (float) Math.sqrt((x - lastMousePos[0]) * (x - lastMousePos[0]) + (y - lastMousePos[1]) * (y - lastMousePos[1]));
             if (length != 0) {
                 for (int i = 0; i <= length / radius; i++) {
@@ -145,6 +146,19 @@ public class FallingInput {
                     for (int iy = y - radius; iy < y + radius; iy++) {
                         if (grid.valid(ix, iy)) {
                             grid.set(ix, iy, null);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (FallingData.inputTool.isKeyPressed(GLFW_KEY_F)){
+            for (int ix = x - radius; ix < x + radius; ix++) {
+                for (int iy = y - radius; iy < y + radius; iy++) {
+                    if (grid.valid(ix, iy)) {
+                        Element element = grid.get(ix, iy);
+                        if(element != null){
+                            element.heat(grid, ix, iy, FallingData.tick, 500);
                         }
                     }
                 }

@@ -7,6 +7,8 @@ import core.render.EasyRender;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
+import java.util.Random;
+
 import static org.lwjgl.glfw.GLFW.glfwGetWindowSize;
 
 public class FallingGrid extends Grid {
@@ -442,6 +444,7 @@ public class FallingGrid extends Grid {
             inverse = !inverse;
         }
         tick++;
+        FallingData.tick = tick;
         double stepTime = System.nanoTime() - start;
         return stepTime/1e6;
     }
@@ -532,7 +535,73 @@ public class FallingGrid extends Grid {
     }
 
     public void randomTick(){
-
+        Random random = new Random();
+        int chunkWidth = FallingData.chunkWidth;
+        for(int chunkX = 0; chunkX < chunkSize[0]; chunkX++){
+            for(int chunkY = 0; chunkY < chunkSize[1]; chunkY++){
+                Chunk chunk = chunks[chunkX][chunkY];
+                if(chunk == null)
+                    continue;
+                int x;
+                int y;
+                for(int i = 0; i < 64; i++){
+                    x = random.nextInt(chunkWidth);
+                    y = random.nextInt(64);
+                    Element element = chunk.get(x, y);
+                    if(element != null){
+                        element.randomTick(this, chunkX * chunkWidth + x, chunkY * chunkWidth + y, tick, 1);
+                    }
+                }
+                for(int i = 0; i < 32; i++){
+                    x = random.nextInt(chunkWidth);
+                    y = random.nextInt(chunkWidth);
+                    Element element = chunk.get(x, y);
+                    if(element != null){
+                        element.randomTick(this, chunkX * chunkWidth + x, chunkY * chunkWidth + y, tick, 2);
+                    }
+                }
+                for (int i = 0; i < 16; i++) {
+                    x = random.nextInt(chunkWidth);
+                    y = random.nextInt(chunkWidth);
+                    Element element = chunk.get(x, y);
+                    if (element != null) {
+                        element.randomTick(this, chunkX * chunkWidth + x, chunkY * chunkWidth + y, tick, 3);
+                    }
+                }
+                for (int i = 0; i < 8; i++) {
+                    x = random.nextInt(chunkWidth);
+                    y = random.nextInt(chunkWidth);
+                    Element element = chunk.get(x, y);
+                    if (element != null) {
+                        element.randomTick(this, chunkX * chunkWidth + x, chunkY * chunkWidth + y, tick, 4);
+                    }
+                }
+                for(int i = 0; i < 4; i++){
+                    x = random.nextInt(chunkWidth);
+                    y = random.nextInt(chunkWidth);
+                    Element element = chunk.get(x, y);
+                    if(element != null){
+                        element.randomTick(this, chunkX * chunkWidth + x, chunkY * chunkWidth + y, tick, 5);
+                    }
+                }
+                for (int i = 0; i < 2; i++) {
+                    x = random.nextInt(chunkWidth);
+                    y = random.nextInt(chunkWidth);
+                    Element element = chunk.get(x, y);
+                    if (element != null) {
+                        element.randomTick(this, chunkX * chunkWidth + x, chunkY * chunkWidth + y, tick, 6);
+                    }
+                }
+                for (int i = 0; i < 1; i++) {
+                    x = random.nextInt(chunkWidth);
+                    y = random.nextInt(chunkWidth);
+                    Element element = chunk.get(x, y);
+                    if (element != null) {
+                        element.randomTick(this, chunkX * chunkWidth + x, chunkY * chunkWidth + y, tick, 7);
+                    }
+                }
+            }
+        }
     }
 
     @Override

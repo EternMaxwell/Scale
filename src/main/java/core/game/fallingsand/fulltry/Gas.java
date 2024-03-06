@@ -4,9 +4,15 @@ import core.game.fallingsand.Element;
 import core.game.fallingsand.Grid;
 
 public abstract class Gas extends Element {
+    int existenceTime;
     int lastStepTick = -1;
     float sinkingProcess = 0.0f;
+    boolean sinkingTried = false;
     public static final float AIR_DENSITY = 0.05f;
+
+    public Gas(int existenceTime){
+        this.existenceTime = existenceTime;
+    }
 
     /**
      * @return Gas type.
@@ -33,23 +39,33 @@ public abstract class Gas extends Element {
     }
 
     public boolean step(Grid grid, int x, int y, int tick) {
+        grid.set(x, y, this);
+        existenceTime--;
+        if(existenceTime <= 0){
+            grid.set(x, y, null);
+            return true;
+        }
+
         boolean moved = false;
+        sinkingTried = false;
         //check the above block
         Element above = grid.get(x, y + 1);
         if (above == null && (grid.valid(x, y + 1) || FallingData.invalidPassThrough)) {
-            sinkingProcess += 1 - density();
+            sinkingProcess += 1 - density()/AIR_DENSITY;
+            sinkingTried = true;
             if(sinkingProcess >= 1){
                 sinkingProcess = 0;
                 lastStepTick = tick;
                 moved = true;
                 grid.set(x, y + 1, this);
-                grid.set(x, y, null);
+                grid.set(x, y, above);
             }else {
                 grid.set(x, y, this);
             }
         } else if(above != null && above.type() == FallingType.GAS){
             if(above.density() > density()) {
                 sinkingProcess += (above.density() - density())/above.density();
+                sinkingTried = true;
                 if(sinkingProcess >= 1) {
                     sinkingProcess = 0;
                     moved = true;
@@ -59,14 +75,16 @@ public abstract class Gas extends Element {
                 }else {
                     grid.set(x, y, this);
                 }
-            }else
-                sinkingProcess = 0;
+            }
         }
-        //check the diagonal blocks
+        if(moved)
+            return true;
         int dir = Math.random() > 0.5 ? 1 : -1;
+        //check the diagonal blocks
         Element diagonal = grid.get(x + dir, y + 1);
         if (diagonal == null && (grid.valid(x + dir, y + 1) || FallingData.invalidPassThrough)) {
             sinkingProcess += 1 - density()/AIR_DENSITY;
+            sinkingTried = true;
             if(sinkingProcess >= 1){
                 sinkingProcess = 0;
                 moved = true;
@@ -80,6 +98,7 @@ public abstract class Gas extends Element {
             diagonal = grid.get(x - dir, y + 1);
             if (diagonal == null && (grid.valid(x - dir, y + 1) || FallingData.invalidPassThrough)) {
                 sinkingProcess += 1 - density()/AIR_DENSITY;
+                sinkingTried = true;
                 if(sinkingProcess >= 1){
                     sinkingProcess = 0;
                     moved = true;
@@ -97,6 +116,7 @@ public abstract class Gas extends Element {
             if (diagonal != null && diagonal.type() == FallingType.GAS) {
                 if (diagonal.density() > density()) {
                     sinkingProcess += (diagonal.density() - density()) / diagonal.density();
+                    sinkingTried = true;
                     if (sinkingProcess >= 1) {
                         sinkingProcess = 0;
                         moved = true;
@@ -106,13 +126,13 @@ public abstract class Gas extends Element {
                     } else {
                         grid.set(x, y, this);
                     }
-                } else
-                    sinkingProcess = 0;
+                }
             } else {
                 diagonal = grid.get(x - dir, y + 1);
                 if (diagonal != null && diagonal.type() == FallingType.GAS) {
                     if (diagonal.density() > density()) {
                         sinkingProcess += (diagonal.density() - density()) / diagonal.density();
+                        sinkingTried = true;
                         if (sinkingProcess >= 1) {
                             sinkingProcess = 0;
                             moved = true;
@@ -122,24 +142,27 @@ public abstract class Gas extends Element {
                         } else {
                             grid.set(x, y, this);
                         }
-                    } else
-                        sinkingProcess = 0;
+                    }
                 }
             }
         }
         //check the side blocks
-        if(!moved){
-            Element side = grid.get(x + dir, y);
-            if (side == null && (grid.valid(x + dir, y) || FallingData.invalidPassThrough)) {
-                grid.set(x + dir, y, this);
-                grid.set(x, y, null);
-                moved = true;
-            } else {
-                side = grid.get(x - dir, y);
-                if (side == null && (grid.valid(x - dir, y) || FallingData.invalidPassThrough)) {
-                    grid.set(x - dir, y, this);
+        if(!moved && !sinkingTried) {
+            sinkingProcess += 1 - density()/AIR_DENSITY;
+            if(sinkingProcess >= 1) {
+                sinkingProcess = 0;
+                Element side = grid.get(x + dir, y);
+                if (side == null && (grid.valid(x + dir, y) || FallingData.invalidPassThrough)) {
+                    grid.set(x + dir, y, this);
                     grid.set(x, y, null);
                     moved = true;
+                } else {
+                    side = grid.get(x - dir, y);
+                    if (side == null && (grid.valid(x - dir, y) || FallingData.invalidPassThrough)) {
+                        grid.set(x - dir, y, this);
+                        grid.set(x, y, null);
+                        moved = true;
+                    }
                 }
             }
         }
