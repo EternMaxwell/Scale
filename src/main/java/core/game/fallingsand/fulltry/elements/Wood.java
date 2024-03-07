@@ -8,7 +8,7 @@ public class Wood extends Solid {
 
     private boolean burning = false;
     private int burnTime = 0;
-    private float life = 400;
+    private float life = 600;
     private final static float burnHeat = 100;
 
     public Wood() {
@@ -72,7 +72,7 @@ public class Wood extends Solid {
         if(burning) {
             life -= 10f;
             burnTime--;
-            if(intensity >= 2){
+            if(intensity >= 3){
                 if(grid.valid(x, y + 1) && grid.get(x, y + 1) == null)
                     grid.set(x, y + 1, new Smoke());
                 else if(grid.valid(x + 1, y) && grid.get(x + 1, y) == null)
@@ -88,17 +88,25 @@ public class Wood extends Solid {
                 case 1 : nearbyHeat += 20;
             }
             Element nearby = grid.get(x + 1, y);
-            if(nearby != null)
+            if(nearby != null) {
                 nearby.heat(grid, x + 1, y, tick, nearbyHeat);
+                burnTime-=40;
+            }
             nearby = grid.get(x - 1, y);
-            if(nearby != null)
+            if(nearby != null) {
                 nearby.heat(grid, x - 1, y, tick, nearbyHeat);
+                burnTime-=40;
+            }
             nearby = grid.get(x, y + 1);
-            if(nearby != null)
+            if(nearby != null) {
                 nearby.heat(grid, x, y + 1, tick, nearbyHeat);
+                burnTime-=40;
+            }
             nearby = grid.get(x, y - 1);
-            if(nearby != null)
+            if(nearby != null) {
                 nearby.heat(grid, x, y - 1, tick, nearbyHeat);
+                burnTime-=40;
+            }
             if(burnTime <= 0) {
                 burning = false;
             }

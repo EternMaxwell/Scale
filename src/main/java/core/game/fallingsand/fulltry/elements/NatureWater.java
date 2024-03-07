@@ -1,5 +1,7 @@
 package core.game.fallingsand.fulltry.elements;
 
+import core.game.fallingsand.Element;
+import core.game.fallingsand.Grid;
 import core.game.fallingsand.fulltry.Fluid;
 
 public class NatureWater extends Fluid {
@@ -52,6 +54,31 @@ public class NatureWater extends Fluid {
     public boolean heat(core.game.fallingsand.Grid grid, int x, int y, int tick, float heat) {
         if(heat > 100){
             grid.set(x, y, new Steam());
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean randomTick(Grid grid, int x, int y, int tick, int intensity) {
+        Element element = grid.get(x, y - 1);
+        if(element != null){
+            element.heat(grid, x, y - 1, tick, -500);
+            return true;
+        }
+        element = grid.get(x + 1, y);
+        if(element != null){
+            element.heat(grid, x + 1, y, tick, -500);
+            return true;
+        }
+        element = grid.get(x - 1, y);
+        if(element != null){
+            element.heat(grid, x - 1, y, tick, -500);
+            return true;
+        }
+        element = grid.get(x, y + 1);
+        if(element != null){
+            element.heat(grid, x, y + 1, tick, -500);
             return true;
         }
         return false;
