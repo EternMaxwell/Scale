@@ -35,6 +35,9 @@ public class UIManager {
                     FallingData.pause = !FallingData.pause;
                 }
                 fallingInput.input(FallingData.window.id());
+                if(FallingData.inputTool.isKeyJustPressed(GLFW_KEY_T)){
+                    manager.setCurrent("world_tool");
+                }
             }
 
             @Override
@@ -71,6 +74,33 @@ public class UIManager {
 
             }
         });
+        addPage("world_tool", new UIPage(this) {
+            @Override
+            public void render(EasyRender render) {
+                render.triangle.setViewMatrix(new Matrix4f().identity());
+                render.text.setProjectionMatrix(new Matrix4f().ortho(-render.window.ratio(), render.window.ratio(), -1, 1, -1, 1));
+                render.triangle.drawTriangle2D(-render.window.ratio(), -1, render.window.ratio(), -1,
+                        render.window.ratio(), 1, 0,0,0,0.5f);
+                render.triangle.drawTriangle2D(-render.window.ratio(), -1, -render.window.ratio(), 1,
+                        render.window.ratio(), 1, 0,0,0,0.5f);
+
+                render.text.drawTextRelative(0,0,0.1f,1,1,1,1,"WORLD_TOOL", new java.awt.Font("Arial", java.awt.Font.PLAIN, 128), 0.5f, 0.5f);
+                render.triangle.flush();
+                render.text.flush();
+            }
+
+            @Override
+            public void handleInput() {
+                if(FallingData.inputTool.isKeyJustPressed(GLFW_KEY_ESCAPE) || FallingData.inputTool.isKeyJustPressed(GLFW_KEY_T)) {
+                    manager.setCurrent("default");
+                }
+            }
+
+            @Override
+            public void update() {
+
+            }
+        });
     }
 
     public void addPage(String name, UIPage page){
@@ -95,5 +125,9 @@ public class UIManager {
     public void update() {
         if(currentPage == null) return;
         currentPage.update();
+    }
+
+    public String getCurrentName() {
+        return currentName;
     }
 }
