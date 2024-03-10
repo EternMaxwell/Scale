@@ -34,7 +34,8 @@ public class UIManager {
                 if(FallingData.inputTool.isKeyJustPressed(GLFW_KEY_P)) {
                     FallingData.pause = !FallingData.pause;
                 }
-                fallingInput.input(FallingData.window.id());
+                if(manager.currentName.equals("default"))
+                    fallingInput.input(FallingData.window.id());
                 if(FallingData.inputTool.isKeyJustPressed(GLFW_KEY_T)){
                     manager.setCurrent("world_tool");
                 }
@@ -47,6 +48,31 @@ public class UIManager {
         });
         setCurrent("default");
         addPage("menu", new UIPage(this) {
+            UIButton button = new UIButton(this.manager, -0.1f, 0, 0.2f, 0.1f, "continue") {
+                @Override
+                public void render(EasyRender render) {
+                    render.text.setViewMatrix(new Matrix4f().identity());
+                    if(!isHovered())
+                        render.text.drawTextRelative(centerX(),centerY(),0.05f,1,1,1,1,text,
+                                new java.awt.Font("Arial", java.awt.Font.PLAIN, 64), 0.5f, 0.5f);
+                    else
+                        render.text.drawTextRelative(centerX(),centerY(),0.05f,1,1,0,1,text,
+                                new java.awt.Font("Arial", java.awt.Font.PLAIN, 64), 0.5f, 0.5f);
+                }
+
+                @Override
+                public void handleInput() {
+                    if(isClicked()){
+                        manager.setCurrent("default");
+                        FallingData.pause = false;
+                    }
+                }
+
+                @Override
+                public void update() {
+
+                }
+            };
             @Override
             public void render(EasyRender render) {
                 render.triangle.setViewMatrix(new Matrix4f().identity());
@@ -56,9 +82,10 @@ public class UIManager {
                 render.triangle.drawTriangle2D(-render.window.ratio(), -1, -render.window.ratio(), 1,
                         render.window.ratio(), 1, 0,0,0,0.5f);
 
-                render.text.drawTextRelative(0,0,0.1f,1,1,1,1,"MENU", new java.awt.Font("Arial", java.awt.Font.PLAIN, 128), 0.5f, 0.5f);
+                render.text.drawTextRelative(0,0.5f,0.1f,1,1,1,1,"MENU", new java.awt.Font("Arial", java.awt.Font.PLAIN, 128), 0.5f, 0.5f);
                 render.triangle.flush();
                 render.text.flush();
+                button.render(render);
             }
 
             @Override
@@ -67,11 +94,12 @@ public class UIManager {
                     manager.setCurrent("default");
                     FallingData.pause = false;
                 }
+                button.handleInput();
             }
 
             @Override
             public void update() {
-
+                button.update();
             }
         });
         addPage("world_tool", new UIPage(this) {

@@ -18,7 +18,8 @@ public class FallingInput {
     private boolean lastTickChunkUpdateKey = false;
     public int radius = 10;
     public float density = 0.1f;
-    private final int[] lastMousePos = new int[2];
+
+    boolean putting = false;
 
     public FallingInput(Grid grid) {
         elements = new Elements();
@@ -83,29 +84,49 @@ public class FallingInput {
             lastTickChunkUpdateKey = false;
         }
 
-        double[] xpos = new double[1];
-        double[] ypos = new double[1];
         int[] xsize = new int[1];
         int[] ysize = new int[1];
-        glfwGetCursorPos(window, xpos, ypos);
         glfwGetWindowSize(window, xsize, ysize);
-        float x1 = (float) xpos[0] / xsize[0];
-        float y1 = (1 - (float) ypos[0] / ysize[0]);
-        int x = (int) ((x1 - 0.5f) * FallingData.defaultShowGridWidth * FallingData.scale / (16 / 9f * ysize[0] / xsize[0]));
-        int y = (int) ((y1 - 0.5f) * FallingData.defaultShowGridWidth * FallingData.scale * 9/16f);
+
+        int x = (int) ((FallingData.inputTool.mousePosX()/2) * FallingData.defaultShowGridWidth * FallingData.scale / (16 / 9f * ysize[0] / xsize[0]));
+        int y = (int) ((FallingData.inputTool.mousePosY()/2) * FallingData.defaultShowGridWidth * FallingData.scale * 9/16f);
         x -= FallingData.chunkBasePos[0] * FallingData.chunkWidth;
         y -= FallingData.chunkBasePos[1] * FallingData.chunkWidth;
         x += (int) FallingData.cameraCentrePos[0];
         y += (int) FallingData.cameraCentrePos[1];
 
+        int[] lastMousePos = new int[]{(int) (FallingData.inputTool.mousePosLastX()/2 * FallingData.defaultShowGridWidth * FallingData.scale / (16 / 9f * ysize[0] / xsize[0])),
+                (int) (FallingData.inputTool.mousePosLastY()/2 * FallingData.defaultShowGridWidth * FallingData.scale * 9/16f)};
+
+        lastMousePos[0] -= FallingData.chunkBasePos[0] * FallingData.chunkWidth;
+        lastMousePos[1] -= FallingData.chunkBasePos[1] * FallingData.chunkWidth;
+        lastMousePos[0] += (int) FallingData.cameraCentrePos[0];
+        lastMousePos[1] += (int) FallingData.cameraCentrePos[1];
+
+        if(FallingData.inputTool.isMouseJustPressed(GLFW_MOUSE_BUTTON_LEFT)){
+            putting = true;
+        }
+
         if (FallingData.inputTool.isMousePressed(GLFW_MOUSE_BUTTON_LEFT)) {
-            float length = (float) Math.sqrt((x - lastMousePos[0]) * (x - lastMousePos[0]) + (y - lastMousePos[1]) * (y - lastMousePos[1]));
-            if (length != 0) {
-                for (int i = 0; i <= length / radius; i++) {
-                    int nx = (int) (lastMousePos[0] + (x - lastMousePos[0]) / length * i * radius);
-                    int ny = (int) (lastMousePos[1] + (y - lastMousePos[1]) / length * i * radius);
-                    for (int ix = nx - radius; ix < nx + radius; ix++) {
-                        for (int iy = ny - radius; iy < ny + radius; iy++) {
+            if(putting){
+                float length = (float) Math.sqrt((x - lastMousePos[0]) * (x - lastMousePos[0]) + (y - lastMousePos[1]) * (y - lastMousePos[1]));
+                if (length != 0) {
+                    for (int i = 0; i <= length / radius; i++) {
+                        int nx = (int) (lastMousePos[0] + (x - lastMousePos[0]) / length * i * radius);
+                        int ny = (int) (lastMousePos[1] + (y - lastMousePos[1]) / length * i * radius);
+                        for (int ix = nx - radius; ix < nx + radius; ix++) {
+                            for (int iy = ny - radius; iy < ny + radius; iy++) {
+                                if (grid.valid(ix, iy)) {
+                                    grid.set(ix, iy, null);
+                                    if (random.nextFloat() < density)
+                                        grid.set(ix, iy, elements.getFromId(id));
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    for (int ix = x - radius; ix < x + radius; ix++) {
+                        for (int iy = y - radius; iy < y + radius; iy++) {
                             if (grid.valid(ix, iy)) {
                                 grid.set(ix, iy, null);
                                 if (random.nextFloat() < density)
@@ -114,18 +135,9 @@ public class FallingInput {
                         }
                     }
                 }
-            } else {
-                for (int ix = x - radius; ix < x + radius; ix++) {
-                    for (int iy = y - radius; iy < y + radius; iy++) {
-                        if (grid.valid(ix, iy)) {
-                            grid.set(ix, iy, null);
-                            if (random.nextFloat() < density)
-                                grid.set(ix, iy, elements.getFromId(id));
-                        }
-                    }
-                }
             }
-        }
+        }else
+            putting = false;
 
         if (FallingData.inputTool.isMousePressed(GLFW_MOUSE_BUTTON_RIGHT)) {
             float length = (float) Math.sqrt((x - lastMousePos[0]) * (x - lastMousePos[0]) + (y - lastMousePos[1]) * (y - lastMousePos[1]));
@@ -164,9 +176,6 @@ public class FallingInput {
                 }
             }
         }
-
-        lastMousePos[0] = x;
-        lastMousePos[1] = y;
     }
 
     public void render(EasyRender render) {
