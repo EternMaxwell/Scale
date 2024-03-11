@@ -3,6 +3,10 @@ package core.game.fallingsand;
 public abstract class Element {
     protected float[] color;
 
+    public Element createInstance(){
+        return null;
+    }
+
     /**
      * update the element.
      *

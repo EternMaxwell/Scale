@@ -75,12 +75,12 @@ public class FallingWorld extends FallingSandWorld {
                 "pause: " + FallingData.pause,
                 new Font("Arial", Font.PLAIN, 12))[1];
         startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
-                "mouse pos: " + "(" + String.format("%.3f",FallingData.inputTool.mousePosX()) + " " +
-                        String.format("%.3f",FallingData.inputTool.mousePosY()) + ")" ,
+                "mouse pos: " + "(" + String.format("%3.3f",FallingData.inputTool.mousePosX()) + ", " +
+                        String.format("%3.3f",FallingData.inputTool.mousePosY()) + ")" ,
                 new Font("Arial", Font.PLAIN, 12))[1];
         startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
-                "mouse pos last: " + "(" + String.format("%.3f",FallingData.inputTool.mousePosLast()[0]) + " " +
-                        String.format("%.3f",FallingData.inputTool.mousePosLast()[1]) + ")",
+                "mouse pos last: " + "(" + String.format("%3.3f",FallingData.inputTool.mousePosLast()[0]) + ", " +
+                        String.format("%3.3f",FallingData.inputTool.mousePosLast()[1]) + ")",
                 new Font("Arial", Font.PLAIN, 12))[1];
 
         grid.render(render);

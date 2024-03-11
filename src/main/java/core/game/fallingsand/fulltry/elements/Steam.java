@@ -5,6 +5,12 @@ import core.game.fallingsand.Grid;
 import core.game.fallingsand.fulltry.Gas;
 
 public class Steam extends Gas {
+
+    @Override
+    public Element createInstance() {
+        return new Steam();
+    }
+
     public Steam() {
         super(2000 + (int)(Math.random() * 800));
         color = defaultColor();

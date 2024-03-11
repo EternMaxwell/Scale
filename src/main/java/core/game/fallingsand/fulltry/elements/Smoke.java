@@ -1,9 +1,15 @@
 package core.game.fallingsand.fulltry.elements;
 
+import core.game.fallingsand.Element;
 import core.game.fallingsand.Grid;
 import core.game.fallingsand.fulltry.Gas;
 
 public class Smoke extends Gas {
+
+    @Override
+    public Element createInstance() {
+        return new Smoke();
+    }
 
     public Smoke() {
         super(2000 + (int)(Math.random() * 800));

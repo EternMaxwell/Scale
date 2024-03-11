@@ -11,6 +11,11 @@ public class Sawdust extends FluidSolid {
     private float life = 200;
     private final static float burnHeat = 60;
 
+    @Override
+    public Element createInstance() {
+        return new Sawdust();
+    }
+
     public Sawdust() {
         float l = (float)(Math.random() * 0.2 + 0.8);
         color = new float[]{defaultColor()[0] * l, defaultColor()[1] * l, defaultColor()[2] * l, 1};

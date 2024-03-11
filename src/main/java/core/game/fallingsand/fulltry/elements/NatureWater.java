@@ -8,6 +8,11 @@ public class NatureWater extends Fluid {
 
     private static final float steamHeat = 100;
 
+    @Override
+    public Element createInstance() {
+        return new NatureWater();
+    }
+
     public NatureWater(){
         color = new float[]{0.1f, 0.1f, 1f, 0.8f};
     }

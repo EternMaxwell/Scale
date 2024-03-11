@@ -1770,6 +1770,8 @@ public class EasyRender {
         }
     }
 
+    //TODO: clipped rendering
+
     public EasyRender(Window window) {
         this.window = window;
         line = new Line();

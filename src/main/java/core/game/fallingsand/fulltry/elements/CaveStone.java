@@ -1,8 +1,14 @@
 package core.game.fallingsand.fulltry.elements;
 
+import core.game.fallingsand.Element;
 import core.game.fallingsand.fulltry.Solid;
 
 public class CaveStone extends Solid {
+
+    @Override
+    public Element createInstance() {
+        return new CaveStone();
+    }
 
     public CaveStone() {
         float light = (float) (Math.random() * 0.2 + 0.8);

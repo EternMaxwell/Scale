@@ -1,8 +1,14 @@
 package core.game.fallingsand.fulltry.elements;
 
+import core.game.fallingsand.Element;
 import core.game.fallingsand.fulltry.FluidSolid;
 
 public class YellowSand extends FluidSolid {
+
+    @Override
+    public Element createInstance() {
+        return new YellowSand();
+    }
 
     public YellowSand() {
         float l = (float) Math.random();
