@@ -90,22 +90,22 @@ public class Sawdust extends FluidSolid {
             Element nearby = grid.get(x + 1, y);
             if(nearby != null) {
                 nearby.heat(grid, x + 1, y, tick, nearbyHeat);
-                burnTime-=20;
+                burnTime-=5;
             }
             nearby = grid.get(x - 1, y);
             if(nearby != null) {
                 nearby.heat(grid, x - 1, y, tick, nearbyHeat);
-                burnTime-=20;
+                burnTime-=5;
             }
             nearby = grid.get(x, y + 1);
             if(nearby != null) {
                 nearby.heat(grid, x, y + 1, tick, nearbyHeat);
-                burnTime-=20;
+                burnTime-=5;
             }
             nearby = grid.get(x, y - 1);
             if(nearby != null) {
                 nearby.heat(grid, x, y - 1, tick, nearbyHeat);
-                burnTime-=20;
+                burnTime-=5;
             }
             if(burnTime <= 0) {
                 burning = false;

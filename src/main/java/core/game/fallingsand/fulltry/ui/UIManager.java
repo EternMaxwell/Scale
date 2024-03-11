@@ -8,6 +8,7 @@ import org.joml.Matrix4f;
 
 import static org.lwjgl.glfw.GLFW.*;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,10 +55,10 @@ public class UIManager {
                     render.text.setViewMatrix(new Matrix4f().identity());
                     if(!isHovered())
                         render.text.drawTextRelative(centerX(),centerY(),0.05f,1,1,1,1,text,
-                                new java.awt.Font("Arial", java.awt.Font.PLAIN, 64), 0.5f, 0.5f);
+                                new java.awt.Font("Arial", Font.BOLD, 12), 0.5f, 0.5f);
                     else
-                        render.text.drawTextRelative(centerX(),centerY(),0.05f,1,1,0,1,text,
-                                new java.awt.Font("Arial", java.awt.Font.PLAIN, 64), 0.5f, 0.5f);
+                        render.text.drawTextRelative(centerX(),centerY(),0.05f,1,1,0,1,">"+text+"<",
+                                new java.awt.Font("Arial", Font.BOLD, 12), 0.5f, 0.5f);
                 }
 
                 @Override
@@ -82,7 +83,7 @@ public class UIManager {
                 render.triangle.drawTriangle2D(-render.window.ratio(), -1, -render.window.ratio(), 1,
                         render.window.ratio(), 1, 0,0,0,0.5f);
 
-                render.text.drawTextRelative(0,0.5f,0.1f,1,1,1,1,"MENU", new java.awt.Font("Arial", java.awt.Font.PLAIN, 128), 0.5f, 0.5f);
+                render.text.drawTextRelative(0,0.5f,0.1f,1,1,1,1,"MENU", new java.awt.Font("Arial", Font.BOLD, 12), 0.5f, 0.5f);
                 render.triangle.flush();
                 render.text.flush();
                 button.render(render);
@@ -112,7 +113,7 @@ public class UIManager {
                 render.triangle.drawTriangle2D(-render.window.ratio(), -1, -render.window.ratio(), 1,
                         render.window.ratio(), 1, 0,0,0,0.5f);
 
-                render.text.drawTextRelative(0,0,0.1f,1,1,1,1,"WORLD_TOOL", new java.awt.Font("Arial", java.awt.Font.PLAIN, 128), 0.5f, 0.5f);
+                render.text.drawTextRelative(0,0,0.1f,1,1,1,1,"WORLD_TOOL", new java.awt.Font("Arial", Font.BOLD, 12), 0.5f, 0.5f);
                 render.triangle.flush();
                 render.text.flush();
             }

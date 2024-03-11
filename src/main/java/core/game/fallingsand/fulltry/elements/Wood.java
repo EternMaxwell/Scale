@@ -90,22 +90,22 @@ public class Wood extends Solid {
             Element nearby = grid.get(x + 1, y);
             if(nearby != null) {
                 nearby.heat(grid, x + 1, y, tick, nearbyHeat);
-                burnTime-=40;
+                burnTime-=20;
             }
             nearby = grid.get(x - 1, y);
             if(nearby != null) {
                 nearby.heat(grid, x - 1, y, tick, nearbyHeat);
-                burnTime-=40;
+                burnTime-=20;
             }
             nearby = grid.get(x, y + 1);
             if(nearby != null) {
                 nearby.heat(grid, x, y + 1, tick, nearbyHeat);
-                burnTime-=40;
+                burnTime-=20;
             }
             nearby = grid.get(x, y - 1);
             if(nearby != null) {
                 nearby.heat(grid, x, y - 1, tick, nearbyHeat);
-                burnTime-=40;
+                burnTime-=20;
             }
             if(burnTime <= 0) {
                 burning = false;
