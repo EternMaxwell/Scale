@@ -2,7 +2,6 @@ package core.game.fallingsand.fulltry.ui;
 
 import core.game.fallingsand.fulltry.FallingData;
 import core.game.fallingsand.fulltry.FallingInput;
-import core.game.fallingsand.fulltry.InputTool;
 import core.render.EasyRender;
 import org.joml.Matrix4f;
 
@@ -131,6 +130,43 @@ public class UIManager {
             }
         });
         addPage("world_tool", new UIPage(this) {
+            UIScroller scroller = new UIScroller(this.manager, -0.1f, 0.1f, 0.2f, new UIButton(this.manager, 0, 0, 0.02f, 0.06f, "scroller") {
+                @Override
+                public void render(EasyRender render) {
+                    render.triangle.setViewMatrix(new Matrix4f().identity());
+                    if(!isHovered()) {
+                        render.triangle.drawTriangle2D(x, y, x + width, y, x + width, y + height, 1, 1, 1, 0.8f);
+                        render.triangle.drawTriangle2D(x, y, x, y + height, x + width, y + height, 1, 1, 1, 0.8f);
+                    }else {
+                        render.triangle.drawTriangle2D(x, y, x + width, y, x + width, y + height, 1, 1, 0, 0.8f);
+                        render.triangle.drawTriangle2D(x, y, x, y + height, x + width, y + height, 1, 1, 0, 0.8f);
+                    }
+                }
+
+                @Override
+                public void handleInput() {
+
+                }
+
+                @Override
+                public void update() {
+
+                }
+            }, 0.02f) {
+                @Override
+                public void render(EasyRender render) {
+                    render.triangle.setViewMatrix(new Matrix4f().identity());
+                    render.triangle.drawTriangle2D(x, y, x + length, y, x + length, y + height, 1,1,1,0.5f);
+                    render.triangle.drawTriangle2D(x, y, x, y + height, x + length, y + height, 1,1,1,0.5f);
+                    scroller.render(render);
+                    render.triangle.flush();
+                }
+
+                @Override
+                public void update() {
+                    scroller.update();
+                }
+            };
             @Override
             public void render(EasyRender render) {
                 render.triangle.setViewMatrix(new Matrix4f().identity());
@@ -143,6 +179,7 @@ public class UIManager {
                 render.text.drawTextRelative(0,0,0.1f,1,1,1,1,"WORLD_TOOL", new java.awt.Font("Arial", Font.BOLD, 12), 0.5f, 0.5f);
                 render.triangle.flush();
                 render.text.flush();
+                scroller.render(render);
             }
 
             @Override
@@ -150,6 +187,7 @@ public class UIManager {
                 if(FallingData.inputTool.isKeyJustPressed(GLFW_KEY_ESCAPE) || FallingData.inputTool.isKeyJustPressed(GLFW_KEY_T)) {
                     manager.setCurrent("default");
                 }
+                scroller.handleInput();
             }
 
             @Override

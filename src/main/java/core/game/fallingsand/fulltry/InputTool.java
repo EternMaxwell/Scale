@@ -99,7 +99,7 @@ public class InputTool {
         double[] y = new double[1];
         glfwGetCursorPos(window.id(), x, y);
 
-        return new double[]{2 * x[0] / window.width() - 1, 1 - 2 * y[0] / window.height()};
+        return new double[]{(2 * x[0] / window.width() - 1) * window.ratio(), 1 - 2 * y[0] / window.height()};
     }
 
     public double mousePosX(){
