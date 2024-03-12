@@ -17,7 +17,7 @@ public class FallingInput {
     public int id = 0;
     private boolean lastTickChunkUpdateKey = false;
     public int radius = 10;
-    public float density = 0.1f;
+    public float density = 0;
 
     boolean putting = false;
 
@@ -75,7 +75,7 @@ public class FallingInput {
         if(FallingData.inputTool.isKeyPressed(GLFW_KEY_Q)){
             FallingData.scale *= 1.02f;
         }
-        if(FallingData.inputTool.isKeyJustPressed(GLFW_KEY_TAB)){
+        if(FallingData.inputTool.isKeyJustPressed(GLFW_KEY_C)){
             if(!lastTickChunkUpdateKey){
                 FallingData.enableChunkUpdate = !FallingData.enableChunkUpdate;
             }
@@ -88,14 +88,14 @@ public class FallingInput {
         int[] ysize = new int[1];
         glfwGetWindowSize(window, xsize, ysize);
 
-        int x = (int) ((FallingData.inputTool.mousePosX()/2) * FallingData.defaultShowGridWidth * FallingData.scale / (16 / 9f * ysize[0] / xsize[0]));
+        int x = (int) ((FallingData.inputTool.mousePosX()/2) * FallingData.defaultShowGridWidth * FallingData.scale / (16 / 9f));
         int y = (int) ((FallingData.inputTool.mousePosY()/2) * FallingData.defaultShowGridWidth * FallingData.scale * 9/16f);
         x -= FallingData.chunkBasePos[0] * FallingData.chunkWidth;
         y -= FallingData.chunkBasePos[1] * FallingData.chunkWidth;
         x += (int) FallingData.cameraCentrePos[0];
         y += (int) FallingData.cameraCentrePos[1];
 
-        int[] lastMousePos = new int[]{(int) (FallingData.inputTool.mousePosLastX()/2 * FallingData.defaultShowGridWidth * FallingData.scale / (16 / 9f * ysize[0] / xsize[0])),
+        int[] lastMousePos = new int[]{(int) (FallingData.inputTool.mousePosLastX()/2 * FallingData.defaultShowGridWidth * FallingData.scale / (16 / 9f)),
                 (int) (FallingData.inputTool.mousePosLastY()/2 * FallingData.defaultShowGridWidth * FallingData.scale * 9/16f)};
 
         lastMousePos[0] -= FallingData.chunkBasePos[0] * FallingData.chunkWidth;

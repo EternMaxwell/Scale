@@ -5,6 +5,10 @@ import core.game.fallingsand.fulltry.FluidSolid;
 
 public class YellowSand extends FluidSolid {
 
+    static {
+        Elements.registerElement("yellow_sand", new YellowSand());
+    }
+
     @Override
     public Element createInstance() {
         return new YellowSand();

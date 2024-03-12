@@ -6,6 +6,10 @@ import core.game.fallingsand.fulltry.Fluid;
 
 public class NatureWater extends Fluid {
 
+    static {
+        Elements.registerElement("nature_water", new NatureWater());
+    }
+
     private static final float steamHeat = 100;
 
     @Override

@@ -15,11 +15,11 @@ public class UIManager {
     public Map<String, UIPage> pages;
     public UIPage currentPage;
     public String currentName;
+    FallingInput fallingInput = new FallingInput(FallingData.world.grid);
 
     public UIManager() {
         pages = new HashMap<>();
         addPage("default", new UIPage(this) {
-            FallingInput fallingInput = new FallingInput(FallingData.world.grid);
             @Override
             public void render(EasyRender render) {
                 fallingInput.render(render);
@@ -36,7 +36,7 @@ public class UIManager {
                 }
                 if(manager.currentName.equals("default"))
                     fallingInput.input(FallingData.window.id());
-                if(FallingData.inputTool.isKeyJustPressed(GLFW_KEY_T)){
+                if(FallingData.inputTool.isKeyJustPressed(GLFW_KEY_TAB)){
                     manager.setCurrent("world_tool");
                 }
             }
@@ -77,11 +77,11 @@ public class UIManager {
                 @Override
                 public void render(EasyRender render) {
                     render.text.setViewMatrix(new Matrix4f().identity());
-                    if(!isHovered())
-                        render.text.drawTextRelative(centerX(),centerY(),0.05f,1,1,1,1,text,
+                    if(isHovered())
+                        render.text.drawTextRelative(centerX(),centerY(),0.05f,1,1,0,1,text,
                                 new java.awt.Font("Arial", Font.BOLD, 12), 0.5f, 0.5f);
                     else
-                        render.text.drawTextRelative(centerX(),centerY(),0.05f,1,1,0,1,">"+text+"<",
+                        render.text.drawTextRelative(centerX(),centerY(),0.05f,1,1,1,1,">"+text+"<",
                                 new java.awt.Font("Arial", Font.BOLD, 12), 0.5f, 0.5f);
                 }
 
@@ -130,7 +130,7 @@ public class UIManager {
             }
         });
         addPage("world_tool", new UIPage(this) {
-            UIScroller scroller = new UIScroller(this.manager, -0.1f, 0.1f, 0.2f, new UIButton(this.manager, 0, 0, 0.02f, 0.06f, "scroller") {
+            UIScroller scroller = new UIScroller(this.manager, -0.3f, 0.3f, 0.3f, new UIButton(this.manager, 0, 0, 0.015f, 0.02f, "scroller") {
                 @Override
                 public void render(EasyRender render) {
                     render.triangle.setViewMatrix(new Matrix4f().identity());
@@ -152,7 +152,7 @@ public class UIManager {
                 public void update() {
 
                 }
-            }, 0.02f) {
+            }, 0.01f) {
                 @Override
                 public void render(EasyRender render) {
                     render.triangle.setViewMatrix(new Matrix4f().identity());
@@ -160,6 +160,16 @@ public class UIManager {
                     render.triangle.drawTriangle2D(x, y, x, y + height, x + length, y + height, 1,1,1,0.5f);
                     scroller.render(render);
                     render.triangle.flush();
+                    render.text.setViewMatrix(new Matrix4f().identity());
+                    render.text.setProjectionMatrix(new Matrix4f().ortho(-render.window.ratio(), render.window.ratio(), -1, 1, -1, 1));
+                    render.text.drawTextRelative(-x,y + height / 2,0.04f,1,1,1,1,String.format("density: %2.2f", scrollValue()),
+                            new java.awt.Font("Arial", Font.PLAIN, 64), 1, 0.5f);
+                }
+
+                @Override
+                public void handleInput() {
+                    super.handleInput();
+                    fallingInput.density = scrollValue();
                 }
 
                 @Override
@@ -176,7 +186,7 @@ public class UIManager {
                 render.triangle.drawTriangle2D(-render.window.ratio(), -1, -render.window.ratio(), 1,
                         render.window.ratio(), 1, 0,0,0,0.5f);
 
-                render.text.drawTextRelative(0,0,0.1f,1,1,1,1,"WORLD_TOOL", new java.awt.Font("Arial", Font.BOLD, 12), 0.5f, 0.5f);
+                render.text.drawTextRelative(0,0.5f,0.1f,1,1,1,1,"WORLD_TOOL", new java.awt.Font("Arial", Font.BOLD, 12), 0.5f, 0.5f);
                 render.triangle.flush();
                 render.text.flush();
                 scroller.render(render);
@@ -184,7 +194,7 @@ public class UIManager {
 
             @Override
             public void handleInput() {
-                if(FallingData.inputTool.isKeyJustPressed(GLFW_KEY_ESCAPE) || FallingData.inputTool.isKeyJustPressed(GLFW_KEY_T)) {
+                if(FallingData.inputTool.isKeyJustPressed(GLFW_KEY_ESCAPE) || FallingData.inputTool.isKeyJustPressed(GLFW_KEY_TAB)) {
                     manager.setCurrent("default");
                 }
                 scroller.handleInput();

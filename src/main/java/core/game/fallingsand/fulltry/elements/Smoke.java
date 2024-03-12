@@ -6,6 +6,10 @@ import core.game.fallingsand.fulltry.Gas;
 
 public class Smoke extends Gas {
 
+    static {
+        Elements.registerElement("smoke", new Smoke());
+    }
+
     @Override
     public Element createInstance() {
         return new Smoke();

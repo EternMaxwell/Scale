@@ -10,4 +10,5 @@ public abstract class UIComponent {
     public abstract void render(EasyRender render);
     public abstract void handleInput();
     public abstract void update();
+    public abstract void move(float x, float y);
 }

@@ -6,6 +6,10 @@ import core.game.fallingsand.fulltry.Gas;
 
 public class Steam extends Gas {
 
+    static {
+        Elements.registerElement("steam", new Steam());
+    }
+
     @Override
     public Element createInstance() {
         return new Steam();

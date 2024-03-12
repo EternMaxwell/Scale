@@ -22,6 +22,7 @@ public abstract class UIScroller extends UIComponent{
     }
 
     public boolean dragging = false;
+    public boolean choosing = false;
     public boolean isHovered() {
         float mouseX = (float) FallingData.inputTool.mousePosX();
         float mouseY = (float) FallingData.inputTool.mousePosY();
@@ -29,13 +30,14 @@ public abstract class UIScroller extends UIComponent{
     }
 
     public float scrollValue() {
-        return (scroller.x - x) / length;
+        return (scroller.centerX() - x) / length;
     }
 
     public abstract void render(EasyRender render);
     public void handleInput(){
         if(FallingData.inputTool.isMouseReleased(GLFW_MOUSE_BUTTON_LEFT)){
             dragging = false;
+            choosing = false;
         }
         if(FallingData.inputTool.isMouseJustPressed(GLFW_MOUSE_BUTTON_LEFT) && scroller.isHovered()){
             dragging = true;
@@ -47,6 +49,9 @@ public abstract class UIScroller extends UIComponent{
             if (scroller.x > x + length - scroller.width / 2)
                 scroller.x = x + length - scroller.width / 2;
         }else if(FallingData.inputTool.isMouseJustPressed(GLFW_MOUSE_BUTTON_LEFT) && isHovered()){
+            choosing = true;
+        }
+        if(choosing){
             scroller.x = (float) FallingData.inputTool.mousePosX() - scroller.width / 2;
             if (scroller.x < x - scroller.width / 2)
                 scroller.x = x - scroller.width / 2;
@@ -55,4 +60,10 @@ public abstract class UIScroller extends UIComponent{
         }
     }
     public abstract void update();
+
+    public void move(float x, float y){
+        this.x += x;
+        this.y += y;
+        scroller.move(x,y);
+    }
 }

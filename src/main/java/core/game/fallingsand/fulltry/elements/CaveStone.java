@@ -4,6 +4,9 @@ import core.game.fallingsand.Element;
 import core.game.fallingsand.fulltry.Solid;
 
 public class CaveStone extends Solid {
+    static {
+        Elements.registerElement("cave_stone", new CaveStone());
+    }
 
     @Override
     public Element createInstance() {

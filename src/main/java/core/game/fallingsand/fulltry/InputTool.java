@@ -12,6 +12,8 @@ public class InputTool {
 
     private double[] mousePos;
     private double[] mousePosLast;
+    private double[] mouseScroll;
+    private double[] mouseScrollLast;
 
     private Map<Integer, Integer> keyMap;
     private Map<Integer, Integer> keyMapLast;
@@ -26,6 +28,17 @@ public class InputTool {
         mouseMapLast = new HashMap<>();
         mousePos = new double[2];
         mousePosLast = new double[2];
+        mouseScroll = new double[2];
+        glfwSetScrollCallback(window.id(), (windowId, x, y) -> {
+            mouseScroll[0] = x;
+            mouseScroll[1] = y;
+            if(mouseScrollLast == null)
+                mouseScrollLast = new double[]{x, y};
+            else {
+                mouseScrollLast[0] = mouseScroll[0];
+                mouseScrollLast[1] = mouseScroll[1];
+            }
+        });
     }
 
     public void input(){
@@ -94,7 +107,7 @@ public class InputTool {
         return mouseMap.get(key) == GLFW_RELEASE && mouseMapLast.get(key) == GLFW_PRESS;
     }
 
-    public double[] mousePos(){
+    public double[] mousePos() {
         double[] x = new double[1];
         double[] y = new double[1];
         glfwGetCursorPos(window.id(), x, y);
@@ -120,5 +133,9 @@ public class InputTool {
 
     public double mousePosLastY(){
         return mousePosLast()[1];
+    }
+
+    public double[] mouseScroll(){
+        return mouseScroll;
     }
 }

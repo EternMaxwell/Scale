@@ -6,6 +6,10 @@ import core.game.fallingsand.fulltry.FluidSolid;
 
 public class Sawdust extends FluidSolid {
 
+    static {
+        Elements.registerElement("sawdust", new Sawdust());
+    }
+
     private boolean burning = false;
     private int burnTime = 0;
     private float life = 200;

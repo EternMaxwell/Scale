@@ -9,4 +9,10 @@ public abstract class UIPage extends UIComponent{
     public UIPage(UIManager manager) {
         super(manager);
     }
+
+    public void move(float x, float y){
+        for(UIComponent component : children.values()){
+            component.move(x,y);
+        }
+    }
 }

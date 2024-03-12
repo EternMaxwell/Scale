@@ -22,6 +22,7 @@ public class FallingData {
     public static UIManager uiManager;
     public static FallingWorld world;
     public static int tick = 0;
+    public static FallingInput input;
 
     public static void startup() {
         scale = 1;

@@ -6,6 +6,10 @@ import core.game.fallingsand.fulltry.Solid;
 
 public class Wood extends Solid {
 
+    static {
+        Elements.registerElement("wood", new Wood());
+    }
+
     private boolean burning = false;
     private int burnTime = 0;
     private float life = 600;

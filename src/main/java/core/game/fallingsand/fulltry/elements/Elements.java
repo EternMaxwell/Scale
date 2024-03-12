@@ -3,7 +3,20 @@ package core.game.fallingsand.fulltry.elements;
 import core.game.fallingsand.Element;
 import core.game.fallingsand.easyfallingsand.Sand;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Elements {
+    public static Map<String, Element> elements = new HashMap<>();
+    public static Element newInstanceFromName(String name){
+        if(elements.get(name) != null)
+            return elements.get(name).createInstance();
+        System.err.println("Element not found: " + name);
+        return null;
+    }
+    public static void registerElement(String name, Element element){
+        elements.put(name, element);
+    }
 
     public Element cave_stone(){
         return new CaveStone();
