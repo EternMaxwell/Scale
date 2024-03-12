@@ -41,12 +41,7 @@ public abstract class Gas extends Element {
     }
 
     public boolean step(Grid grid, int x, int y, int tick) {
-        grid.set(x, y, this);
-        existenceTime--;
-        if (existenceTime <= 0) {
-            grid.set(x, y, existTimeEndReplaceElement());
-            return true;
-        }
+//        grid.set(x, y, this);
 
         boolean moved = false;
         sinkingTried = false;
@@ -208,6 +203,16 @@ public abstract class Gas extends Element {
             }
         }
         return moved;
+    }
+
+    @Override
+    public boolean randomTick(Grid grid, int x, int y, int tick, int intensity) {
+        existenceTime -= 32;
+        if (existenceTime <= 0) {
+            grid.set(x, y, existTimeEndReplaceElement());
+            return true;
+        }
+        return false;
     }
 
     public Element existTimeEndReplaceElement() {

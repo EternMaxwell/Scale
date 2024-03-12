@@ -16,7 +16,7 @@ public class Smoke extends Gas {
     }
 
     public Smoke() {
-        super(2000 + (int)(Math.random() * 800));
+        super(2400);
         color = defaultColor();
     }
 
