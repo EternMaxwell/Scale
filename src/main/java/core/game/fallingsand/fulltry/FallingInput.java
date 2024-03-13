@@ -19,7 +19,8 @@ public class FallingInput {
     public int radius = 10;
     public float density = 0;
 
-    boolean putting = false;
+    public boolean putting = false;
+    public boolean deleting = false;
 
     public FallingInput(Grid grid) {
         elements = new Elements();
@@ -139,30 +140,37 @@ public class FallingInput {
         }else
             putting = false;
 
+        if(FallingData.inputTool.isMouseJustPressed(GLFW_MOUSE_BUTTON_RIGHT)){
+            deleting = true;
+        }
+
         if (FallingData.inputTool.isMousePressed(GLFW_MOUSE_BUTTON_RIGHT)) {
-            float length = (float) Math.sqrt((x - lastMousePos[0]) * (x - lastMousePos[0]) + (y - lastMousePos[1]) * (y - lastMousePos[1]));
-            if (length != 0) {
-                for (int i = 0; i <= length / radius; i++) {
-                    int nx = (int) (lastMousePos[0] + (x - lastMousePos[0]) / length * i * radius);
-                    int ny = (int) (lastMousePos[1] + (y - lastMousePos[1]) / length * i * radius);
-                    for (int ix = nx - radius; ix < nx + radius; ix++) {
-                        for (int iy = ny - radius; iy < ny + radius; iy++) {
+            if(deleting){
+                float length = (float) Math.sqrt((x - lastMousePos[0]) * (x - lastMousePos[0]) + (y - lastMousePos[1]) * (y - lastMousePos[1]));
+                if (length != 0) {
+                    for (int i = 0; i <= length / radius; i++) {
+                        int nx = (int) (lastMousePos[0] + (x - lastMousePos[0]) / length * i * radius);
+                        int ny = (int) (lastMousePos[1] + (y - lastMousePos[1]) / length * i * radius);
+                        for (int ix = nx - radius; ix < nx + radius; ix++) {
+                            for (int iy = ny - radius; iy < ny + radius; iy++) {
+                                if (grid.valid(ix, iy)) {
+                                    grid.set(ix, iy, null);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    for (int ix = x - radius; ix < x + radius; ix++) {
+                        for (int iy = y - radius; iy < y + radius; iy++) {
                             if (grid.valid(ix, iy)) {
                                 grid.set(ix, iy, null);
                             }
                         }
                     }
                 }
-            } else {
-                for (int ix = x - radius; ix < x + radius; ix++) {
-                    for (int iy = y - radius; iy < y + radius; iy++) {
-                        if (grid.valid(ix, iy)) {
-                            grid.set(ix, iy, null);
-                        }
-                    }
-                }
             }
-        }
+        }else
+            deleting = false;
 
         if (FallingData.inputTool.isKeyPressed(GLFW_KEY_F)){
             for (int ix = x - radius; ix < x + radius; ix++) {

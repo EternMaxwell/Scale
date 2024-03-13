@@ -20,9 +20,173 @@ public class UIManager {
     public UIManager() {
         pages = new HashMap<>();
         addPage("default", new UIPage(this) {
+            UIWindow world_tool_window = new UIWindow(this.manager, "world_tool_window", 0,0,0.8f, 0.46f) {
+                boolean dragging = false;
+                float[] draggingStartPos = new float[2];
+                double[] draggingStartMousePos = new double[2];
+
+                @Override
+                public void init() {
+                    components.putIfAbsent("density_scroll", new UIScroller(this.manager, 0.05f, 0.37f, 0.3f,
+                            new UIButton(this.manager, 0, 0, 0.015f, 0.02f, "scroller") {
+                        @Override
+                        public void render(EasyRender render) {
+                            render.triangle.setViewMatrix(new Matrix4f().identity());
+                            if(!isHovered()) {
+                                render.triangle.drawTriangle2D(x, y, x + width, y, x + width, y + height, 1, 1, 1, 0.8f);
+                                render.triangle.drawTriangle2D(x, y, x, y + height, x + width, y + height, 1, 1, 1, 0.8f);
+                            }else {
+                                render.triangle.drawTriangle2D(x, y, x + width, y, x + width, y + height, 1, 1, 0, 0.8f);
+                                render.triangle.drawTriangle2D(x, y, x, y + height, x + width, y + height, 1, 1, 0, 0.8f);
+                            }
+                        }
+
+                        @Override
+                        public void handleInput() {
+
+                        }
+
+                        @Override
+                        public void update() {
+
+                        }
+                    }, 0.01f) {
+                        @Override
+                        public void render(EasyRender render) {
+                            render.triangle.setViewMatrix(new Matrix4f().identity());
+                            render.triangle.drawTriangle2D(x, y, x + length, y, x + length, y + height, 1,1,1,0.5f);
+                            render.triangle.drawTriangle2D(x, y, x, y + height, x + length, y + height, 1,1,1,0.5f);
+                            scroller.render(render);
+                            render.triangle.flush();
+                            render.text.setViewMatrix(new Matrix4f().identity());
+                            render.text.setProjectionMatrix(new Matrix4f().ortho(-render.window.ratio(), render.window.ratio(), -1, 1, -1, 1));
+                            render.text.drawTextRelative(x + length + 0.05f,y + height / 2,0.04f,1,1,1,1,String.format("density: %2.2f", scrollValue()),
+                                    new java.awt.Font("Arial", Font.PLAIN, 12), 0, 0.5f);
+                        }
+
+                        @Override
+                        public void handleInput() {
+                            super.handleInput();
+                            fallingInput.density = scrollValue();
+                        }
+
+                        @Override
+                        public void update() {
+                            scroller.update();
+                        }
+                    });
+                    addComponent("radius_scroll", new UIScroller(this.manager, 0.05f, 0.34f, 0.3f, new UIButton(this.manager, 0, 0, 0.015f, 0.02f, "scroller") {
+                        @Override
+                        public void render(EasyRender render) {
+                            render.triangle.setViewMatrix(new Matrix4f().identity());
+                            if(!isHovered()) {
+                                render.triangle.drawTriangle2D(x, y, x + width, y, x + width, y + height, 1, 1, 1, 0.8f);
+                                render.triangle.drawTriangle2D(x, y, x, y + height, x + width, y + height, 1, 1, 1, 0.8f);
+                            }else {
+                                render.triangle.drawTriangle2D(x, y, x + width, y, x + width, y + height, 1, 1, 0, 0.8f);
+                                render.triangle.drawTriangle2D(x, y, x, y + height, x + width, y + height, 1, 1, 0, 0.8f);
+                            }
+                        }
+
+                        @Override
+                        public void handleInput() {
+
+                        }
+
+                        @Override
+                        public void update() {
+
+                        }
+                    }, 0.01f) {
+                        @Override
+                        public void render(EasyRender render) {
+                            render.triangle.setViewMatrix(new Matrix4f().identity());
+                            render.triangle.drawTriangle2D(x, y, x + length, y, x + length, y + height, 1,1,1,0.5f);
+                            render.triangle.drawTriangle2D(x, y, x, y + height, x + length, y + height, 1,1,1,0.5f);
+                            scroller.render(render);
+                            render.triangle.flush();
+                            render.text.setViewMatrix(new Matrix4f().identity());
+                            render.text.setProjectionMatrix(new Matrix4f().ortho(-render.window.ratio(), render.window.ratio(), -1, 1, -1, 1));
+                            render.text.drawTextRelative(x + length + 0.05f,y + height / 2,0.04f,1,1,1,1,String.format("radios: %d", 1 + (int) (scrollValue() * 124)),
+                                    new java.awt.Font("Arial", Font.PLAIN, 12), 0, 0.5f);
+                        }
+
+                        @Override
+                        public void handleInput() {
+                            super.handleInput();
+                            fallingInput.radius = 1 + (int) (scrollValue() * 124);
+                        }
+
+                        @Override
+                        public void update() {
+                            scroller.update();
+                        }
+                    });
+                    move(0.3f,0.3f);
+                }
+
+                private boolean isOnBar(){
+                    float mouseX = (float) FallingData.inputTool.mousePosX();
+                    float mouseY = (float) FallingData.inputTool.mousePosY();
+                    return mouseX > x && mouseX < x + width && mouseY > y + height - 0.06f && mouseY < y + height;
+                }
+
+                @Override
+                public void renderOwn(EasyRender render) {
+                    render.triangle.setViewMatrix(new Matrix4f().identity());
+                    render.triangle.drawTriangle2D(x, y, x + width, y, x + width, y + height, 0,0,0,0.5f);
+                    render.triangle.drawTriangle2D(x, y, x, y + height, x + width, y + height, 0,0,0,0.5f);
+                    render.triangle.flush();
+                    render.line.setViewMatrix(new Matrix4f().identity());
+                    render.line.drawLine2D(x, y, x + width, y, 1, 1, 1, 1);
+                    render.line.drawLine2D(x, y, x, y + height, 1, 1, 1, 1);
+                    render.line.drawLine2D(x + width, y, x + width, y + height, 1, 1, 1, 1);
+                    render.line.drawLine2D(x, y + height, x + width, y + height, 1, 1, 1, 1);
+                    render.line.drawLine2D(x, y + height - 0.06f, x + width, y + height - 0.06f, 1, 1, 1, 1);
+                    render.line.flush();
+                    render.text.setViewMatrix(new Matrix4f().identity());
+                    render.text.setProjectionMatrix(new Matrix4f().ortho(-render.window.ratio(), render.window.ratio(), -1, 1, -1, 1));
+                    render.text.drawTextRelative(x + width / 2, y + height - 0.03f, 0.04f, 1, 1, 1, 1, "world tool",
+                            new java.awt.Font("Arial", Font.BOLD, 12), 0.5f, 0.5f);
+                    render.text.flush();
+                }
+
+                @Override
+                public void handleInputOwn() {
+                    if(FallingData.inputTool.isMouseReleased(GLFW_MOUSE_BUTTON_LEFT)){
+                        dragging = false;
+                    }
+                    if(FallingData.inputTool.isMouseJustPressed(GLFW_MOUSE_BUTTON_LEFT) && isOnBar()){
+                        draggingStartPos[0] = x;
+                        draggingStartPos[1] = y;
+                        draggingStartMousePos[0] = FallingData.inputTool.mousePosX();
+                        draggingStartMousePos[1] = FallingData.inputTool.mousePosY();
+                        dragging = true;
+                    }
+                    if(dragging){
+                        float movex = draggingStartPos[0] + (float) (FallingData.inputTool.mousePosX() - draggingStartMousePos[0]) - x;
+                        float movey = draggingStartPos[1] + (float) (FallingData.inputTool.mousePosY() - draggingStartMousePos[1]) - y;
+                        move(movex, movey);
+                    }
+                }
+
+                @Override
+                public void updateOwn() {
+                }
+
+                @Override
+                public void moveOwn(float x, float y) {
+                    this.x += x;
+                    this.y += y;
+                }
+            };
+            boolean window_show = false;
+
             @Override
             public void render(EasyRender render) {
                 fallingInput.render(render);
+                if(window_show)
+                    world_tool_window.render(render);
             }
 
             @Override
@@ -34,11 +198,13 @@ public class UIManager {
                 if(FallingData.inputTool.isKeyJustPressed(GLFW_KEY_P)) {
                     FallingData.pause = !FallingData.pause;
                 }
-                if(manager.currentName.equals("default"))
+                if(fallingInput.putting || fallingInput.deleting || (manager.currentName.equals("default") && !(window_show && world_tool_window.isHovered())))
                     fallingInput.input(FallingData.window.id());
                 if(FallingData.inputTool.isKeyJustPressed(GLFW_KEY_TAB)){
-                    manager.setCurrent("world_tool");
+                    window_show = !window_show;
                 }
+                if(window_show)
+                    world_tool_window.handleInput();
             }
 
             @Override
@@ -177,6 +343,53 @@ public class UIManager {
                     scroller.update();
                 }
             };
+            UIScroller scroller2 = new UIScroller(this.manager, -0.3f, 0.27f, 0.3f, new UIButton(this.manager, 0, 0, 0.015f, 0.02f, "scroller") {
+                @Override
+                public void render(EasyRender render) {
+                    render.triangle.setViewMatrix(new Matrix4f().identity());
+                    if(!isHovered()) {
+                        render.triangle.drawTriangle2D(x, y, x + width, y, x + width, y + height, 1, 1, 1, 0.8f);
+                        render.triangle.drawTriangle2D(x, y, x, y + height, x + width, y + height, 1, 1, 1, 0.8f);
+                    }else {
+                        render.triangle.drawTriangle2D(x, y, x + width, y, x + width, y + height, 1, 1, 0, 0.8f);
+                        render.triangle.drawTriangle2D(x, y, x, y + height, x + width, y + height, 1, 1, 0, 0.8f);
+                    }
+                }
+
+                @Override
+                public void handleInput() {
+
+                }
+
+                @Override
+                public void update() {
+
+                }
+            }, 0.01f) {
+                @Override
+                public void render(EasyRender render) {
+                    render.triangle.setViewMatrix(new Matrix4f().identity());
+                    render.triangle.drawTriangle2D(x, y, x + length, y, x + length, y + height, 1,1,1,0.5f);
+                    render.triangle.drawTriangle2D(x, y, x, y + height, x + length, y + height, 1,1,1,0.5f);
+                    scroller.render(render);
+                    render.triangle.flush();
+                    render.text.setViewMatrix(new Matrix4f().identity());
+                    render.text.setProjectionMatrix(new Matrix4f().ortho(-render.window.ratio(), render.window.ratio(), -1, 1, -1, 1));
+                    render.text.drawTextRelative(-x,y + height / 2,0.04f,1,1,1,1,String.format("radios: %d", (int) (scrollValue() * 125)),
+                            new java.awt.Font("Arial", Font.PLAIN, 64), 1, 0.5f);
+                }
+
+                @Override
+                public void handleInput() {
+                    super.handleInput();
+                    fallingInput.radius = (int) (scrollValue() * 125);
+                }
+
+                @Override
+                public void update() {
+                    scroller.update();
+                }
+            };
             @Override
             public void render(EasyRender render) {
                 render.triangle.setViewMatrix(new Matrix4f().identity());
@@ -190,6 +403,7 @@ public class UIManager {
                 render.triangle.flush();
                 render.text.flush();
                 scroller.render(render);
+                scroller2.render(render);
             }
 
             @Override
@@ -198,6 +412,7 @@ public class UIManager {
                     manager.setCurrent("default");
                 }
                 scroller.handleInput();
+                scroller2.handleInput();
             }
 
             @Override
