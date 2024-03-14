@@ -82,7 +82,9 @@ public class FallingWorld extends FallingSandWorld {
                 "mouse pos last: " + "(" + String.format("%3.3f",FallingData.inputTool.mousePosLast()[0]) + ", " +
                         String.format("%3.3f",FallingData.inputTool.mousePosLast()[1]) + ")",
                 new Font("Arial", Font.PLAIN, 12))[1];
-
+        startH -= render.text.drawTextRT(x,startH,0,1,1,1,0.8f,
+        "scroll: " + String.format("%3.3f %3.3f",FallingData.inputTool.mouseScrollX(),FallingData.inputTool.mouseScrollY()),
+                new Font("Arial", Font.PLAIN, 12))[1];
         grid.render(render);
         uiManager.render(render);
     }

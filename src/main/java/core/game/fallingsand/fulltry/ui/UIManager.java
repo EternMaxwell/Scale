@@ -28,6 +28,15 @@ public class UIManager {
                 boolean dragging = false;
                 float[] draggingStartPos = new float[2];
                 double[] draggingStartMousePos = new double[2];
+                String currentChooserName(){
+                    try {
+                        return scrollableChooserNames[currentChooserIndex];
+                    }catch (ArrayIndexOutOfBoundsException e){
+                        return "";
+                    }
+                }
+                String scrollableChooserNames[] = {"element_chooser", "action_left_chooser", "density_scroll", "radius_scroll"};
+                int currentChooserIndex = 0;
 
                 @Override
                 public void init() {
@@ -72,6 +81,17 @@ public class UIManager {
                         public void handleInput() {
                             super.handleInput();
                             fallingInput.density = scrollValue();
+                            if(currentChooserName().equals("density_scroll")){
+                                if(FallingData.inputTool.mouseScrollY() >= 1) {
+                                    scroller.x += 0.003f;
+                                    if(scroller.x > x + length - scroller.width/2)
+                                        scroller.x = x + length - scroller.width/2;
+                                }else if(FallingData.inputTool.mouseScrollY() <= -1) {
+                                    scroller.x -= 0.003f;
+                                    if(scroller.x < x - scroller.width/2)
+                                        scroller.x = x - scroller.width/2;
+                                }
+                            }
                         }
 
                         @Override
@@ -133,7 +153,7 @@ public class UIManager {
                         public void render(EasyRender render) {
                             render.text.setViewMatrix(new Matrix4f().identity());
                             render.text.setProjectionMatrix(new Matrix4f().ortho(-render.window.ratio(), render.window.ratio(), -1, 1, -1, 1));
-                            if(!isHovered())
+                            if(!isHovered() && !currentChooserName().equals(this.text))
                                 render.text.drawTextRelative(x + width / 2, y + height / 2, 0.04f, 1, 1, 1, 1, elementNames[elementIndex],
                                         new java.awt.Font("Arial", Font.PLAIN, 12), 0.5f, 0.5f);
                             else
@@ -169,6 +189,19 @@ public class UIManager {
                                     elementIndex = 0;
                                 fallingInput.elementName = elementNames[elementIndex];
                             }
+                            if(currentChooserName().equals(this.text)){
+                                if(FallingData.inputTool.mouseScrollY() >= 1) {
+                                    elementIndex++;
+                                    if(elementIndex >= elementNames.length)
+                                        elementIndex = 0;
+                                    fallingInput.elementName = elementNames[elementIndex];
+                                }else if(FallingData.inputTool.mouseScrollY() <= -1) {
+                                    elementIndex--;
+                                    if(elementIndex < 0)
+                                        elementIndex = elementNames.length - 1;
+                                    fallingInput.elementName = elementNames[elementIndex];
+                                }
+                            }
                         }
 
                         @Override
@@ -176,18 +209,18 @@ public class UIManager {
 
                         }
                     });
-                    addComponent("action_chooser", new UIButton(this.manager, 0.05f, 0.24f, 0.3f, 0.04f, "action_chooser") {
-                        String actions[] = {"put", "delete", "heat"};
+                    addComponent("action_left_chooser", new UIButton(this.manager, 0.05f, 0.24f, 0.3f, 0.04f, "action_left_chooser") {
+                        String actionsLeft[] = {"put", "heat"};
                         int actionIndex = 0;
                         @Override
                         public void render(EasyRender render) {
                             render.text.setViewMatrix(new Matrix4f().identity());
                             render.text.setProjectionMatrix(new Matrix4f().ortho(-render.window.ratio(), render.window.ratio(), -1, 1, -1, 1));
-                            if(!isHovered())
-                                render.text.drawTextRelative(x + width / 2, y + height / 2, 0.04f, 1, 1, 1, 1, fallingInput.action,
+                            if(!isHovered() && !currentChooserName().equals(this.text))
+                                render.text.drawTextRelative(x + width / 2, y + height / 2, 0.04f, 1, 1, 1, 1, fallingInput.actionLeft,
                                         new java.awt.Font("Arial", Font.PLAIN, 12), 0.5f, 0.5f);
                             else
-                                render.text.drawTextRelative(x + width / 2, y + height / 2, 0.04f, 1, 1, 0, 1, ">"+fallingInput.action+"<",
+                                render.text.drawTextRelative(x + width / 2, y + height / 2, 0.04f, 1, 1, 0, 1, ">"+fallingInput.actionLeft+"<",
                                         new java.awt.Font("Arial", Font.PLAIN, 12), 0.5f, 0.5f);
                         }
 
@@ -195,9 +228,22 @@ public class UIManager {
                         public void handleInput() {
                             if(isClicked()){
                                 actionIndex++;
-                                if(actionIndex >= actions.length)
+                                if(actionIndex >= actionsLeft.length)
                                     actionIndex = 0;
-                                fallingInput.action = actions[actionIndex];
+                                fallingInput.actionLeft = actionsLeft[actionIndex];
+                            }
+                            if(currentChooserName().equals(this.text)){
+                                if (FallingData.inputTool.mouseScrollY() >= 1) {
+                                    actionIndex++;
+                                    if (actionIndex >= actionsLeft.length)
+                                        actionIndex = 0;
+                                    fallingInput.actionLeft = actionsLeft[actionIndex];
+                                } else if (FallingData.inputTool.mouseScrollY() <= -1) {
+                                    actionIndex--;
+                                    if (actionIndex < 0)
+                                        actionIndex = actionsLeft.length - 1;
+                                    fallingInput.actionLeft = actionsLeft[actionIndex];
+                                }
                             }
                         }
 
@@ -251,6 +297,15 @@ public class UIManager {
                         float movex = draggingStartPos[0] + (float) (FallingData.inputTool.mousePosX() - draggingStartMousePos[0]) - x;
                         float movey = draggingStartPos[1] + (float) (FallingData.inputTool.mousePosY() - draggingStartMousePos[1]) - y;
                         move(movex, movey);
+                    }
+                    if(FallingData.inputTool.mouseScrollX() <= -1 || FallingData.inputTool.isKeyJustPressed(GLFW_KEY_EQUAL)){
+                        currentChooserIndex++;
+                        if(currentChooserIndex >= scrollableChooserNames.length)
+                            currentChooserIndex = 0;
+                    }else if(FallingData.inputTool.mouseScrollX() >= 1 || FallingData.inputTool.isKeyJustPressed(GLFW_KEY_MINUS)){
+                        currentChooserIndex--;
+                        if(currentChooserIndex < 0)
+                            currentChooserIndex = scrollableChooserNames.length - 1;
                     }
                 }
 

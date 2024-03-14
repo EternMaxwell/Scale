@@ -23,7 +23,8 @@ public class FallingInput {
     public boolean putting = false;
     public boolean deleting = false;
     public String elementName = "cave_stone";
-    public String action = "put";
+    public String actionLeft = "put";
+    public String actionRight = "delete";
 
     public FallingInput(Grid grid) {
         elements = new Elements();
@@ -107,11 +108,11 @@ public class FallingInput {
         lastMousePos[0] += (int) (FallingData.cameraCentrePos[0] + 0.75f);
         lastMousePos[1] += (int) (FallingData.cameraCentrePos[1] + 0.5f);
 
-        if(FallingData.inputTool.isMouseJustPressed(GLFW_MOUSE_BUTTON_LEFT) && Objects.equals(action, "put")){
+        if(FallingData.inputTool.isMouseJustPressed(GLFW_MOUSE_BUTTON_LEFT) && Objects.equals(actionLeft, "put")){
             putting = true;
         }
 
-        if (FallingData.inputTool.isMousePressed(GLFW_MOUSE_BUTTON_LEFT) && Objects.equals(action, "put")) {
+        if (FallingData.inputTool.isMousePressed(GLFW_MOUSE_BUTTON_LEFT) && Objects.equals(actionLeft, "put")) {
             if(putting){
                 float length = (float) Math.sqrt((x - lastMousePos[0]) * (x - lastMousePos[0]) + (y - lastMousePos[1]) * (y - lastMousePos[1]));
                 if (length != 0) {
@@ -143,11 +144,11 @@ public class FallingInput {
         }else
             putting = false;
 
-        if(FallingData.inputTool.isMouseJustPressed(GLFW_MOUSE_BUTTON_LEFT) && Objects.equals(action, "delete")){
+        if(FallingData.inputTool.isMouseJustPressed(GLFW_MOUSE_BUTTON_RIGHT) && Objects.equals(actionRight, "delete")){
             deleting = true;
         }
 
-        if (FallingData.inputTool.isMousePressed(GLFW_MOUSE_BUTTON_LEFT) && Objects.equals(action, "delete")) {
+        if (FallingData.inputTool.isMousePressed(GLFW_MOUSE_BUTTON_RIGHT) && Objects.equals(actionRight, "delete")) {
             if(deleting){
                 float length = (float) Math.sqrt((x - lastMousePos[0]) * (x - lastMousePos[0]) + (y - lastMousePos[1]) * (y - lastMousePos[1]));
                 if (length != 0) {
@@ -175,7 +176,7 @@ public class FallingInput {
         }else
             deleting = false;
 
-        if (FallingData.inputTool.isMousePressed(GLFW_MOUSE_BUTTON_LEFT) && Objects.equals(action, "heat")) {
+        if (FallingData.inputTool.isMousePressed(GLFW_MOUSE_BUTTON_LEFT) && Objects.equals(actionLeft, "heat")) {
             for (int ix = x - radius; ix < x + radius; ix++) {
                 for (int iy = y - radius; iy < y + radius; iy++) {
                     if (grid.valid(ix, iy)) {

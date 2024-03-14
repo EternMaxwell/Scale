@@ -13,7 +13,7 @@ public class InputTool {
     private double[] mousePos;
     private double[] mousePosLast;
     private double[] mouseScroll;
-    private double[] mouseScrollLast;
+    private boolean scrollChanged = false;
 
     private Map<Integer, Integer> keyMap;
     private Map<Integer, Integer> keyMapLast;
@@ -29,30 +29,30 @@ public class InputTool {
         mousePos = new double[2];
         mousePosLast = new double[2];
         mouseScroll = new double[2];
-        mouseScrollLast = new double[2];
         glfwSetScrollCallback(window.id(), (windowId, x, y) -> {
             mouseScroll[0] = x;
             mouseScroll[1] = y;
-            if(mouseScrollLast == null)
-                mouseScrollLast = new double[]{x, y};
-            else {
-                mouseScrollLast[0] = mouseScroll[0];
-                mouseScrollLast[1] = mouseScroll[1];
-            }
+            scrollChanged = true;
         });
     }
 
-    public void input(){
+    public void input() {
+        if(scrollChanged){
+            scrollChanged = false;
+        }else {
+            mouseScroll[0] = 0;
+            mouseScroll[1] = 0;
+        }
         Map<Integer, Integer> temp = keyMapLast;
         keyMapLast = keyMap;
         keyMap = temp;
         temp = mouseMapLast;
         mouseMapLast = mouseMap;
         mouseMap = temp;
-        for(Map.Entry<Integer, Integer> entry : keyMap.entrySet()){
+        for (Map.Entry<Integer, Integer> entry : keyMap.entrySet()) {
             entry.setValue(glfwGetKey(window.id(), entry.getKey()));
         }
-        for(Map.Entry<Integer, Integer> entry : mouseMap.entrySet()){
+        for (Map.Entry<Integer, Integer> entry : mouseMap.entrySet()) {
             entry.setValue(glfwGetMouseButton(window.id(), entry.getKey()));
         }
 
@@ -141,22 +141,10 @@ public class InputTool {
     }
 
     public double mouseScrollX(){
-        return mouseScroll()[0];
+        return mouseScroll[0];
     }
 
     public double mouseScrollY(){
-        return mouseScroll()[1];
-    }
-
-    public double[] mouseScrollLast(){
-        return mouseScrollLast;
-    }
-
-    public double mouseScrollLastX(){
-        return mouseScrollLast()[0];
-    }
-
-    public double mouseScrollLastY(){
-        return mouseScrollLast()[1];
+        return mouseScroll[1];
     }
 }
