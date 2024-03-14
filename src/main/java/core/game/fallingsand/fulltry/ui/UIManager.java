@@ -1,15 +1,19 @@
 package core.game.fallingsand.fulltry.ui;
 
+import core.game.fallingsand.Element;
 import core.game.fallingsand.fulltry.FallingData;
 import core.game.fallingsand.fulltry.FallingInput;
+import core.game.fallingsand.fulltry.elements.Elements;
 import core.render.EasyRender;
 import org.joml.Matrix4f;
 
+import static core.game.fallingsand.fulltry.FallingType.*;
 import static org.lwjgl.glfw.GLFW.*;
 
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
+import core.game.fallingsand.fulltry.FallingType.*;
 
 public class UIManager {
     public Map<String, UIPage> pages;
@@ -120,6 +124,86 @@ public class UIManager {
                         @Override
                         public void update() {
                             scroller.update();
+                        }
+                    });
+                    addComponent("element_chooser", new UIButton(this.manager, 0.05f, 0.29f, 0.3f, 0.04f, "element_chooser") {
+                        int elementIndex = 0;
+                        String[] elementNames = Elements.elements.keySet().toArray(new String[0]);
+                        @Override
+                        public void render(EasyRender render) {
+                            render.text.setViewMatrix(new Matrix4f().identity());
+                            render.text.setProjectionMatrix(new Matrix4f().ortho(-render.window.ratio(), render.window.ratio(), -1, 1, -1, 1));
+                            if(!isHovered())
+                                render.text.drawTextRelative(x + width / 2, y + height / 2, 0.04f, 1, 1, 1, 1, elementNames[elementIndex],
+                                        new java.awt.Font("Arial", Font.PLAIN, 12), 0.5f, 0.5f);
+                            else
+                                render.text.drawTextRelative(x + width / 2, y + height / 2, 0.04f, 1, 1, 0, 1, ">"+elementNames[elementIndex]+"<",
+                                        new java.awt.Font("Arial", Font.PLAIN, 12), 0.5f, 0.5f);
+                            render.text.drawTextRelative(x + width + 0.05f, y + height / 2, 0.04f, 1, 1, 1, 1,
+                                    switch (Elements.newInstanceFromName(elementNames[elementIndex]).type()){
+                                        case SOLID -> "solid";
+                                        case FLUID -> "liquid";
+                                        case GAS -> "gas";
+                                        case FLUIDSOLID -> "powder";
+                                        default -> "unknown";
+                                    },
+                                    new java.awt.Font("Arial", Font.PLAIN, 12), 0, 0.5f);
+                            render.triangle.setViewMatrix(new Matrix4f().identity());
+                            float squareX = x + width + 0.25f;
+                            Element element = Elements.newInstanceFromName(elementNames[elementIndex]);
+                            float r = element.defaultColor()[0];
+                            float g = element.defaultColor()[1];
+                            float b = element.defaultColor()[2];
+                            float a = element.defaultColor()[3];
+                            if(element != null) {
+                                render.triangle.drawTriangle2D(squareX, y, squareX + 0.04f, y, squareX + 0.04f, y + height, r, g, b, a);
+                                render.triangle.drawTriangle2D(squareX, y, squareX, y + height, squareX + 0.04f, y + height, r, g, b, a);
+                            }
+                        }
+
+                        @Override
+                        public void handleInput() {
+                            if(isClicked()){
+                                elementIndex++;
+                                if(elementIndex >= elementNames.length)
+                                    elementIndex = 0;
+                                fallingInput.elementName = elementNames[elementIndex];
+                            }
+                        }
+
+                        @Override
+                        public void update() {
+
+                        }
+                    });
+                    addComponent("action_chooser", new UIButton(this.manager, 0.05f, 0.24f, 0.3f, 0.04f, "action_chooser") {
+                        String actions[] = {"put", "delete", "heat"};
+                        int actionIndex = 0;
+                        @Override
+                        public void render(EasyRender render) {
+                            render.text.setViewMatrix(new Matrix4f().identity());
+                            render.text.setProjectionMatrix(new Matrix4f().ortho(-render.window.ratio(), render.window.ratio(), -1, 1, -1, 1));
+                            if(!isHovered())
+                                render.text.drawTextRelative(x + width / 2, y + height / 2, 0.04f, 1, 1, 1, 1, fallingInput.action,
+                                        new java.awt.Font("Arial", Font.PLAIN, 12), 0.5f, 0.5f);
+                            else
+                                render.text.drawTextRelative(x + width / 2, y + height / 2, 0.04f, 1, 1, 0, 1, ">"+fallingInput.action+"<",
+                                        new java.awt.Font("Arial", Font.PLAIN, 12), 0.5f, 0.5f);
+                        }
+
+                        @Override
+                        public void handleInput() {
+                            if(isClicked()){
+                                actionIndex++;
+                                if(actionIndex >= actions.length)
+                                    actionIndex = 0;
+                                fallingInput.action = actions[actionIndex];
+                            }
+                        }
+
+                        @Override
+                        public void update() {
+
                         }
                     });
                     move(0.3f,0.3f);

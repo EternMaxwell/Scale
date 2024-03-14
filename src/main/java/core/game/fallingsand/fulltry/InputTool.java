@@ -29,6 +29,7 @@ public class InputTool {
         mousePos = new double[2];
         mousePosLast = new double[2];
         mouseScroll = new double[2];
+        mouseScrollLast = new double[2];
         glfwSetScrollCallback(window.id(), (windowId, x, y) -> {
             mouseScroll[0] = x;
             mouseScroll[1] = y;
@@ -137,5 +138,25 @@ public class InputTool {
 
     public double[] mouseScroll(){
         return mouseScroll;
+    }
+
+    public double mouseScrollX(){
+        return mouseScroll()[0];
+    }
+
+    public double mouseScrollY(){
+        return mouseScroll()[1];
+    }
+
+    public double[] mouseScrollLast(){
+        return mouseScrollLast;
+    }
+
+    public double mouseScrollLastX(){
+        return mouseScrollLast()[0];
+    }
+
+    public double mouseScrollLastY(){
+        return mouseScrollLast()[1];
     }
 }

@@ -8,7 +8,19 @@ import java.util.Map;
 
 public class Elements {
     public static Map<String, Element> elements = new HashMap<>();
+    static {
+        Elements elements = new Elements();
+        elements.cave_stone();
+        elements.yellow_sand();
+        elements.nature_water();
+        elements.sawdust();
+        elements.wood();
+        elements.smoke();
+        elements.steam();
+    }
     public static Element newInstanceFromName(String name){
+        if(name == null)
+            return null;
         if(elements.get(name) != null)
             return elements.get(name).createInstance();
         System.err.println("Element not found: " + name);
