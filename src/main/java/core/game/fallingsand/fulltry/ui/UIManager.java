@@ -67,8 +67,13 @@ public class UIManager {
                         @Override
                         public void render(EasyRender render) {
                             render.triangle.setViewMatrix(new Matrix4f().identity());
-                            render.triangle.drawTriangle2D(x, y, x + length, y, x + length, y + height, 1,1,1,0.5f);
-                            render.triangle.drawTriangle2D(x, y, x, y + height, x + length, y + height, 1,1,1,0.5f);
+                            if(!currentChooserName().equals("density_scroll")){
+                                render.triangle.drawTriangle2D(x, y, x + length, y, x + length, y + height, 1, 1, 1, 0.5f);
+                                render.triangle.drawTriangle2D(x, y, x, y + height, x + length, y + height, 1, 1, 1, 0.5f);
+                            }else{
+                                render.triangle.drawTriangle2D(x, y, x + length, y, x + length, y + height, 1, 1, 0, 0.5f);
+                                render.triangle.drawTriangle2D(x, y, x, y + height, x + length, y + height, 1, 1, 0, 0.5f);
+                            }
                             scroller.render(render);
                             render.triangle.flush();
                             render.text.setViewMatrix(new Matrix4f().identity());
@@ -125,8 +130,13 @@ public class UIManager {
                         @Override
                         public void render(EasyRender render) {
                             render.triangle.setViewMatrix(new Matrix4f().identity());
-                            render.triangle.drawTriangle2D(x, y, x + length, y, x + length, y + height, 1,1,1,0.5f);
-                            render.triangle.drawTriangle2D(x, y, x, y + height, x + length, y + height, 1,1,1,0.5f);
+                            if(!currentChooserName().equals("radius_scroll")){
+                                render.triangle.drawTriangle2D(x, y, x + length, y, x + length, y + height, 1, 1, 1, 0.5f);
+                                render.triangle.drawTriangle2D(x, y, x, y + height, x + length, y + height, 1, 1, 1, 0.5f);
+                            }else {
+                                render.triangle.drawTriangle2D(x, y, x + length, y, x + length, y + height, 1, 1, 0, 0.5f);
+                                render.triangle.drawTriangle2D(x, y, x, y + height, x + length, y + height, 1, 1, 0, 0.5f);
+                            }
                             scroller.render(render);
                             render.triangle.flush();
                             render.text.setViewMatrix(new Matrix4f().identity());
@@ -139,6 +149,17 @@ public class UIManager {
                         public void handleInput() {
                             super.handleInput();
                             fallingInput.radius = 1 + (int) (scrollValue() * 124);
+                            if (currentChooserName().equals("radius_scroll")) {
+                                if (FallingData.inputTool.mouseScrollY() >= 1) {
+                                    scroller.x += 1 / 124f / 3;
+                                    if (scroller.x > x + length - scroller.width / 2)
+                                        scroller.x = x + length - scroller.width / 2;
+                                } else if (FallingData.inputTool.mouseScrollY() <= -1) {
+                                    scroller.x -= 1 / 124f / 3;
+                                    if (scroller.x < x - scroller.width / 2)
+                                        scroller.x = x - scroller.width / 2;
+                                }
+                            }
                         }
 
                         @Override
