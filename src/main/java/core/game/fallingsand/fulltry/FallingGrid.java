@@ -488,9 +488,17 @@ public class FallingGrid extends Grid {
                         for(int yy = 0; yy < FallingData.chunkWidth; yy++) {
                             Element element = chunk.get(xx, yy);
                             if (element != null) {
-                                float[] color = element.color();
-                                render.pixel.drawPixel((float) (x * FallingData.chunkWidth + xx),
-                                        (float) (y * FallingData.chunkWidth + yy), color[0], color[1], color[2], color[3]);
+                                if(element.type() != FallingType.GAS){
+                                    float[] color = element.color();
+                                    render.pixel.drawPixel((float) (x * FallingData.chunkWidth + xx),
+                                            (float) (y * FallingData.chunkWidth + yy), color[0], color[1], color[2], color[3]);
+                                }else{
+                                    float[] color = element.color();
+                                    render.pixel.drawPixel((float) (x * FallingData.chunkWidth + xx) + 0.5f,
+                                            (float) (y * FallingData.chunkWidth + yy), color[0], color[1], color[2], color[3]/2);
+                                    render.pixel.drawPixel((float) (x * FallingData.chunkWidth + xx) - 0.5f,
+                                            (float) (y * FallingData.chunkWidth + yy), color[0], color[1], color[2], color[3]/2);
+                                }
                             }
                         }
                     }
