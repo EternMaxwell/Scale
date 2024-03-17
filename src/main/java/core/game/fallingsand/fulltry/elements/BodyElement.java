@@ -10,10 +10,12 @@ public abstract class BodyElement extends Solid {
 
     public Element[][] mapElement;
     public float[] mapCenter;
+    public boolean showInGrid;
 
-    public BodyElement(int x, int y, Element leftBottom, Element rightBottom, Element leftTop, Element rightTop, float centerX, float centerY){
+    public BodyElement(int x, int y, Element leftBottom, Element rightBottom, Element leftTop, Element rightTop, float centerX, float centerY, boolean showInGrid){
         this.x = x;
         this.y = y;
+        this.showInGrid = showInGrid;
         mapElement = new Element[2][2];
         mapCenter = new float[2];
         mapElement[0][0] = leftBottom;
@@ -50,5 +52,32 @@ public abstract class BodyElement extends Solid {
     @Override
     public int id() {
         return ElementID.BODY_ELEMENT;
+    }
+
+    @Override
+    public float[] color(){
+        if(showInGrid){
+            float totalMapValue = 0;
+            float[] color = new float[4];
+            for (int i = 0; i <= 1; i++) {
+                for (int j = 0; j <= 1; j++) {
+                    if (mapElement[i][j] != null) {
+                        totalMapValue += mapValueFor(i, j);
+                        color[0] += mapElement[i][j].color()[0] * mapValueFor(i, j);
+                        color[1] += mapElement[i][j].color()[1] * mapValueFor(i, j);
+                        color[2] += mapElement[i][j].color()[2] * mapValueFor(i, j);
+                        color[3] += mapElement[i][j].color()[3] * mapValueFor(i, j);
+                    }
+                }
+            }
+            if (totalMapValue != 0) {
+                color[0] /= totalMapValue;
+                color[1] /= totalMapValue;
+                color[2] /= totalMapValue;
+                color[3] /= totalMapValue;
+            }
+            return color;
+        }else
+            return new float[]{0, 0, 0, 0};
     }
 }

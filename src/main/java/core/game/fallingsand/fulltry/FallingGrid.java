@@ -3,11 +3,16 @@ package core.game.fallingsand.fulltry;
 import core.game.fallingsand.Element;
 import core.game.fallingsand.Grid;
 import core.game.fallingsand.easyfallingsand.ChunkAndSleepingBasedGrid;
+import core.game.fallingsand.fulltry.box2d.FallingBody;
 import core.render.EasyRender;
+import org.jbox2d.collision.shapes.PolygonShape;
+import org.jbox2d.dynamics.*;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 import static org.lwjgl.glfw.GLFW.glfwGetWindowSize;
 
@@ -22,6 +27,8 @@ public class FallingGrid extends Grid {
         public final static int bitShift = 4;
         public static final int level = width/(1<<bitShift);
         public static final int levelWidth = width/level;
+        private boolean changed = true;
+        private Set<FallingBody> chunkBodies;
 
         public Chunk(int x, int y){
             this.x = x;
@@ -29,6 +36,7 @@ public class FallingGrid extends Grid {
             grid = new Element[width][width];
             sleepGrid = new boolean[level][level];
             sleepDetectGrid = new boolean[level][level];
+            chunkBodies = new HashSet<>();
         }
         public Element get(int x, int y){
             if(x >= 0 && x < grid.length && y >= 0 && y < grid[0].length){
@@ -88,6 +96,32 @@ public class FallingGrid extends Grid {
                     sleepDetectGrid[x][y] = true;
                 }
             }
+        }
+
+        public void calculateChunkBodies(World world){
+            chunkBodies.clear();
+            for(int x = 0; x < grid.length; x++){
+                for(int y = 0; y < grid[0].length; y++){
+                    if(grid[x][y] != null && grid[x][y].type() == FallingType.SOLID || grid[x][y].type() == FallingType.FLUIDSOLID){
+                        BodyDef bodyDef = new BodyDef();
+                        bodyDef.type = BodyType.STATIC;
+                        Body body = new Body(bodyDef, world);
+                        FixtureDef fixtureDef = new FixtureDef();
+                        PolygonShape shape = new PolygonShape();
+                        shape.setAsBox(0.05f, 0.05f);
+                        fixtureDef.shape = shape;
+                        body.createFixture(fixtureDef);
+                    }
+                }
+            }
+        }
+
+        public Set<FallingBody> getChunkBody(World world) {
+            if(changed){
+                calculateChunkBodies(world);
+                changed = false;
+            }
+            return chunkBodies;
         }
     }
 
@@ -615,5 +649,18 @@ public class FallingGrid extends Grid {
     @Override
     public int[] basePos() {
         return new int[]{chunkBasePos[0] * FallingData.chunkWidth, chunkBasePos[1] * FallingData.chunkWidth};
+    }
+
+    @Override
+    public Set<FallingBody> toBodies(World world) {
+        Set<FallingBody> bodies = new HashSet<>();
+        for(int x = 0; x < chunkSize[0]; x++){
+            for(int y = 0; y < chunkSize[1]; y++){
+                if(chunks[x][y] != null){
+                    bodies.addAll(chunks[x][y].getChunkBody(world));
+                }
+            }
+        }
+        return bodies;
     }
 }

@@ -2,6 +2,8 @@ package core.game.fallingsand.easyfallingsand;
 
 import core.game.fallingsand.Element;
 import core.game.fallingsand.Grid;
+import core.game.fallingsand.fulltry.box2d.FallingBody;
+import org.jbox2d.dynamics.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -243,5 +245,10 @@ public class ChunkBasedSimpleGrid extends Grid {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public Set<FallingBody> toBodies(World world) {
+        return null;
     }
 }

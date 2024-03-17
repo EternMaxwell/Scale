@@ -2,6 +2,10 @@ package core.game.fallingsand.easyfallingsand;
 
 import core.game.fallingsand.Element;
 import core.game.fallingsand.Grid;
+import core.game.fallingsand.fulltry.box2d.FallingBody;
+import org.jbox2d.dynamics.World;
+
+import java.util.Set;
 
 public class EasyGrid extends Grid {
 
@@ -83,5 +87,10 @@ public class EasyGrid extends Grid {
     @Override
     public boolean valid(int x, int y) {
         return x >= 0 && x < grid.length && y >= 0 && y < grid[0].length;
+    }
+
+    @Override
+    public Set<FallingBody> toBodies(World world) {
+        return null;
     }
 }
