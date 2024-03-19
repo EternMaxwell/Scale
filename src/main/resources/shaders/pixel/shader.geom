@@ -8,7 +8,7 @@ layout (triangle_strip, max_vertices = 6) out;
 
 layout (location = 0) out vec4 out_color;
 
-uniform float size = 1f;
+uniform float size;
 
 layout (binding = 0) uniform block{
     mat4 model;

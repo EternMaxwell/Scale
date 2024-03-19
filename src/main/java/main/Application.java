@@ -168,15 +168,20 @@ public class Application {
         //====RENDER THE GAME====//
         float ratio = window.width() / (float) window.height();
         renderer.line.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
+        renderer.lineWithClip.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
         renderer.triangle.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
+        renderer.triangleWithClip.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
         renderer.pixel.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
+        renderer.triangleWithClip.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
         renderer.image.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
+        renderer.imageWithClip.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
         renderer.point.setProjectionMatrix(new Matrix4f().ortho(-ratio, ratio, -1, 1, -1, 1));
         int height = window.height();
         int width = window.width();
 //
 //        float rate = 1.35f;
-//        renderer.image.drawTexture(-1 * rate,-1 * rate,2 * rate,2 * rate,1,1, 1,0.8f,0,0,1,1, testTexture, testSampler);
+//        renderer.imageWithClip.drawTexture(-1 * rate,-1,2 * rate,2,1,1, 1,0.8f,
+//                0,0,1,1, -0.5f,-0.5f,0.5f,0.5f, testTexture, testSampler);
 
         test.render(renderer);
 
