@@ -540,6 +540,8 @@ public class FallingGrid extends Grid {
             }
         }
 
+        render.pixel.flush();
+
         for (int x = chunkBasePos[0] - 1; x < chunkBasePos[0] + chunkSize[0] + 1; x++) {
             for(int y = chunkBasePos[1] - 1; y < chunkBasePos[1] + chunkSize[1] + 1; y++){
                 if (chunkAt(x,y) == null
@@ -572,7 +574,6 @@ public class FallingGrid extends Grid {
             }
         }
 
-        render.pixel.flush();
         render.line.flush();
     }
 
