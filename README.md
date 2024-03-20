@@ -1,1 +1,3 @@
 A project created initially for Game Off 2023. But didn't finish it in time. So this became a project where to implement my thoughts in some more simple ways.
+##WHAT IS SCALE NOW
+I put my solution of falling sand simulation here, it wasn't that perfect but i'm proud of the water implementation I did. The water only changes its spreading direction when hitting something or something is on its way to where it is spreading to. So in this implementation water can spread faster and dont heap like a hill. But the actual effect based the scale of the water pool. It may act in an unrealistic way if its too large.
