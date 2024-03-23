@@ -13,10 +13,16 @@ import org.joml.Vector4f;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.lwjgl.glfw.GLFW.glfwGetWindowSize;
 
 public class FallingGrid extends Grid {
+
+    static ExecutorService executorService = Executors.newFixedThreadPool(4);
+
     public static class Chunk{
         public Element[][] grid;
         public boolean[][] sleepGrid;
@@ -444,33 +450,72 @@ public class FallingGrid extends Grid {
                     value.resetSleep();
             }
         }
-        for(int y = 0; y < chunkSize[1] * FallingData.chunkWidth; y++){
-            if(inverse) {
-                for (int x = chunkSize[0] * FallingData.chunkWidth - 1; x >= 0; x--) {
-                    if(chunks[x>>6][y>>6] == null)
-                        continue;
-                    if(chunks[x>>6][y>>6].sleep(x & 63, y & 63)){
-                        x -= FallingData.chunkWidth/FallingData.chunkSleepLevel - 1;
-                        continue;
-                    }
-                    if (chunks[x >> 6][y >> 6].get(x & 63, y & 63) != null) {
-                        chunks[x >> 6][y >> 6].get(x & 63, y & 63).step(this, x, y, tick);
+//        for(int y = 0; y < chunkSize[1] * FallingData.chunkWidth; y++){
+//            if(inverse) {
+//                for (int x = chunkSize[0] * FallingData.chunkWidth - 1; x >= 0; x--) {
+//                    if(chunks[x>>6][y>>6] == null)
+//                        continue;
+//                    if(chunks[x>>6][y>>6].sleep(x & 63, y & 63)){
+//                        x -= FallingData.chunkWidth/FallingData.chunkSleepLevel - 1;
+//                        continue;
+//                    }
+//                    if (chunks[x >> 6][y >> 6].get(x & 63, y & 63) != null) {
+//                        chunks[x >> 6][y >> 6].get(x & 63, y & 63).step(this, x, y, tick);
+//                    }
+//                }
+//            }else {
+//                for (int x = 0; x < chunkSize[0] * FallingData.chunkWidth; x++) {
+//                    if(chunks[x>>6][y>>6] == null)
+//                        continue;
+//                    if(chunks[x>>6][y>>6].sleep(x & 63, y & 63)){
+//                        x += FallingData.chunkWidth/FallingData.chunkSleepLevel - 1;
+//                        continue;
+//                    }
+//                    if (chunks[x >> 6][y >> 6].get(x & 63, y & 63) != null) {
+//                        chunks[x >> 6][y >> 6].get(x & 63, y & 63).step(this, x, y, tick);
+//                    }
+//                }
+//            }
+//        }
+        Set<Future> futures = new HashSet<>();
+        for(int chunkY = 0; chunkY < chunkSize[1]; chunkY++){
+            int finalChunkY = chunkY;
+            futures.add(executorService.submit(() -> {
+                for(int y = 0; y < FallingData.chunkWidth; y++){
+                    if(inverse) {
+                        for (int chunkX = chunkSize[0] - 1; chunkX >= 0; chunkX--) {
+                            if(chunks[chunkX][finalChunkY] == null)
+                                continue;
+                            for (int x = FallingData.chunkWidth - 1; x >= 0; x--) {
+                                if(chunks[chunkX][finalChunkY].sleep(x, y)){
+                                    x -= FallingData.chunkWidth/FallingData.chunkSleepLevel - 1;
+                                    continue;
+                                }
+                                if (chunks[chunkX][finalChunkY].get(x, y) != null) {
+                                    chunks[chunkX][finalChunkY].get(x, y).step(this, chunkX * FallingData.chunkWidth + x, finalChunkY * FallingData.chunkWidth + y, tick);
+                                }
+                            }
+                        }
+                    }else {
+                        for (int chunkX = 0; chunkX < chunkSize[0]; chunkX++) {
+                            if(chunks[chunkX][finalChunkY] == null)
+                                continue;
+                            for (int x = 0; x < FallingData.chunkWidth; x++) {
+                                if(chunks[chunkX][finalChunkY].sleep(x, y)){
+                                    x += FallingData.chunkWidth/FallingData.chunkSleepLevel - 1;
+                                    continue;
+                                }
+                                if (chunks[chunkX][finalChunkY].get(x, y) != null) {
+                                    chunks[chunkX][finalChunkY].get(x, y).step(this, chunkX * FallingData.chunkWidth + x, finalChunkY * FallingData.chunkWidth + y, tick);
+                                }
+                            }
+                        }
                     }
                 }
-            }else {
-                for (int x = 0; x < chunkSize[0] * FallingData.chunkWidth; x++) {
-                    if(chunks[x>>6][y>>6] == null)
-                        continue;
-                    if(chunks[x>>6][y>>6].sleep(x & 63, y & 63)){
-                        x += FallingData.chunkWidth/FallingData.chunkSleepLevel - 1;
-                        continue;
-                    }
-                    if (chunks[x >> 6][y >> 6].get(x & 63, y & 63) != null) {
-                        chunks[x >> 6][y >> 6].get(x & 63, y & 63).step(this, x, y, tick);
-                    }
-                }
-            }
+                return null;
+            }));
         }
+
         randomTick();
         toReverse++;
         if(toReverse > 0) {
