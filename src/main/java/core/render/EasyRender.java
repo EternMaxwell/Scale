@@ -1226,7 +1226,7 @@ public class EasyRender {
             glBindVertexArray(vao);
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
             glBufferData(GL_ARRAY_BUFFER, 1024 * 1024 * 6 * 4, GL_DYNAMIC_DRAW);
-            vertices = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY, 256 * 1024 * 6 * 4, vertices);
+            vertices = MemoryUtil.memAlloc(1024 * 1024 * 6 * 4);
             glVertexAttribPointer(0, 2, GL_FLOAT, false, 6 * Float.BYTES, 0);
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(1, 4, GL_FLOAT, false, 6 * Float.BYTES, 2 * Float.BYTES);
@@ -1312,9 +1312,10 @@ public class EasyRender {
         public void flush(){
             //====FLIP THE BUFFER====//
             vertices.flip();
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glUnmapBuffer(GL_ARRAY_BUFFER);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
+//            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+//            glUnmapBuffer(GL_ARRAY_BUFFER);
+//            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glNamedBufferSubData(vbo, 0, vertices);
 
             //====BIND THE VAO AND VBO====//
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -1325,7 +1326,7 @@ public class EasyRender {
             //====RENDER THE LINES====//
             glUseProgram(shaderProgram);
             glDrawArrays(GL_POINTS, 0, vertexCount);
-            vertices = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY, 1024 * 1024 * 6 * 4, vertices);
+//            vertices = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY, 1024 * 1024 * 6 * 4, vertices);
 
             //====UNBIND====//
             glBindVertexArray(0);

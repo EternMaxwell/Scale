@@ -478,7 +478,7 @@ public class FallingGrid extends Grid {
 //            }
 //        }
         Set<Future> futures = new HashSet<>();
-        for(int chunkY = 0; chunkY < chunkSize[1]; chunkY++){
+        for(int chunkY = 0; chunkY < chunkSize[1]; chunkY+=2){
             int finalChunkY = chunkY;
             futures.add(executorService.submit(() -> {
                 for(int y = 0; y < FallingData.chunkWidth; y++){
@@ -514,6 +514,57 @@ public class FallingGrid extends Grid {
                 }
                 return null;
             }));
+        }
+        for(Future future : futures){
+            try {
+                future.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        for(int chunkY = 1; chunkY < chunkSize[1]; chunkY+=2){
+            int finalChunkY = chunkY;
+            futures.add(executorService.submit(() -> {
+                for(int y = 0; y < FallingData.chunkWidth; y++){
+                    if(inverse) {
+                        for (int chunkX = chunkSize[0] - 1; chunkX >= 0; chunkX--) {
+                            if(chunks[chunkX][finalChunkY] == null)
+                                continue;
+                            for (int x = FallingData.chunkWidth - 1; x >= 0; x--) {
+                                if(chunks[chunkX][finalChunkY].sleep(x, y)){
+                                    x -= FallingData.chunkWidth/FallingData.chunkSleepLevel - 1;
+                                    continue;
+                                }
+                                if (chunks[chunkX][finalChunkY].get(x, y) != null) {
+                                    chunks[chunkX][finalChunkY].get(x, y).step(this, chunkX * FallingData.chunkWidth + x, finalChunkY * FallingData.chunkWidth + y, tick);
+                                }
+                            }
+                        }
+                    }else {
+                        for (int chunkX = 0; chunkX < chunkSize[0]; chunkX++) {
+                            if(chunks[chunkX][finalChunkY] == null)
+                                continue;
+                            for (int x = 0; x < FallingData.chunkWidth; x++) {
+                                if(chunks[chunkX][finalChunkY].sleep(x, y)){
+                                    x += FallingData.chunkWidth/FallingData.chunkSleepLevel - 1;
+                                    continue;
+                                }
+                                if (chunks[chunkX][finalChunkY].get(x, y) != null) {
+                                    chunks[chunkX][finalChunkY].get(x, y).step(this, chunkX * FallingData.chunkWidth + x, finalChunkY * FallingData.chunkWidth + y, tick);
+                                }
+                            }
+                        }
+                    }
+                }
+                return null;
+            }));
+        }
+        for(Future future : futures){
+            try {
+                future.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         randomTick();
@@ -623,71 +674,84 @@ public class FallingGrid extends Grid {
     }
 
     public void randomTick(){
+        Set<Future> futures = new HashSet<>();
         Random random = new Random();
         int chunkWidth = FallingData.chunkWidth;
         for(int chunkX = 0; chunkX < chunkSize[0]; chunkX++){
             for(int chunkY = 0; chunkY < chunkSize[1]; chunkY++){
-                Chunk chunk = chunks[chunkX][chunkY];
-                if(chunk == null)
-                    continue;
-                int x;
-                int y;
-                for(int i = 0; i < 64; i++){
-                    x = random.nextInt(chunkWidth);
-                    y = random.nextInt(64);
-                    Element element = chunk.get(x, y);
-                    if(element != null){
-                        element.randomTick(this, chunkX * chunkWidth + x, chunkY * chunkWidth + y, tick, 1);
+                int finalChunkX = chunkX;
+                int finalChunkY = chunkY;
+//                futures.add(executorService.submit(() -> {
+                    Chunk chunk = chunks[finalChunkX][finalChunkY];
+                    if (chunk == null)
+                        return;
+                    int x;
+                    int y;
+                    for (int i = 0; i < 64; i++) {
+                        x = random.nextInt(chunkWidth);
+                        y = random.nextInt(64);
+                        Element element = chunk.get(x, y);
+                        if (element != null) {
+                            element.randomTick(this, finalChunkX * chunkWidth + x, finalChunkY * chunkWidth + y, tick, 1);
+                        }
                     }
-                }
-                for(int i = 0; i < 32; i++){
-                    x = random.nextInt(chunkWidth);
-                    y = random.nextInt(chunkWidth);
-                    Element element = chunk.get(x, y);
-                    if(element != null){
-                        element.randomTick(this, chunkX * chunkWidth + x, chunkY * chunkWidth + y, tick, 2);
+                    for (int i = 0; i < 32; i++) {
+                        x = random.nextInt(chunkWidth);
+                        y = random.nextInt(chunkWidth);
+                        Element element = chunk.get(x, y);
+                        if (element != null) {
+                            element.randomTick(this, finalChunkX * chunkWidth + x, finalChunkY * chunkWidth + y, tick, 2);
+                        }
                     }
-                }
-                for (int i = 0; i < 16; i++) {
-                    x = random.nextInt(chunkWidth);
-                    y = random.nextInt(chunkWidth);
-                    Element element = chunk.get(x, y);
-                    if (element != null) {
-                        element.randomTick(this, chunkX * chunkWidth + x, chunkY * chunkWidth + y, tick, 3);
+                    for (int i = 0; i < 16; i++) {
+                        x = random.nextInt(chunkWidth);
+                        y = random.nextInt(chunkWidth);
+                        Element element = chunk.get(x, y);
+                        if (element != null) {
+                            element.randomTick(this, finalChunkX * chunkWidth + x, finalChunkY * chunkWidth + y, tick, 3);
+                        }
                     }
-                }
-                for (int i = 0; i < 8; i++) {
-                    x = random.nextInt(chunkWidth);
-                    y = random.nextInt(chunkWidth);
-                    Element element = chunk.get(x, y);
-                    if (element != null) {
-                        element.randomTick(this, chunkX * chunkWidth + x, chunkY * chunkWidth + y, tick, 4);
+                    for (int i = 0; i < 8; i++) {
+                        x = random.nextInt(chunkWidth);
+                        y = random.nextInt(chunkWidth);
+                        Element element = chunk.get(x, y);
+                        if (element != null) {
+                            element.randomTick(this, finalChunkX * chunkWidth + x, finalChunkY * chunkWidth + y, tick, 4);
+                        }
                     }
-                }
-                for(int i = 0; i < 4; i++){
-                    x = random.nextInt(chunkWidth);
-                    y = random.nextInt(chunkWidth);
-                    Element element = chunk.get(x, y);
-                    if(element != null){
-                        element.randomTick(this, chunkX * chunkWidth + x, chunkY * chunkWidth + y, tick, 5);
+                    for (int i = 0; i < 4; i++) {
+                        x = random.nextInt(chunkWidth);
+                        y = random.nextInt(chunkWidth);
+                        Element element = chunk.get(x, y);
+                        if (element != null) {
+                            element.randomTick(this, finalChunkX * chunkWidth + x, finalChunkY * chunkWidth + y, tick, 5);
+                        }
                     }
-                }
-                for (int i = 0; i < 2; i++) {
-                    x = random.nextInt(chunkWidth);
-                    y = random.nextInt(chunkWidth);
-                    Element element = chunk.get(x, y);
-                    if (element != null) {
-                        element.randomTick(this, chunkX * chunkWidth + x, chunkY * chunkWidth + y, tick, 6);
+                    for (int i = 0; i < 2; i++) {
+                        x = random.nextInt(chunkWidth);
+                        y = random.nextInt(chunkWidth);
+                        Element element = chunk.get(x, y);
+                        if (element != null) {
+                            element.randomTick(this, finalChunkX * chunkWidth + x, finalChunkY * chunkWidth + y, tick, 6);
+                        }
                     }
-                }
-                for (int i = 0; i < 1; i++) {
-                    x = random.nextInt(chunkWidth);
-                    y = random.nextInt(chunkWidth);
-                    Element element = chunk.get(x, y);
-                    if (element != null) {
-                        element.randomTick(this, chunkX * chunkWidth + x, chunkY * chunkWidth + y, tick, 7);
+                    for (int i = 0; i < 1; i++) {
+                        x = random.nextInt(chunkWidth);
+                        y = random.nextInt(chunkWidth);
+                        Element element = chunk.get(x, y);
+                        if (element != null) {
+                            element.randomTick(this, finalChunkX * chunkWidth + x, finalChunkY * chunkWidth + y, tick, 7);
+                        }
                     }
-                }
+//                    return;
+//                }));
+            }
+        }
+        for(Future future : futures){
+            try {
+                future.get();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
