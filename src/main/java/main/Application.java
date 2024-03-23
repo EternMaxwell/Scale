@@ -5,6 +5,7 @@ import core.TickTimer;
 import core.game.CurvedSpaceTest;
 import core.game.Tests;
 import core.game.fallingsand.easyfallingsand.EasyFallingSandWorld;
+import core.game.fallingsand.fulltry.FallingGrid;
 import core.game.fallingsand.fulltry.FallingWorld;
 import core.render.EasyRender;
 import core.render.Window;
@@ -192,6 +193,7 @@ public class Application {
         //====DESTROY THE GAME====//
         renderer.dispose();
         window.dispose();
+        FallingGrid.executorService.shutdown();
     }
 
     public void run(){

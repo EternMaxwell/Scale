@@ -21,7 +21,7 @@ import static org.lwjgl.glfw.GLFW.glfwGetWindowSize;
 
 public class FallingGrid extends Grid {
 
-    static ExecutorService executorService = Executors.newFixedThreadPool(4);
+    public static ExecutorService executorService = Executors.newFixedThreadPool(4);
 
     public static class Chunk{
         public Element[][] grid;
