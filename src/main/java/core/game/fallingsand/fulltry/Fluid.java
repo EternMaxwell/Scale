@@ -43,6 +43,8 @@ public abstract class Fluid extends Element {
 
     @Override
     public boolean step(Grid grid, int x, int y, int tick) {
+//        if(lastTick == tick)
+//            return false;
         boolean moved = false;
 
         int distance = velocity > 1 ? (int) velocity : 1;
@@ -101,12 +103,14 @@ public abstract class Fluid extends Element {
         if ((diagnose == null || diagnose.type() == FallingType.GAS) && (grid.valid(x + dir, iy - 1) || FallingData.invalidPassThrough)) {
             grid.set(x + dir, iy - 1, this);
             grid.set(x, iy, diagnose);
+            lastTick = tick;
             moved = true;
         } else {
             diagnose = grid.get(x - dir, iy - 1);
             if ((diagnose == null || diagnose.type() == FallingType.GAS) && (grid.valid(x - dir, iy - 1) || FallingData.invalidPassThrough)) {
                 grid.set(x - dir, iy - 1, this);
                 grid.set(x, iy, diagnose);
+                lastTick = tick;
                 moved = true;
             }
         }
@@ -171,6 +175,7 @@ public abstract class Fluid extends Element {
                 side = grid.get(x + dir * dirL, iy);
                 grid.set(x + dir * dirL, iy, this);
                 grid.set(x, iy, side);
+                lastTick = tick;
                 moved = true;
             }else{
                 if(lastBlocked > 0 && dirBlock){
@@ -188,6 +193,7 @@ public abstract class Fluid extends Element {
                         side = grid.get(x + dir * dirL, iy);
                         grid.set(x + dir * dirL, iy, this);
                         grid.set(x, iy, side);
+                        lastTick = tick;
                         moved = true;
                     }
                 }else {

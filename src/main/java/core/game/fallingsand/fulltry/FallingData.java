@@ -30,7 +30,7 @@ public class FallingData {
         cameraCentrePos = new double[]{0, 0};
         chunkMaxNum = 256;
         chunkWidth = 64;
-        chunkSleepBitShift = FallingGrid.Chunk.bitShift;
+//        chunkSleepBitShift = FallingGrid.Chunk.bitShift;
         chunkSleepLevel = chunkWidth / (1 << chunkSleepBitShift);
         chunkBasePos = new int[]{0, 0};
         chunkNum = 0;

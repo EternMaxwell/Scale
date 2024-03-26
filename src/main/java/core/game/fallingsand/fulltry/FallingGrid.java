@@ -25,14 +25,24 @@ public class FallingGrid extends Grid {
 
     public static class Chunk{
         public Element[][] grid;
-        public boolean[][] sleepGrid;
-        public boolean[][] sleepDetectGrid;
+//        public boolean[][] sleepGrid;
+//        public boolean[][] sleepDetectGrid;
         public int x;
         public int y;
+        public int rectX = 0;
+        public int rectY = 0;
+        public int rectMX = 0;
+        public int rectMY = 0;
+
+        public int rectXT = 64;
+        public int rectYT = 64;
+        public int rectMXT = 0;
+        public int rectMYT = 0;
+
         public static final int width = 64;
-        public final static int bitShift = 4;
-        public static final int level = width/(1<<bitShift);
-        public static final int levelWidth = width/level;
+//        public final static int bitShift = 4;
+//        public static final int level = width/(1<<bitShift);
+//        public static final int levelWidth = width/level;
         private boolean changed = true;
         private Set<FallingBody> chunkBodies;
 
@@ -40,8 +50,8 @@ public class FallingGrid extends Grid {
             this.x = x;
             this.y = y;
             grid = new Element[width][width];
-            sleepGrid = new boolean[level][level];
-            sleepDetectGrid = new boolean[level][level];
+//            sleepGrid = new boolean[level][level];
+//            sleepDetectGrid = new boolean[level][level];
             chunkBodies = new HashSet<>();
         }
         public Element get(int x, int y){
@@ -78,30 +88,42 @@ public class FallingGrid extends Grid {
         }
         public boolean sleep(int x, int y){
             if(x >= 0 && x < grid.length && y >= 0 && y < grid[0].length){
-                return sleepGrid[x>>bitShift][y>>bitShift];
+//                return sleepGrid[x>>bitShift][y>>bitShift];
             }
             return false;
         }
         public void setSleep(int x, int y, boolean sleep){
             if(x >= 0 && x < grid.length && y >= 0 && y < grid[0].length){
-                sleepDetectGrid[x][y] = sleep;
+//                sleepDetectGrid[x][y] = sleep;
             }
         }
         public void awake(int x, int y){
             if(x >= 0 && x < grid.length && y >= 0 && y < grid[0].length){
-                sleepDetectGrid[x>>bitShift][y>>bitShift] = false;
+//                sleepDetectGrid[x>>bitShift][y>>bitShift] = false;
                 //sleepGrid[x>>bitShift][y>>bitShift] = false;
+                rectXT = Math.min(rectXT, x);
+                rectYT = Math.min(rectYT, y);
+                rectMXT = Math.max(rectMXT, x + 1);
+                rectMYT = Math.max(rectMYT, y + 1);
             }
         }
         public void resetSleep(){
-            boolean[][] temp = sleepGrid;
-            sleepGrid = sleepDetectGrid;
-            sleepDetectGrid = temp;
-            for(int x = 0; x < sleepDetectGrid.length; x++){
-                for(int y = 0; y < sleepDetectGrid[0].length; y++){
-                    sleepDetectGrid[x][y] = true;
-                }
-            }
+//            boolean[][] temp = sleepGrid;
+//            sleepGrid = sleepDetectGrid;
+//            sleepDetectGrid = temp;
+//            for(int x = 0; x < sleepDetectGrid.length; x++){
+//                for(int y = 0; y < sleepDetectGrid[0].length; y++){
+//                    sleepDetectGrid[x][y] = true;
+//                }
+//            }
+            rectX = rectXT;
+            rectY = rectYT;
+            rectMX = rectMXT;
+            rectMY = rectMYT;
+            rectXT = 64;
+            rectYT = 64;
+            rectMXT = 0;
+            rectMYT = 0;
         }
 
         public void calculateChunkBodies(World world){
@@ -128,6 +150,14 @@ public class FallingGrid extends Grid {
                 changed = false;
             }
             return chunkBodies;
+        }
+
+        public boolean inRect(int x, int y){
+            return x >= rectX && x < rectMX && y >= rectY && y < rectMY;
+        }
+
+        public boolean yInRect(int y){
+            return y >= rectY && y < rectMY;
         }
     }
 
@@ -528,29 +558,31 @@ public class FallingGrid extends Grid {
                 for(int y = 0; y < FallingData.chunkWidth; y++){
                     if(inverse) {
                         for (int chunkX = chunkSize[0] - 1; chunkX >= 0; chunkX--) {
-                            if(chunks[chunkX][finalChunkY] == null)
+                            Chunk chunk = chunks[chunkX][finalChunkY];
+                            if(chunk == null || !chunk.yInRect(y))
                                 continue;
-                            for (int x = FallingData.chunkWidth - 1; x >= 0; x--) {
-                                if(chunks[chunkX][finalChunkY].sleep(x, y)){
+                            for (int x = chunk.rectMX - 1; x >= chunk.rectX; x--) {
+                                if(chunk.sleep(x, y)){
                                     x -= FallingData.chunkWidth/FallingData.chunkSleepLevel - 1;
                                     continue;
                                 }
-                                if (chunks[chunkX][finalChunkY].get(x, y) != null) {
-                                    chunks[chunkX][finalChunkY].get(x, y).step(this, chunkX * FallingData.chunkWidth + x, finalChunkY * FallingData.chunkWidth + y, tick);
+                                if (chunk.get(x, y) != null) {
+                                    chunk.get(x, y).step(this, chunkX * FallingData.chunkWidth + x, finalChunkY * FallingData.chunkWidth + y, tick);
                                 }
                             }
                         }
                     }else {
                         for (int chunkX = 0; chunkX < chunkSize[0]; chunkX++) {
-                            if(chunks[chunkX][finalChunkY] == null)
+                            Chunk chunk = chunks[chunkX][finalChunkY];
+                            if(chunk == null || !chunk.yInRect(y))
                                 continue;
-                            for (int x = 0; x < FallingData.chunkWidth; x++) {
-                                if(chunks[chunkX][finalChunkY].sleep(x, y)){
+                            for (int x = chunk.rectX; x < chunk.rectMX; x++) {
+                                if(chunk.sleep(x, y)){
                                     x += FallingData.chunkWidth/FallingData.chunkSleepLevel - 1;
                                     continue;
                                 }
-                                if (chunks[chunkX][finalChunkY].get(x, y) != null) {
-                                    chunks[chunkX][finalChunkY].get(x, y).step(this, chunkX * FallingData.chunkWidth + x, finalChunkY * FallingData.chunkWidth + y, tick);
+                                if (chunk.get(x, y) != null) {
+                                    chunk.get(x, y).step(this, chunkX * FallingData.chunkWidth + x, finalChunkY * FallingData.chunkWidth + y, tick);
                                 }
                             }
                         }
@@ -639,34 +671,42 @@ public class FallingGrid extends Grid {
         render.pixel.flush();
 
         for (int x = chunkBasePos[0] - 1; x < chunkBasePos[0] + chunkSize[0] + 1; x++) {
-            for(int y = chunkBasePos[1] - 1; y < chunkBasePos[1] + chunkSize[1] + 1; y++){
-                if (chunkAt(x,y) == null
+            for(int y = chunkBasePos[1] - 1; y < chunkBasePos[1] + chunkSize[1] + 1; y++) {
+                if (chunkAt(x, y) == null
                         || outOf(new double[][]{{x * 64, y * 64}, {(x + 1) * 64, y * 64},
                         {(x + 1) * 64, (y + 1) * 64}, {x * 64, (y + 1) * 64}}, screenRectangle)
                 )
                     continue;
-                for (int xx = 0; xx < FallingData.chunkSleepLevel; xx++) {
-                    for (int yy = 0; yy < FallingData.chunkSleepLevel; yy++) {
-                        float drawX = x * FallingData.chunkWidth + xx * ((float) FallingData.chunkWidth / FallingData.chunkSleepLevel);
-                        float drawY = y * FallingData.chunkWidth + yy * ((float) FallingData.chunkWidth / FallingData.chunkSleepLevel);
-                        float drawWidth = (float) FallingData.chunkWidth / FallingData.chunkSleepLevel;
-                        drawY -= 0.5f;
-                        drawX -= 0.5f;
-                        float[] color = new float[]{1, 1, 1, 0.05f};
-                        if (!chunkAt(x,y).sleep(xx * FallingData.chunkWidth / FallingData.chunkSleepLevel,
-                                yy * FallingData.chunkWidth / FallingData.chunkSleepLevel)) {
-                            color = new float[]{1, 1, 1, 0.2f};
-                        }
-                        render.line.drawLine2D(drawX, drawY, drawX + drawWidth, drawY,
-                                color[0], color[1], color[2], color[3]);
-                        render.line.drawLine2D(drawX, drawY, drawX, drawY + drawWidth,
-                                color[0], color[1], color[2], color[3]);
-                        render.line.drawLine2D(drawX + drawWidth, drawY, drawX + drawWidth, drawY + drawWidth,
-                                color[0], color[1], color[2], color[3]);
-                        render.line.drawLine2D(drawX, drawY + drawWidth, drawX + drawWidth, drawY + drawWidth,
-                                color[0], color[1], color[2], color[3]);
-                    }
-                }
+                Chunk chunk = chunkAt(x, y);
+                float drawX = x * FallingData.chunkWidth;
+                float drawY = y * FallingData.chunkWidth;
+                float drawWidth = (float) FallingData.chunkWidth;
+                drawY -= 0.5f;
+                drawX -= 0.5f;
+                float[] color = new float[]{1, 1, 1, 0.1f};
+                render.line.drawLine2D(drawX, drawY, drawX + drawWidth, drawY,
+                        color[0], color[1], color[2], color[3]);
+                render.line.drawLine2D(drawX, drawY, drawX, drawY + drawWidth,
+                        color[0], color[1], color[2], color[3]);
+                render.line.drawLine2D(drawX + drawWidth, drawY, drawX + drawWidth, drawY + drawWidth,
+                        color[0], color[1], color[2], color[3]);
+                render.line.drawLine2D(drawX, drawY + drawWidth, drawX + drawWidth, drawY + drawWidth,
+                        color[0], color[1], color[2], color[3]);
+                if(chunk.rectX == 64 || chunk.rectY == 64 || chunk.rectMX == 0 || chunk.rectMY == 0)
+                    continue;
+                float rectX = chunk.rectX;
+                float rectY = chunk.rectY;
+                float rectMX = chunk.rectMX;
+                float rectMY = chunk.rectMY;
+                color = new float[]{1, 0, 0, 0.5f};
+                render.line.drawLine2D(drawX + rectX, drawY + rectY, drawX + rectMX, drawY + rectY,
+                        color[0], color[1], color[2], color[3]);
+                render.line.drawLine2D(drawX + rectX, drawY + rectY, drawX + rectX, drawY + rectMY,
+                        color[0], color[1], color[2], color[3]);
+                render.line.drawLine2D(drawX + rectMX, drawY + rectY, drawX + rectMX, drawY + rectMY,
+                        color[0], color[1], color[2], color[3]);
+                render.line.drawLine2D(drawX + rectX, drawY + rectMY, drawX + rectMX, drawY + rectMY,
+                        color[0], color[1], color[2], color[3]);
             }
         }
 
